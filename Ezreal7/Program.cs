@@ -17,6 +17,7 @@ namespace Ezreal7
         public const string ChampionName = "Ezreal";
         public static Menu Menu, ComboMenu, HarassMenu, Auto, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Skin, Drawings;
         public static Item Botrk;
+        public static Item Bil;
         public static AIHeroClient PlayerInstance
         {
             get { return Player.Instance; }
@@ -55,16 +56,15 @@ namespace Ezreal7
                 R= new Spell.Skillshot(SpellSlot.R,5000,SkillShotType.Linear,1000,2000,160);
                 R.AllowedCollisionCount = int.MaxValue;
                 Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
+                Bil = new Item(3144, 475f);
                 Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
                 Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
                 Menu.AddSeparator();
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
                 ComboMenu.AddSeparator();
-                ComboMenu.AddLabel("Combo Settings");
+                ComboMenu.AddGroupLabel("Combo Settings");
                 ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
                 ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
-                ComboMenu.Add("item", new CheckBox("Use [BOTRK]"));
-                ComboMenu.Add("ComboRange", new Slider("Q-W Distance", 900, 0, 1000));
                 ComboMenu.AddSeparator();
                 ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
                 ComboMenu.AddSeparator();
@@ -75,41 +75,41 @@ namespace Ezreal7
                 ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
 
                 HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-                HarassMenu.AddLabel("Harass Settings");
+                HarassMenu.AddGroupLabel("Harass Settings");
                 HarassMenu.Add("HarassQ", new CheckBox("Spell [Q]"));
                 HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
                 HarassMenu.AddSeparator();
                 HarassMenu.Add("HarassW", new CheckBox("Spell [W]", false) );
                 HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
                 HarassMenu.AddSeparator();
-                HarassMenu.AddLabel("Harass On");
+                HarassMenu.AddGroupLabel("Harass On");
                 foreach (var enemies in EntityManager.Heroes.Enemies)
                 {
                     HarassMenu.Add("haras" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
                 }
                 Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
-				Auto.AddLabel("Auto Harass Settings");
+				Auto.AddGroupLabel("Auto Harass Settings");
                 Auto.Add("AutoQ", new CheckBox("Auto [Q]"));
                 Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
                 Auto.AddSeparator();
                 Auto.Add("AutoW", new CheckBox("Auto [W]", false));
                 Auto.Add("AutomanaW", new Slider("Min Mana Auto [W]", 60));
                 Auto.AddSeparator();
-                Auto.AddLabel("Auto Harass On");
+                Auto.AddGroupLabel("Auto Harass On");
                 foreach (var enemies in EntityManager.Heroes.Enemies)
                 {
                     Auto.Add("harass" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
                 }
 
                 LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-                LaneClearMenu.AddLabel("LastHit Settings");
+                LaneClearMenu.AddGroupLabel("LastHit Settings");
                 LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
                 LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
                 LaneClearMenu.AddSeparator();
                 LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] LastHit If Out Range AA", false));
                 LaneClearMenu.Add("AAMana", new Slider("Min Mana Lasthit [Q] If Out Range AA", 50));
                 LaneClearMenu.AddSeparator();
-                LaneClearMenu.AddLabel("Lane Clear Settings");
+                LaneClearMenu.AddGroupLabel("Lane Clear Settings");
                 LaneClearMenu.Add("LastQLC", new CheckBox("Always LastHit With [Q]", false));
                 LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
                 LaneClearMenu.AddSeparator();
@@ -117,29 +117,33 @@ namespace Ezreal7
                 LaneClearMenu.Add("ManaLA", new Slider("Min Mana LastHit [Q] If Out Range AA", 50));
 
                 JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-                JungleClearMenu.AddLabel("JungleClear Settings");
+                JungleClearMenu.AddGroupLabel("JungleClear Settings");
                 JungleClearMenu.Add("QJungle", new CheckBox("Spell [Q]"));
                 JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
                 Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-                Misc.AddLabel("AntiGap Settings");
+                Misc.AddGroupLabel("AntiGap Settings");
                 Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
                 Misc.AddSeparator();
-                Misc.AddLabel("Ultimate On CC Settings");
+                Misc.AddGroupLabel("Ultimate On CC Settings");
                 Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
                 Misc.Add("MinR", new Slider("Min Range Use [R]", 800, 300, 2000));
                 Misc.Add("MaxR", new Slider("Max Range Use [R]", 2200, 300, 30000));
                 Misc.AddSeparator();
-                Misc.AddLabel("Auto Stacks Settings");
+                Misc.AddGroupLabel("Auto Stacks Settings");
                 Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
+                Misc.AddGroupLabel("Items Settings");
+                Misc.Add("BOTRK", new CheckBox("Use [Botrk]"));
+                Misc.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+                Misc.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 
                 KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-                KillStealMenu.AddLabel("KillSteal Settings");
+                KillStealMenu.AddGroupLabel("KillSteal Settings");
                 KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
                 KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
                 KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
                 KillStealMenu.AddSeparator();
-                KillStealMenu.AddLabel("Ultimate Settings");
+                KillStealMenu.AddGroupLabel("Ultimate Settings");
                 KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
                 KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 900, 1, 5000));
                 KillStealMenu.Add("maxKsR", new Slider("Max [R] Range KillSteal", 4000, 1, 5000));
@@ -205,6 +209,7 @@ namespace Ezreal7
             Stacks();
             AutoHarass();
             RStun();
+            Item();
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -222,33 +227,52 @@ namespace Ezreal7
         {
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
+
+        public static void Item()
+        {
+
+            var item = Misc["BOTRK"].Cast<CheckBox>().CurrentValue;
+            var Minhp = Misc["ihp"].Cast<Slider>().CurrentValue;
+            var Minhpp = Misc["ihpp"].Cast<Slider>().CurrentValue;
+            var target = TargetSelector.GetTarget(550, DamageType.Physical);
+            if (target != null)
+            {
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                {
+                    Bil.Cast(target);
+                }
+                else if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                {
+                    Botrk.Cast(target);
+                }
+            }
+        }
 		
         public static void Combo()
         {
-            var target = TargetSelector.GetTarget(ComboMenu["ComboRange"].Cast<Slider>().CurrentValue, DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MaxRangeR = ComboMenu["MaxRangeR"].Cast<Slider>().CurrentValue;
             var MinRangeR = ComboMenu["MinRangeR"].Cast<Slider>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            var item = ComboMenu["item"].Cast<CheckBox>().CurrentValue;
-            var Qpred = Q.GetPrediction(target);
             if (target != null)
      	    {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
-                {				
+                {
+                    var Qpred = Q.GetPrediction(target);
                     if (Qpred.HitChance >= HitChance.High)
                     {
                         Q.Cast(Qpred.CastPosition);
                     }
                 }
-                var Wpred = W.GetPrediction(target);
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
-                {				
+                {
+                    var Wpred = W.GetPrediction(target);
                     if (Wpred.HitChance >= HitChance.High)
                     {
-                        W.Cast(Qpred.CastPosition);
+                        W.Cast(Wpred.CastPosition);
                     }
 	    		}
 
@@ -259,10 +283,6 @@ namespace Ezreal7
                     {
                         R.Cast(pred.CastPosition);
                     }
-                }
-                if (Player.Instance.HealthPercent <= 50 || target.HealthPercent < 50 && item && Botrk.IsReady() && Botrk.IsOwned())
-                {
-                    Botrk.Cast(target);
                 }
             }
         }
@@ -314,7 +334,7 @@ namespace Ezreal7
             {
                 if (Player.Instance.ManaPercent >= laneQMN)
                 {
-                    if (useQLH && Q.IsReady())
+                    if (useQLH && Q.IsReady() && _Player.GetAutoAttackDamage(minions) < minions.TotalShieldHealth())
                     {
                         Q.Cast(minions);
                     }
@@ -327,12 +347,6 @@ namespace Ezreal7
                     }
                 }
             }
-        }
-		
-        public static bool Tru()
-        {
-            var player = Player.Instance;
-            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.Team != _Player.Team && turret.Health > 0 && turret.Distance(_Player) < 1000);
         }
 
         public static void Harass()
@@ -374,23 +388,16 @@ namespace Ezreal7
             }
         }
 
-        public static float QDamage(Obj_AI_Base target)
-        {
-            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 35, 55, 75, 95, 115 }[Program.Q.Level] + 1.1f * _Player.FlatPhysicalDamageMod + 0.4f * _Player.FlatMagicDamageMod
-                    ));
-        }
-
         public static void LastHit()
         {
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var useAA = LaneClearMenu["LhAA"].Cast<CheckBox>().CurrentValue;
             var LAA = LaneClearMenu["AAMana"].Cast<Slider>().CurrentValue;
             var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (QDamage(m) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
+            var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
             if (minion != null)
             {
-                if (Player.Instance.ManaPercent >= LhM)
+                if (Player.Instance.ManaPercent >= LhM && _Player.GetAutoAttackDamage(minion) < minion.TotalShieldHealth())
                 {
                     if (useQ && Q.IsReady())
                     {
@@ -466,6 +473,12 @@ namespace Ezreal7
                     }
                 }
             }
+        }
+
+        public static bool Tru()
+        {
+            var player = Player.Instance;
+            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.Team != _Player.Team && turret.Health > 0 && turret.Distance(_Player) < 1000);
         }
 
         public static void KillSteal()
