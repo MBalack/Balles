@@ -10,6 +10,7 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
+using SharpDX;
 using Color = System.Drawing.Color;
 
 namespace Bristana
@@ -28,7 +29,6 @@ namespace Bristana
         JungleMenu,
         HarassMenu,
         LaneMenu,
-        StealMenu,
         Misc,
         Items,
         Skin;
@@ -185,12 +185,15 @@ namespace Bristana
 
         private static void KillSteal()
         {
-            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(1200) && !e.IsDead && !e.IsZombie && e.HealthPercent <= 25);
+            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.IsDead && !e.IsZombie && e.HealthPercent <= 25);
             foreach (var target2 in target)
 	    	{
-                if (StealMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() && target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
+                if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    R.Cast(target2);
+                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
+                    {
+                        R.Cast(target2);
+                    }
                 }
             }
         }
@@ -243,7 +246,18 @@ namespace Bristana
             }
             if (Misc["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+            if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
+            {
+                var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+                if (target.IsValidTarget(R.Range))
+                {
+                    if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, (int)(target.Health / Player.Instance.GetSpellDamage(target, SpellSlot.R)) + " Use R Can Kill: " + target.ChampionName);
+                    }
+                }
             }
         }
 		
@@ -262,13 +276,16 @@ namespace Bristana
 
             Menu = MainMenu.AddMenu("Bristana", "Bristana");
             Menu.AddGroupLabel("Bristana");
-            Menu.AddLabel(" Please Select E Before Play ! ");
+            Menu.AddLabel(" Good Luck! ");
             
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
-            SpellMenu.Add("ComboR", new CheckBox("Spell [R]"));
             SpellMenu.Add("ComboER", new CheckBox("Spell [ER]"));
+            SpellMenu.AddSeparator();
+            SpellMenu.Add("RKs", new CheckBox("Spell [R]"));
+            SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
+            SpellMenu.AddSeparator();
             SpellMenu.AddGroupLabel("Combo [E] On");
             foreach (var target in EntityManager.Heroes.Enemies)
             {
@@ -299,10 +316,6 @@ namespace Bristana
             JungleMenu.Add("jungleW", new CheckBox("Spell [W]", false));
             JungleMenu.Add("manaJung", new Slider("Min Mana For JungleClear", 50, 0, 100));
 
-            StealMenu = Menu.AddSubMenu("KillSteal Settings", "KS");
-            StealMenu.AddGroupLabel("Killsteal Settings");
-            StealMenu.Add("RKs", new CheckBox("Spell [R]"));
-
             Items = Menu.AddSubMenu("Items Settings", "Items");
             Items.AddGroupLabel("Items Settings");
             Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
@@ -317,6 +330,7 @@ namespace Bristana
             Misc.AddGroupLabel("Drawings Settings");
             Misc.Add("drawAA", new CheckBox("Draw E"));
             Misc.Add("drawW", new CheckBox("Draw W", false));
+            Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
 			
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
