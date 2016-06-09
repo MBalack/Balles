@@ -464,10 +464,7 @@ namespace Ezreal7
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Knockup) &&
-                        target.IsInRange(Player.Instance, maxR) &&
-                        !target.IsInRange(Player.Instance, MinR))
+                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, maxR) && !target.IsInRange(Player.Instance, MinR))
                     {
                         R.Cast(target.Position);
                     }

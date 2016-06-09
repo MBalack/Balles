@@ -397,8 +397,7 @@ namespace Graves7
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Knockup))
+                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
                         R.Cast(target.Position);
                     }
@@ -414,8 +413,7 @@ namespace Graves7
                 var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Knockup))
+                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
                         Q.Cast(target.Position);
                     }
