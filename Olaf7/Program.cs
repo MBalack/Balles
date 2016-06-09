@@ -74,6 +74,7 @@ namespace Olaf7
                 HarassMenu.AddGroupLabel("Harass Settings");
                 HarassMenu.Add("HarassQ", new CheckBox("Use [Q]"));
                 HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
+                HarassMenu.Add("HarassE", new CheckBox("Use [E]"));
                 HarassMenu.Add("ManaQ", new Slider("Min Mana For Harass", 40));
 
                 LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
@@ -121,6 +122,8 @@ namespace Olaf7
                 Misc.Add("knockback", new CheckBox("Knock Backs", false));
                 Misc.Add("nearsight", new CheckBox("NearSight", false));
                 Misc.Add("poly", new CheckBox("Polymorph", false));
+                Misc.AddGroupLabel("Ultimate Delay");
+                Misc.Add("delay", new Slider("Humanizer Delay", 0, 0, 1000));
 
                 KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
                 KillStealMenu.AddGroupLabel("KillSteal Settings");
@@ -317,26 +320,28 @@ namespace Olaf7
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
+            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaQ)
-     	    {
-                if (target != null)
-                {
+            if (target != null)
+            {
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaQ)
+     	        {
                     var Qpred = Q.GetPrediction(target);
                     if (Qpred.HitChance >= HitChance.High)
                     {
                         Q.Cast(Qpred.CastPosition);
                     }
-                }
-			}
-            if (useW && W.IsReady() && target.IsValidTarget(300) && Player.Instance.ManaPercent >= ManaQ)
-     	    {
-                if (target != null)
+		    	}
+                if (useW && W.IsReady() && target.IsValidTarget(300) && Player.Instance.ManaPercent >= ManaQ)
                 {				
                     W.Cast();
+		    	}
+                if (E.IsReady() && useE && target.IsValidTarget(E.Range))
+                {
+                    E.Cast(target);
                 }
-			}
+            }
         }
 
         public static void LastHit()
@@ -421,7 +426,7 @@ namespace Olaf7
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
-            var Enemies = ObjectManager.Player.Position.CountEnemiesInRange(700);
+            var Enemies = Player.Position.CountEnemiesInRange(700);
             var cc = (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             || (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             || (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
@@ -441,7 +446,7 @@ namespace Olaf7
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
             if (R.IsReady() && ulti && cc && Enemies >= 1)
             {
-                R.Cast();
+                Core.DelayAction(() => R.Cast(), Misc["delay"].Cast<Slider>().CurrentValue);
             }
         }
     }
