@@ -29,8 +29,6 @@ namespace Talon7
         {
             return (PlayerInstance.Health / PlayerInstance.MaxHealth) * 100;
         }
-        private static readonly Item Tear = new Item(ItemId.Tear_of_the_Goddess);
-        private static readonly Item Manamune = new Item(ItemId.Manamune);
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -251,12 +249,12 @@ namespace Talon7
             }
             if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget())
+                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(_Player.AttackRange))
                 {
                     Hydra.Cast();
                 }
 
-                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget())
+                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(_Player.AttackRange))
                 {
                     Tiamat.Cast();
                 }
