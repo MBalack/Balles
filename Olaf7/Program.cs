@@ -216,11 +216,7 @@ namespace Olaf7
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
          	    {
-                    var Qpred = Q.GetPrediction(target);
-                    if (Qpred.HitChance >= HitChance.Medium)
-                    {
-                        Q.Cast(Qpred.CastPosition);
-                    }
+                    Q.Cast(target);
 	    		}
                 if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
          	    {				
@@ -327,11 +323,7 @@ namespace Olaf7
             {
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaQ)
      	        {
-                    var Qpred = Q.GetPrediction(target);
-                    if (Qpred.HitChance >= HitChance.High)
-                    {
-                        Q.Cast(Qpred.CastPosition);
-                    }
+                    Q.Cast(target);
 		    	}
                 if (useW && W.IsReady() && target.IsValidTarget(300) && Player.Instance.ManaPercent >= ManaQ)
                 {				

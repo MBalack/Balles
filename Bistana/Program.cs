@@ -255,7 +255,7 @@ namespace Bristana
                 {
                     if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health)
                     {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, (int)(target.Health / Player.Instance.GetSpellDamage(target, SpellSlot.R)) + " Use R Can Kill: " + target.ChampionName);
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, (int)(target.Health / Player.Instance.GetSpellDamage(target, SpellSlot.R)) + " Useeeeee RRRRRRRR Cannnnnnnn Killlllllllll: " + target.ChampionName);
                     }
                 }
             }
