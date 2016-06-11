@@ -209,7 +209,7 @@ namespace Twitch7
             var MinE = ComboMenu["MinEC"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(700))
+                if (useQ && Q.IsReady() && target.IsValidTarget(800))
                 {
                     Q.Cast();
                 }
