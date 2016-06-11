@@ -246,7 +246,7 @@ namespace Bristana
             }
             if (Misc["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -280,10 +280,10 @@ namespace Bristana
             
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
-            SpellMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
-            SpellMenu.Add("ComboER", new CheckBox("Spell [ER]"));
+            SpellMenu.Add("ComboQ", new CheckBox("Combo [Q]"));
+            SpellMenu.Add("ComboER", new CheckBox("Combo [ER]"));
             SpellMenu.AddSeparator();
-            SpellMenu.Add("RKs", new CheckBox("Spell [R]"));
+            SpellMenu.Add("RKs", new CheckBox("Combo [R]"));
             SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
             SpellMenu.AddSeparator();
             SpellMenu.AddGroupLabel("Combo [E] On");
@@ -294,8 +294,8 @@ namespace Bristana
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
-            HarassMenu.Add("HarassQ", new CheckBox("Spell [Q]", false));
-            HarassMenu.AddGroupLabel("Spell [E] on");
+            HarassMenu.Add("HarassQ", new CheckBox("Harass [Q]", false));
+            HarassMenu.AddGroupLabel("Harass [E] on");
             foreach (var target in EntityManager.Heroes.Enemies)
             {
                 HarassMenu.Add("HarassE" + target.ChampionName, new CheckBox("" + target.ChampionName));
@@ -304,16 +304,16 @@ namespace Bristana
 
             LaneMenu = Menu.AddSubMenu("Laneclear Settings", "Clear");
             LaneMenu.AddGroupLabel("Laneclear Settings");
-            LaneMenu.Add("ClearQ", new CheckBox("Spell [Q]", false));
-            LaneMenu.Add("ClearE", new CheckBox("Spell [E]", false));
-            LaneMenu.Add("ClearTower", new CheckBox("Spell [E] Turret", false));
+            LaneMenu.Add("ClearQ", new CheckBox("Laneclear [Q]", false));
+            LaneMenu.Add("ClearE", new CheckBox("Laneclear [E]", false));
+            LaneMenu.Add("ClearTower", new CheckBox("Laneclear [E] Turret", false));
             LaneMenu.Add("manaFarm", new Slider("Min Mana For LaneClear", 50, 0, 100));
 			
             JungleMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleMenu.AddGroupLabel("JungleClear Settings");
-            JungleMenu.Add("jungleQ", new CheckBox("Spell [Q]"));
-            JungleMenu.Add("jungleE", new CheckBox("Spell [E]"));
-            JungleMenu.Add("jungleW", new CheckBox("Spell [W]", false));
+            JungleMenu.Add("jungleQ", new CheckBox("JungleClear [Q]"));
+            JungleMenu.Add("jungleE", new CheckBox("JungleClear [E]"));
+            JungleMenu.Add("jungleW", new CheckBox("JungleClear [W]", false));
             JungleMenu.Add("manaJung", new Slider("Min Mana For JungleClear", 50, 0, 100));
 
             Items = Menu.AddSubMenu("Items Settings", "Items");

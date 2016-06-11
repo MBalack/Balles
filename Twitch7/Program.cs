@@ -209,12 +209,9 @@ namespace Twitch7
             var MinE = ComboMenu["MinEC"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(700))
                 {
-                    if (ObjectManager.Player.Position.CountEnemiesInRange(E.Range) >= 1)
-                    {
-                        Q.Cast();
-                    }
+                    Q.Cast();
                 }
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
