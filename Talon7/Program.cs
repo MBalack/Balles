@@ -14,7 +14,6 @@ namespace Talon7
 {
     internal class Program
     {
-        public const string ChampionName = "Talon";
         public static Menu Menu, ComboMenu, HarassMenu, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Items;
         public static Item Botrk;
         public static Item Hydra;

@@ -14,7 +14,6 @@ namespace Twitch7
 {
     internal class Program
     {
-        public const string ChampionName = "Twitch";
         public static Menu Menu, ComboMenu, HarassMenu, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Items;
         public static Item Botrk;
         public static Item Bil;

@@ -16,7 +16,6 @@ namespace Hecarim7
 {
     internal class Program
     {
-        public const string ChampionName = "Hecarim";
         public static Menu Menu, ComboMenu, HarassMenu, Auto, LaneClearMenu, KillStealMenu, Skin, Drawings;
         public static AIHeroClient _Player
         {

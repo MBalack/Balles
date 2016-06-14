@@ -14,7 +14,6 @@ namespace Olaf7
 {
     internal class Program
     {
-        public const string ChampionName = "Olaf";
         public static Menu Menu, ComboMenu, HarassMenu, LaneClearMenu, LastHitMenu, JungleClearMenu, Misc, KillStealMenu, Skin, Drawings;
         public static Item Botrk;
         public static Item Hydra;

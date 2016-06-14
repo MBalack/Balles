@@ -15,7 +15,6 @@ namespace Graves7
 {
     internal static class Program
     {
-        public const string ChampionName = "Graves";
         private static Menu Menu, ComboMenu, HarassMenu, ClearMenu, JungleMenu, Drawings, KillStealMenu, Skin, Misc;
         public static AIHeroClient PlayerInstance
         {

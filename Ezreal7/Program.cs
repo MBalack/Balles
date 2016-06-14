@@ -14,7 +14,6 @@ namespace Ezreal7
 {
     internal class Program
     {
-        public const string ChampionName = "Ezreal";
         public static Menu Menu, ComboMenu, HarassMenu, Auto, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Skin, Drawings;
         public static Item Botrk;
         public static Item Bil;
