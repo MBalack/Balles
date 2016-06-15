@@ -59,8 +59,10 @@ namespace Renekton7
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA", false));
             ComboMenu.Add("FastW", new CheckBox("Use [W] Fast"));
+            ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo", false));
+            ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 300, 0, 450));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
             ComboMenu.Add("titanic", new CheckBox("Use [Titanic]"));
@@ -182,6 +184,7 @@ namespace Renekton7
             var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useE2 = ComboMenu["ComboE2"].Cast<CheckBox>().CurrentValue;
+            var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
                 if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
@@ -201,7 +204,7 @@ namespace Renekton7
                 {
                     W.Cast();
                 }
-                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && 300 <= target.Distance(Player.Instance))
+                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
                 }
@@ -214,11 +217,11 @@ namespace Renekton7
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var minE = Ulti["MinE"].Cast<Slider>().CurrentValue;
-            if (useR && _Player.HealthPercent <= minR && ObjectManager.Player.Position.CountEnemiesInRange(600) >= 1 && !Player.Instance.IsInShopRange())
+            if (useR && _Player.HealthPercent <= minR && ObjectManager.Player.Position.CountEnemiesInRange(550) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
             }
-            if (useR2 && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(600) >= minE)
+            if (useR2 && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(500) >= minE)
             {
                 R.Cast();
             }
