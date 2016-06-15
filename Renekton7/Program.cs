@@ -73,7 +73,7 @@ namespace Renekton7
             Ulti.Add("MinR", new Slider("Min Health Use [R]", 50));
             Ulti.AddGroupLabel("Ultimate Enemies Count");
             Ulti.Add("ultiR2", new CheckBox("Use [R] Enemies In Range"));
-            Ulti.Add("MinE", new Slider("Min Enemies Use [R]", 2, 1, 5));
+            Ulti.Add("MinE", new Slider("Min Enemies Use [R]", 3, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -217,11 +217,11 @@ namespace Renekton7
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var minE = Ulti["MinE"].Cast<Slider>().CurrentValue;
-            if (useR && _Player.HealthPercent <= minR && ObjectManager.Player.Position.CountEnemiesInRange(550) >= 1 && !Player.Instance.IsInShopRange())
+            if (useR && _Player.HealthPercent <= minR && ObjectManager.Player.Position.CountEnemiesInRange(500) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
             }
-            if (useR2 && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(500) >= minE)
+            if (useR2 && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(450) >= minE)
             {
                 R.Cast();
             }
