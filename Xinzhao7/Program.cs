@@ -59,7 +59,7 @@ namespace XinZhao7
             Bil = new Item(3144, 475f);
             Menu = MainMenu.AddMenu("Xinzhao7", "Xinzhao");
             Menu.AddSeparator();
-			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
@@ -145,9 +145,9 @@ namespace XinZhao7
                 LaneClear();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-			{
+            {
                 Harass();
-			}
+            }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
@@ -157,9 +157,9 @@ namespace XinZhao7
                 Flee();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-			{
+            {
 				Combo();
-			}
+            }
                 KillSteal();
                 Ultimate();
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
@@ -337,17 +337,17 @@ namespace XinZhao7
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
                 if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
-		    	{
+                {
                     Q.Cast();
                 }
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
                 {
                     W.Cast();
-	    		}
+                }
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range))
                 {
                     E.Cast(jungleMonsters);
-	    		}
+                }
                 if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
@@ -381,18 +381,18 @@ namespace XinZhao7
             if (E.IsReady())
             {
                 var CursorPos = Game.CursorPos;
-                Obj_AI_Base JumpPlace = EntityManager.MinionsAndMonsters.Minions.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
-                if (JumpPlace != default(Obj_AI_Base))
+                Obj_AI_Base fl = EntityManager.MinionsAndMonsters.Minions.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
+                if (fl != default(Obj_AI_Base))
                 {
-                    E.Cast(JumpPlace);
+                    E.Cast(fl);
                 }
                 else
                 {
-                    JumpPlace = EntityManager.Heroes.Enemies.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
+                    fl = EntityManager.Heroes.Enemies.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
 
-                    if (JumpPlace != default(Obj_AI_Base))
+                    if (fl != default(Obj_AI_Base))
                     {
-                        E.Cast(JumpPlace);
+                        E.Cast(fl);
                     }
                 }
             }
@@ -409,7 +409,7 @@ namespace XinZhao7
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target);
-					}
+                    }
                 }
 
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
@@ -417,7 +417,7 @@ namespace XinZhao7
                     if (target.Health + target.AttackShield < RDamage(target))
                     {
                         R.Cast();
-					}
+                    }
                 }
 
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
@@ -428,6 +428,6 @@ namespace XinZhao7
                     }
                 }
             }
-		}
+        }
     }
 }
