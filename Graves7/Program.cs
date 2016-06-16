@@ -38,8 +38,7 @@ namespace Graves7
         {
             if(Player.Instance.Hero != Champion.Graves)
                 return;
-            Chat.Print("Graves7 Loaded!", Color.GreenYellow);
-            Chat.Print("Doctor7", Color.Yellow);
+            Chat.Print("Graves7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 850, SkillShotType.Linear, 250, 2000, 60);
             Q.AllowedCollisionCount = int.MaxValue;
