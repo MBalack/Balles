@@ -48,8 +48,7 @@ namespace Twitch7
         static void OnLoadingComplete(EventArgs args)
         {
                 if (!_Player.ChampionName.Contains("Twitch")) return;
-                Chat.Print("Twitch7 Loaded!", Color.GreenYellow);
-                Chat.Print("Doctor7", Color.Yellow);
+                Chat.Print("Twitch7 Loaded!", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Active(SpellSlot.Q);
                 W = new Spell.Skillshot(SpellSlot.W,950,SkillShotType.Circular,250,1550,275);
