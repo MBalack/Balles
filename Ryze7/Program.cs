@@ -41,8 +41,7 @@ namespace Ryze
         public static void Loading_OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Ryze")) return;
-            Chat.Print("Ball Ryze7 Loaded!", Color.GreenYellow);
-            Chat.Print("Doctor7 Good Luck!", Color.Yellow);
+            Chat.Print("Ryze7 Loaded!", Color.GreenYellow);
             Bootstrap.Init(null);
 
             Q = new Spell.Skillshot(SpellSlot.Q, 900, SkillShotType.Linear, 250, 1500, 50);
@@ -64,7 +63,7 @@ namespace Ryze
             ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
             ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
             ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
-            ComboMenu.Add("Human", new Slider("Humanizer Delay", 200, 0, 1000));
+            ComboMenu.Add("Human", new Slider("Humanizer Delay", 100, 0, 1000));
 
             HarassMenu = menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.Add("HQ", new CheckBox("Spell [Q]"));
@@ -112,7 +111,7 @@ namespace Ryze
 
 			
             Autos = menu.AddSubMenu("Stacks Settings", "Stacks");
-            Autos.Add("AutoStack", new KeyBind("Auto Stack", true, KeyBind.BindTypes.PressToggle, 'T'));
+            Autos.Add("AutoStack", new KeyBind("Auto Stack", false, KeyBind.BindTypes.PressToggle, 'T'));
             Autos.Add("MaxStack", new Slider("Keep Max Stacks", 2, 1, 5));
             Autos.Add("StackMana", new Slider("Min Mana AutoStack", 70, 0, 100));
 
