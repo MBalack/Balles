@@ -240,7 +240,7 @@ namespace Ezreal7
                 {
                     Bil.Cast(target);
                 }
-                else if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
                 {
                     Botrk.Cast(target);
                 }
