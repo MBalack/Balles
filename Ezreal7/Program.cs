@@ -45,7 +45,7 @@ namespace Ezreal7
         static void OnLoadingComplete(EventArgs args)
         {
                 if (!_Player.ChampionName.Contains("Ezreal")) return;
-                Chat.Print("Ezreal7 Loaded!", Color.GreenYellow);
+                Chat.Print("Ezreal7 Loaded!", Color.Orange);
                 Chat.Print("Please Setting Target Harass Before Playing", Color.Yellow);
                 Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
