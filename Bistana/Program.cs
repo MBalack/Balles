@@ -117,6 +117,19 @@ namespace Bristana
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
+        public static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
+        {
+            var Inter = Misc["inter"].Cast<CheckBox>().CurrentValue;
+            if (!sender.IsEnemy || !(sender is AIHeroClient) || Player.Instance.IsRecalling())
+            {
+                return;
+            }
+            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
+            {
+                R.Cast(sender);
+            }
+        }
+
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
             if(Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player)<300)
@@ -327,6 +340,7 @@ namespace Bristana
             Misc.Add("antiGap", new CheckBox("Anti Gapcloser"));
             Misc.Add("antiRengar", new CheckBox("Anti Rengar"));
             Misc.Add("antiKZ", new CheckBox("Anti Kha'Zix"));
+            Misc.Add("inter", new CheckBox("Use [R] Interupt"));
             Misc.AddGroupLabel("Drawings Settings");
             Misc.Add("drawAA", new CheckBox("Draw E"));
             Misc.Add("drawW", new CheckBox("Draw W", false));
@@ -340,6 +354,7 @@ namespace Bristana
             Game.OnTick += Game_OnTick;
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
+            Interrupter.OnInterruptableSpell += Interupt;
             GameObject.OnCreate += GameObject_OnCreate;
 
 		}
