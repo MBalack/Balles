@@ -57,11 +57,11 @@ namespace Renekton7
             ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA", false));
-            ComboMenu.Add("FastW", new CheckBox("Use [W] Fast"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA"));
+            ComboMenu.Add("FastW", new CheckBox("Use [W] Fast", false));
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo", false));
+            ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo"));
             ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 300, 0, 450));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
@@ -72,7 +72,7 @@ namespace Renekton7
             Ulti.Add("ultiR", new CheckBox("Use [R] My Health"));
             Ulti.Add("MinR", new Slider("Min Health Use [R]", 50));
             Ulti.AddGroupLabel("Ultimate Enemies Count");
-            Ulti.Add("ultiR2", new CheckBox("Use [R] Enemies In Range"));
+            Ulti.Add("ultiR2", new CheckBox("Use [R] Enemies In Range", false));
             Ulti.Add("MinE", new Slider("Min Enemies Use [R]", 3, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
