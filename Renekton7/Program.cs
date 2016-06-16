@@ -180,7 +180,6 @@ namespace Renekton7
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            var useAA = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useE2 = ComboMenu["ComboE2"].Cast<CheckBox>().CurrentValue;
@@ -194,11 +193,6 @@ namespace Renekton7
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
-                }
-                if (useAA && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
-                {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
                 }
                 if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
                 {
@@ -231,6 +225,8 @@ namespace Renekton7
         {
             var Titan = ComboMenu["titanic"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
+            var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
+            var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
                 if (useriu && !W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
@@ -248,6 +244,22 @@ namespace Renekton7
                 if (Titan && target.IsValidTarget() && Titanic.IsReady())
                 {
                     Titanic.Cast();
+                }
+                if (useW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(_Player.AttackRange))
+                {
+                    if (target.Type == GameObjectType.AIHeroClient)
+                    {
+                        if (Player.CastSpell(SpellSlot.W))
+                            Orbwalker.ResetAutoAttack();
+                    }
+                }
+                if (HasW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && target.IsValidTarget(_Player.AttackRange))
+                {
+                    if (target.Type == GameObjectType.AIHeroClient)
+                    {
+                        if (Player.CastSpell(SpellSlot.W))
+                            Orbwalker.ResetAutoAttack();
+                    }
                 }
             }
         }
@@ -291,18 +303,12 @@ namespace Renekton7
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(700, DamageType.Physical);
             if (target != null)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
-                }
-                if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
-                {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
                 }
             }
         }
@@ -323,7 +329,6 @@ namespace Renekton7
                 }
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
                 {
-                    Orbwalker.ResetAutoAttack();
                     W.Cast();
 	    		}
                 if (useE && E.IsReady())
