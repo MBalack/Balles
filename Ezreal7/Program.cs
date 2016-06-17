@@ -146,6 +146,7 @@ namespace Ezreal7
                 KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
                 KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 900, 1, 5000));
                 KillStealMenu.Add("maxKsR", new Slider("Max [R] Range KillSteal", 4000, 1, 5000));
+                KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
                 Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
                 Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
@@ -156,6 +157,7 @@ namespace Ezreal7
                 Drawings.Add("DrawQ", new CheckBox("Q Range"));
                 Drawings.Add("DrawW", new CheckBox("W Range", false));
                 Drawings.Add("DrawE", new CheckBox("E Range", false));
+                Drawings.Add("Notifications", new CheckBox("Notifications Can Kill R"));
 
                 Drawing.OnDraw += Drawing_OnDraw;
                 Game.OnTick += Game_OnTick;
@@ -175,6 +177,17 @@ namespace Ezreal7
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+            if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
+            {
+                var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+                if (target.IsValidTarget(R.Range))
+                {
+                    if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, (int)(target.Health / Player.Instance.GetSpellDamage(target, SpellSlot.R)) + " Useeeeee RRRRRRRR Cannnnnnnn Killlllllllll: " + target.ChampionName);
+                    }
+                }
             }
         }
 
@@ -509,7 +522,7 @@ namespace Ezreal7
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 var maxKsR = KillStealMenu["maxKsR"].Cast<Slider>().CurrentValue;
-                if (KsR && R.IsReady())
+                if (KsR && R.IsReady() || KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
                     if (target != null)
                     {
