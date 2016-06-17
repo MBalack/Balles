@@ -60,11 +60,10 @@ namespace Ezreal7
                 Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
                 Menu.AddSeparator();
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-                ComboMenu.AddSeparator();
                 ComboMenu.AddGroupLabel("Combo Settings");
                 ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
                 ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
-                ComboMenu.AddSeparator();
+                ComboMenu.AddGroupLabel("Ultimate Settings");
                 ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
                 ComboMenu.AddSeparator();
                 ComboMenu.Add("MinRangeR", new Slider("Min Range Cast [R]", 1000, 0, 5000));
@@ -183,9 +182,9 @@ namespace Ezreal7
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (target.IsValidTarget(R.Range))
                 {
-                    if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health)
+                    if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                     {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, (int)(target.Health / Player.Instance.GetSpellDamage(target, SpellSlot.R)) + " Useeeeee RRRRRRRR Cannnnnnnn Killlllllllll: " + target.ChampionName);
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, " Useeeeee RRRRRRRR Cannnnnnnn Killlllllllll: " + target.ChampionName);
                     }
                 }
             }
@@ -522,7 +521,7 @@ namespace Ezreal7
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 var maxKsR = KillStealMenu["maxKsR"].Cast<Slider>().CurrentValue;
-                if (KsR && R.IsReady() || KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                if (KsR && R.IsReady())
                 {
                     if (target != null)
                     {
@@ -530,6 +529,20 @@ namespace Ezreal7
                         {
                             var pred = R.GetPrediction(target);
                             if (pred.HitChancePercent >= 90)
+                            {
+                                R.Cast(pred.CastPosition);
+                            }
+                        }
+                    }
+                }
+                if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                {
+                    if (target != null)
+                    {
+                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                        {
+                            var pred = R.GetPrediction(target);
+                            if (pred.HitChancePercent >= 80)
                             {
                                 R.Cast(pred.CastPosition);
                             }
