@@ -46,8 +46,7 @@ namespace Talon7
         static void OnLoadingComplete(EventArgs args)
         {
                 if (!_Player.ChampionName.Contains("Talon")) return;
-                Chat.Print("Talon7 Loaded!", Color.GreenYellow);
-                Chat.Print("Doctor7", Color.Yellow);
+                Chat.Print("Talon7 Loaded!", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Active(SpellSlot.Q);
                 W = new Spell.Skillshot(SpellSlot.W,700,SkillShotType.Cone,1,2300,80);
