@@ -181,7 +181,7 @@ namespace Ezreal7
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
-                if (target.IsValidTarget(R.Range))
+                if (target.IsValidTarget(1800))
                 {
                     if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                     {
