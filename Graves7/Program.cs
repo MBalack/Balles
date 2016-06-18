@@ -48,7 +48,6 @@ namespace Graves7
             R = new Spell.Skillshot(SpellSlot.R, 1500, SkillShotType.Linear, 250, 2100, 100);
             R.AllowedCollisionCount = int.MaxValue;
 
-
             Menu = MainMenu.AddMenu("Graves7","Graves7");
             Menu.AddGroupLabel("Graves7");
             Menu.AddLabel(" FEATURES ");
