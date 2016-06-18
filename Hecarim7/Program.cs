@@ -35,8 +35,7 @@ namespace Hecarim7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Hecarim")) return;
-            Chat.Print("Hecarim7 Loaded!", Color.GreenYellow);
-            Chat.Print("Good Luck!", Color.Yellow);
+            Chat.Print("Hecarim7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
 
 			Q = new Spell.Active(SpellSlot.Q, 350);
