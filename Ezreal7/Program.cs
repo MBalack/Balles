@@ -85,6 +85,7 @@ namespace Ezreal7
                 {
                     HarassMenu.Add("haras" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
                 }
+
                 Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
 				Auto.AddGroupLabel("Auto Harass Settings");
                 Auto.Add("AutoQ", new CheckBox("Auto [Q]"));
