@@ -231,7 +231,7 @@ namespace Twitch7
                 }
                 if (useR && R.IsReady())
                 {
-                    if (ObjectManager.Player.Position.CountEnemiesInRange(W.Range) >= MinR)
+                    if (_Player.Position.CountEnemiesInRange(W.Range) >= MinR)
                     {
                         R.Cast();
                     }
@@ -364,7 +364,7 @@ namespace Twitch7
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (ObjectManager.Player.Position.CountEnemiesInRange(700) >= MinQ)
+                    if (_Player.Position.CountEnemiesInRange(700) >= MinQ)
                     {
                         Q.Cast();
                     }
