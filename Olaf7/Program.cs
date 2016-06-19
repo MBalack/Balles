@@ -418,7 +418,7 @@ namespace Olaf7
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
-            var Enemies = Player.CountEnemiesInRange(700);
+            var Enemies = _Player.CountEnemiesInRange(700);
             var cc = (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             || (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             || (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
@@ -435,7 +435,7 @@ namespace Olaf7
             || (Misc["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
             || (Misc["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
             || (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
-            || (Misc["rot"].Cast<CheckBox>().CurrentValue && Player.IsRooted)
+            || (Misc["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
             if (R.IsReady() && ulti && cc && Enemies >= 1)
             {
