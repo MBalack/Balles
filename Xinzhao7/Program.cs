@@ -251,11 +251,11 @@ namespace XinZhao7
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var mauR = Ulti["MauR"].Cast<Slider>().CurrentValue;
-            if (useR && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= minR)
+            if (useR && !Player.Instance.IsInShopRange() && _Player.Position.CountEnemiesInRange(R.Range) >= minR)
             {
                 R.Cast();
             }
-            if (useR2 && _Player.HealthPercent <= mauR && ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+            if (useR2 && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
             }
