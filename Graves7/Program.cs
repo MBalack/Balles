@@ -28,6 +28,7 @@ namespace Graves7
         public static Spell.Skillshot W;
         public static Spell.Skillshot E;
         public static Spell.Skillshot R;
+        public static Slider ComboMode;
 
         private static void Main(string[] args)
         {
@@ -59,15 +60,15 @@ namespace Graves7
 
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.AddLabel("Spell [Q] On");
+            ComboMenu.AddLabel("Use [Q] On");
             foreach (var enemies in EntityManager.Heroes.Enemies)
             {
                 ComboMenu.Add("combo" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
             }
-            ComboMenu.AddSeparator();
-            ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
-            ComboMenu.Add("ComboE", new CheckBox("Spell [E] Reset AA"));
-            ComboMenu.Add("ComboR", new CheckBox("Spell [R]", false));
+            ComboMenu.AddSeparator();        
+			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E]", 1, 0, 1));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
+            ComboMenu.Add("ComboR", new CheckBox("Use [R]", false));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "HarassMenu");
@@ -80,35 +81,35 @@ namespace Graves7
             HarassMenu.Add("HarassMana", new Slider("Min Mana Harass [Q]", 50));
             HarassMenu.AddSeparator();
             HarassMenu.AddGroupLabel("Spells Settings");
-            HarassMenu.Add("HarassW", new CheckBox("Spell [W]", false));
+            HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
             HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]", 40));
-            HarassMenu.Add("HarassAA", new CheckBox("Spell [E] Reset AA", false));
+            HarassMenu.Add("HarassAA", new CheckBox("Use [E] Reset AA", false));
             HarassMenu.Add("ManaHarass", new Slider("Min Mana For [E] Harass", 50));	
 
             ClearMenu = Menu.AddSubMenu("Laneclear Settings", "LaneClearMenu");
             ClearMenu.AddGroupLabel("Laneclear Settings");
-            ClearMenu.Add("QClear", new CheckBox("Spell [Q]"));
+            ClearMenu.Add("QClear", new CheckBox("Use [Q]"));
             ClearMenu.Add("ClearMana", new Slider("Min Mana For [Q] LaneClear", 70));
-            ClearMenu.Add("LaneAA", new CheckBox("Spell [E] Reset AA", false));
+            ClearMenu.Add("LaneAA", new CheckBox("Use [E] Reset AA", false));
             ClearMenu.Add("ELane", new Slider("Min Mana For [E] LaneClear", 70));			
 
             JungleMenu = Menu.AddSubMenu("JungleClear Settings", "JungleMenu");
             JungleMenu.AddGroupLabel("JungleClear Settings");
-            JungleMenu.Add("QJungleClear", new CheckBox("Spell [Q]"));
+            JungleMenu.Add("QJungleClear", new CheckBox("Use [Q]"));
             JungleMenu.Add("JungleMana", new Slider("Min Mana For [Q] JungleClear", 30));
-            JungleMenu.Add("WJungleClear", new CheckBox("Spell [W]"));
+            JungleMenu.Add("WJungleClear", new CheckBox("Use [W]"));
             JungleMenu.Add("JungleManaW", new Slider("Min Mana For [W] JungleClear", 50));
-            JungleMenu.Add("JungleAA", new CheckBox("Spell [E]"));
+            JungleMenu.Add("JungleAA", new CheckBox("Use [E]"));
             JungleMenu.Add("EJung", new Slider("Min Mana For [E] JungleClear", 30));
 			
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillStealMenu");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
-            KillStealMenu.Add("KsQ", new CheckBox("Spell [Q] KillSteal"));
-            KillStealMenu.Add("KsW", new CheckBox("Spell [W] KillSteal"));
+            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
+            KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
             KillStealMenu.AddSeparator();
             KillStealMenu.AddLabel("Ultimate Settings");
-            KillStealMenu.Add("KsR", new CheckBox("Spell [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 600, 1, 1500));
+            KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
+            KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 100, 1, 1500));
             KillStealMenu.Add("maxKsR", new Slider("Max [R] Range KillSteal", 1500, 1, 1500));
 			
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
@@ -186,19 +187,19 @@ namespace Graves7
         {
             if (Drawings["drawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = Q.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = W.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = E.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = R.Range }.Draw(Player.Instance.Position);
             }
         }
 		
@@ -259,6 +260,20 @@ namespace Graves7
                     }
 				}
 			}
+            if (ComboMode.CurrentValue == 1 && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(Q.Range) >= 1)
+            {
+                if (Selector.Type == GameObjectType.AIHeroClient)
+                {
+                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos));
+                }
+            }
+            if (ComboMode.CurrentValue == 0 && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(Q.Range) >= 1)
+            {
+                if (Selector.Type == GameObjectType.AIHeroClient)
+                {
+                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos));
+                }
+            }
             if (useR && R.IsReady() && Selector.IsValidTarget(R.Range))
             {
                 var pred = R.GetPrediction(Selector);
@@ -346,20 +361,10 @@ namespace Graves7
 		
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
-            var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useJ = JungleMenu["JungleAA"].Cast<CheckBox>().CurrentValue;
             var manaJ = JungleMenu["EJung"].Cast<Slider>().CurrentValue;
             var useL = ClearMenu["LaneAA"].Cast<CheckBox>().CurrentValue;
             var mana = ClearMenu["ELane"].Cast<Slider>().CurrentValue;
-
-            if (useE && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-            {
-                if (target.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos))
-                        Orbwalker.ResetAutoAttack();
-                }
-            }
             if (useJ && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent >= manaJ)
             {
                 if (target.Type == GameObjectType.AIHeroClient)
