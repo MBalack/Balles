@@ -290,7 +290,7 @@ namespace Ryze
         {
             if (!Player.IsDead && Misc["dts"].Cast<CheckBox>().CurrentValue)
             {
-                if (Seraph.IsOwned() && Seraph.IsReady() && Player.HealthPercent <= Misc["Hp"].Cast<Slider>().CurrentValue && ObjectManager.Player.Position.CountEnemiesInRange(600) >= 1)
+                if (Seraph.IsOwned() && Seraph.IsReady() && Player.HealthPercent <= Misc["Hp"].Cast<Slider>().CurrentValue && Player.Position.CountEnemiesInRange(600) >= 1)
                 {
                     Seraph.Cast();
                 }
