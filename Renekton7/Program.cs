@@ -211,11 +211,11 @@ namespace Renekton7
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var minE = Ulti["MinE"].Cast<Slider>().CurrentValue;
-            if (useR && _Player.HealthPercent <= minR && ObjectManager.Player.Position.CountEnemiesInRange(500) >= 1 && !Player.Instance.IsInShopRange())
+            if (useR && _Player.HealthPercent <= minR && _Player.Position.CountEnemiesInRange(500) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
             }
-            if (useR2 && !Player.Instance.IsInShopRange() && ObjectManager.Player.Position.CountEnemiesInRange(450) >= minE)
+            if (useR2 && !Player.Instance.IsInShopRange() && _Player.Position.CountEnemiesInRange(450) >= minE)
             {
                 R.Cast();
             }
