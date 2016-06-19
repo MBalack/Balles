@@ -41,9 +41,8 @@ namespace Ryze
         public static void Loading_OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Ryze")) return;
-            Chat.Print("Ryze7 Loaded!", Color.GreenYellow);
+            Chat.Print("Ryze7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
-
             Q = new Spell.Skillshot(SpellSlot.Q, 900, SkillShotType.Linear, 250, 1500, 50);
             Q.AllowedCollisionCount = 0;
             W = new Spell.Targeted(SpellSlot.W, 600);
@@ -52,18 +51,13 @@ namespace Ryze
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Seraph = new Item(3040);
             menu = MainMenu.AddMenu("Ryze7", "Ryze");
-            menu.AddLabel(" FEATURES ");
-            menu.AddLabel(" Combo Mode ");
-            menu.AddLabel(" Auto Stacks ");
-            menu.AddLabel(" Block AA In Combo ");
-            menu.AddLabel(" Leave Feedback For Any Bugs ");
 
             ComboMenu = menu.AddSubMenu("Combo Settings", "Combo");
 			ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
             ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
             ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
             ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
-            ComboMenu.Add("Human", new Slider("Humanizer Delay", 100, 0, 1000));
+            ComboMenu.Add("Human", new Slider("Humanizer Delay", 1, 0, 1000));
 
             HarassMenu = menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.Add("HQ", new CheckBox("Spell [Q]"));
@@ -81,18 +75,17 @@ namespace Ryze
             ClearMenu.Add("LCQ", new CheckBox("Spell [Q]"));
             ClearMenu.Add("LCW", new CheckBox("Spell [W]"));
             ClearMenu.Add("LCE", new CheckBox("Spell [E]"));
-            ClearMenu.Add("LCR", new CheckBox("Spell [R]"));
+            ClearMenu.Add("LCR", new CheckBox("Spell [R]", false));
             ClearMenu.Add("LaneClearMana", new Slider("Min Mana For LaneClear", 50, 0, 100));
 
             JungleMenu = menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleMenu.Add("JQ", new CheckBox("Spell [Q]"));
             JungleMenu.Add("JW", new CheckBox("Spell [W]"));
             JungleMenu.Add("JE", new CheckBox("Spell [E]"));
-            JungleMenu.Add("JR", new CheckBox("Spell [R]"));
+            JungleMenu.Add("JR", new CheckBox("Spell [R]", false));
             JungleMenu.Add("JungleClearMana", new Slider("Min Mana For JungleClear", 30, 0, 100));
 
             KsMenu = menu.AddSubMenu("KillSteal Settings", "KillSteal");
-            KsMenu.AddSeparator(10);
             KsMenu.AddGroupLabel("KillSteal Setting");
             KsMenu.Add("KsQ", new CheckBox("Spell [Q]"));
             KsMenu.Add("KsW", new CheckBox("Spell [W]"));
@@ -108,7 +101,6 @@ namespace Ryze
             Misc.AddGroupLabel("Skin Changer");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
-
 			
             Autos = menu.AddSubMenu("Stacks Settings", "Stacks");
             Autos.Add("AutoStack", new KeyBind("Auto Stack", false, KeyBind.BindTypes.PressToggle, 'T'));
@@ -150,7 +142,6 @@ namespace Ryze
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
 			{
 				Combo();
-				Human();
 			}
                 AutoStack();
                 KillSteal();
@@ -169,11 +160,11 @@ namespace Ryze
         {
             if (Draws["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 6f, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Draws["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 6f, Radius = W.Range }.Draw(_Player.Position);
             }
         }
 		
@@ -189,12 +180,19 @@ namespace Ryze
             }
         }
 
-        public static void QCast()
+        public static void QCast(Obj_AI_Base target)
         {
-            var TsTarget = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
-            PredictionResult QPred = Q.GetPrediction(TsTarget);
+            var QPred = Q.GetPrediction(target);
+            if (target.IsValidTarget(Q.Range) && Q.IsReady() && !target.IsDead)
             {
-                Q.Cast(QPred.CastPosition);
+                Core.DelayAction(() => Q.Cast(QPred.CastPosition), ComboMenu["Human"].Cast<Slider>().CurrentValue);
+            }
+		    else
+            {
+                if (target.IsValidTarget(Q.Range) && Q.IsReady() && target.IsRooted && !target.IsDead)
+                {
+                    Core.DelayAction(() => Q.Cast(target.ServerPosition), ComboMenu["Human"].Cast<Slider>().CurrentValue);
+                }
             }
         }
 		
@@ -209,30 +207,13 @@ namespace Ryze
 		
         private static void AutoStack()
         {
-            var Stacks = Player.GetBuffCount("ryzepassivestack");
-            if (EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range + 100)))
+            var stacks = Player.GetBuffCount("ryzepassivestack");
+            var mana = Autos["StackMana"].Cast<Slider>().CurrentValue;
+            var ats = Autos["AutoStack"].Cast<KeyBind>().CurrentValue;
+            var max = Autos["MaxStack"].Cast<Slider>().CurrentValue;
+            if (ats && Player.CountEnemiesInRange(Q.Range) <= 0 && !Player.IsRecalling() && _Player.ManaPercent >= mana)
             {
-                return;
-            }
-            if (EntityManager.Heroes.Enemies.Any(x => x.IsValidTarget(Q.Range + 150)))
-            {
-                return;
-            }
-            if (Player.IsRecalling() || Game.CursorPos.IsZero)
-            {
-                return;
-            }
-            if (_Player.ManaPercent < (Autos["StackMana"].Cast<Slider>().CurrentValue))
-            {
-                return;
-            }
-            if (Autos["AutoStack"].Cast<KeyBind>().CurrentValue)
-            {
-                if (Stacks >= Autos["MaxStack"].Cast<Slider>().CurrentValue)
-                {
-                    return;
-                }
-                if (Q.IsReady())
+                if (Q.IsReady() && stacks <= max && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range)))
                 {
                     Q.Cast(Player.ServerPosition.Extend(Game.CursorPos, Q.Range).To3D());
                 }
@@ -250,63 +231,60 @@ namespace Ryze
             Orbwalker.ForcedTarget = target;
             if (target != null && target.IsValidTarget())
             {
+				if (W.IsReady() || E.IsReady())
+		 	    {
+		 	       Orbwalker.DisableAttacking = true;
+				}
                 if (useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
-                else if (!E.IsReady() && useR && R.IsReady())
+                else if (!E.IsReady() && useR && R.IsReady() && Player.CountEnemiesInRange(W.Range + 200) >= 1)
                     Core.DelayAction(() => R.Cast(), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 if (!R.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
             }
         }
-        public static void Human()
-		{
-			if (W.IsReady() || E.IsReady())
-		    {
-		        Orbwalker.DisableAttacking = true;
-			}
-		}
 
         private static void Dtc()
         {
@@ -330,41 +308,41 @@ namespace Ryze
             if (target != null && target.IsValidTarget() && _Player.ManaPercent > HarassMenu["HarassMana"].Cast<Slider>().CurrentValue)
             {
                 if (useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     E.Cast(target);
                 else if (!E.IsReady() && useW && W.IsReady())
                     W.Cast(target);
                 if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     E.Cast(target);
                 if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     W.Cast(target);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     E.Cast(target);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     W.Cast(target);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     E.Cast(target);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     W.Cast(target);
                 else if (!W.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
                     E.Cast(target);
                 else if (!E.IsReady() && useQ && Q.IsReady())
-                    QCast();
+                    QCast(target);
                 else if (!Q.IsReady() && useW && W.IsReady())
                     W.Cast(target);
             }
@@ -404,17 +382,14 @@ namespace Ryze
 
         public static void LastHit()
         {
-            var minion =
-                EntityManager.MinionsAndMonsters.GetLaneMinions()
-                    .OrderByDescending(m => m.Distance(Player))
-                    .FirstOrDefault(m => m.IsValidTarget(Q.Range));
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(Player)).FirstOrDefault(m => m.IsValidTarget(Q.Range));
             var useQ = LastHitMenu["LHQ"].Cast<CheckBox>().CurrentValue;
             var useW = LastHitMenu["LHW"].Cast<CheckBox>().CurrentValue;
             var useE = LastHitMenu["LHE"].Cast<CheckBox>().CurrentValue;
             {
                 if (_Player.ManaPercent > LastHitMenu["LastHitMana"].Cast<Slider>().CurrentValue)
                 {
-                    if (useQ && Q.IsReady() && minion.Health <= _Player.GetSpellDamage(minion, SpellSlot.Q))
+                    if (useQ && Q.IsReady() && minion.Health <= _Player.GetSpellDamage(minion, SpellSlot.Q) && _Player.GetAutoAttackDamage(minion) < minion.TotalShieldHealth())
                     {
                         Q.Cast(minion);
                     }
@@ -440,38 +415,36 @@ namespace Ryze
             {
                 if (_Player.ManaPercent > ClearMenu["LaneClearMana"].Cast<Slider>().CurrentValue)
                 {
-                    if (useQ && Q.IsReady() && minion.IsValidTarget())
-                    {
-                        Q.Cast(minion);
-                    }
-                    if (useW && W.IsReady())
-                    {
-                        W.Cast(minion);
-                    }
-                    if (useE && E.IsReady())
-                    {
-                        E.Cast(minion);
-                    }
-                    if (useR && _Player.Distance(minion) <= W.Range && R.IsReady())
-                    {
-                        R.Cast();
-                    }
+                if (useQ && Q.IsReady())
+                    Q.Cast(minion);
+                else if (!Q.IsReady() && useE && E.IsReady())
+                    E.Cast(minion);
+                else if (!E.IsReady() && useW && W.IsReady())
+                    W.Cast(minion);
+                else if (!E.IsReady() && useR && R.IsReady())
+                    R.Cast();
+                if (!R.IsReady() && useQ && Q.IsReady())
+                    Q.Cast(minion);
+                else if (!Q.IsReady() && useE && E.IsReady())
+                    E.Cast(minion);
+                if (!E.IsReady() && useQ && Q.IsReady())
+                    Q.Cast(minion);
+                else if (!Q.IsReady() && useW && W.IsReady())
+                    W.Cast(minion);
+                else if (!W.IsReady() && useQ && Q.IsReady())
+                    Q.Cast(minion);
                 }
             }
         }
 
         public static void JungleClear()
         {
-            var jungle =
-                EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.ServerPosition, Q.Range)
-                    .OrderByDescending(a => a.MaxHealth)
-                    .FirstOrDefault();
+            var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.ServerPosition, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var useQ = JungleMenu["JQ"].Cast<CheckBox>().CurrentValue;
+            var useW = JungleMenu["JW"].Cast<CheckBox>().CurrentValue;
+            var useE = JungleMenu["JE"].Cast<CheckBox>().CurrentValue;
+            var useR = JungleMenu["JR"].Cast<CheckBox>().CurrentValue;
             {
-                var useQ = JungleMenu["JQ"].Cast<CheckBox>().CurrentValue;
-                var useW = JungleMenu["JW"].Cast<CheckBox>().CurrentValue;
-                var useE = JungleMenu["JE"].Cast<CheckBox>().CurrentValue;
-                var useR = JungleMenu["JR"].Cast<CheckBox>().CurrentValue;
-
                 if (jungle != null && jungle.IsValidTarget() && _Player.ManaPercent > JungleMenu["JungleClearMana"].Cast<Slider>().CurrentValue)
                 {
                     if (useQ && Q.IsReady())

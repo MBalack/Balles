@@ -105,6 +105,7 @@ namespace Olaf7
                 Misc.Add("Ulti", new CheckBox("Use Ultimate"));
                 Misc.AddGroupLabel("Use [R] On");
                 Misc.Add("stun", new CheckBox("Stuns"));
+                Misc.Add("rot", new CheckBox("Root"));
                 Misc.Add("knockup", new CheckBox("Knock Ups"));
                 Misc.Add("tunt", new CheckBox("Taunt"));
                 Misc.Add("charm", new CheckBox("Charm", false));
@@ -417,7 +418,7 @@ namespace Olaf7
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
-            var Enemies = ObjectManager.Player.Position.CountEnemiesInRange(700);
+            var Enemies = Player.CountEnemiesInRange(700);
             var cc = (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             || (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             || (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
@@ -434,6 +435,7 @@ namespace Olaf7
             || (Misc["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
             || (Misc["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
             || (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            || (Misc["rot"].Cast<CheckBox>().CurrentValue && Player.IsRooted)
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
             if (R.IsReady() && ulti && cc && Enemies >= 1)
             {
