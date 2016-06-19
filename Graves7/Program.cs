@@ -122,7 +122,6 @@ namespace Graves7
             Misc.Add("AntiGapW", new CheckBox("Use [W] AntiGapcloser"));
             Misc.AddSeparator();
             Misc.AddLabel("Spells On CC Settings");
-            Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC", false));
             Misc.Add("QStun", new CheckBox("Use [Q] If Enemy Has CC"));
 
 
@@ -163,7 +162,6 @@ namespace Graves7
                 Harass();
             }
 			    KillSteal();
-                RStun();
                 QStun();
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -390,32 +388,16 @@ namespace Graves7
                 }
             }
         }
-
-        public static void RStun()
-		{
-            var Rstun = Misc["Rstun"].Cast<CheckBox>().CurrentValue;
-            if (Rstun && R.IsReady())
-            {
-                var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
-                if (target != null)
-                {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
-                    {
-                        R.Cast(target.Position);
-                    }
-                }
-            }
-		}
 		
         public static void QStun()
 		{
             var Qstun = Misc["Qstun"].Cast<CheckBox>().CurrentValue;
-            if (Qstun && Q.IsReady())
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            if (target != null)
             {
-                var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-                if (target != null)
+                if (Qstun && Q.IsReady())
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
+                    if (target.IsRooted || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
                         Q.Cast(target.Position);
                     }
