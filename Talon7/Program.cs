@@ -222,7 +222,7 @@ namespace Talon7
         {
             var useR = ComboMenu["autor"].Cast<CheckBox>().CurrentValue;
             var mau = ComboMenu["mau"].Cast<Slider>().CurrentValue;
-            var Enemies = ObjectManager.Player.Position.CountEnemiesInRange(500);
+            var Enemies = _Player.Position.CountEnemiesInRange(500);
             if (useR && R.IsReady())
             {
                 if (Player.Instance.HealthPercent < mau && Enemies >= 1)
