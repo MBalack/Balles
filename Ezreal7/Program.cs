@@ -17,6 +17,8 @@ namespace Ezreal7
         public static Menu Menu, ComboMenu, HarassMenu, Auto, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Skin, Drawings;
         public static Item Botrk;
         public static Item Bil;
+        public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
+        public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
         public static AIHeroClient PlayerInstance
         {
             get { return Player.Instance; }
@@ -126,8 +128,8 @@ namespace Ezreal7
                 Misc.AddSeparator();
                 Misc.AddGroupLabel("Ultimate On CC Settings");
                 Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
-                Misc.Add("MinR", new Slider("Min Range Use [R]", 800, 300, 2000));
-                Misc.Add("MaxR", new Slider("Max Range Use [R]", 2200, 300, 30000));
+                Misc.Add("MinR", new Slider("Min Distance Use [R]", 800, 300, 2000));
+                Misc.Add("MaxR", new Slider("Max Distance Use [R]", 2200, 300, 30000));
                 Misc.AddSeparator();
                 Misc.AddGroupLabel("Auto Stacks Settings");
                 Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
@@ -135,6 +137,21 @@ namespace Ezreal7
                 Misc.Add("BOTRK", new CheckBox("Use [Botrk]"));
                 Misc.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
                 Misc.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+                Misc.AddGroupLabel("Qss Settings");
+                Misc.Add("Qss", new CheckBox("Use Qss"));
+                Misc.AddGroupLabel("Qss On CC");
+                Misc.Add("stun", new CheckBox("Stuns"));
+                Misc.Add("rot", new CheckBox("Root"));
+                Misc.Add("tunt", new CheckBox("Taunt"));
+                Misc.Add("snare", new CheckBox("Snare"));
+                Misc.Add("charm", new CheckBox("Charm", false));
+                Misc.Add("slow", new CheckBox("Slows", false));
+                Misc.Add("blind", new CheckBox("Blinds", false));
+                Misc.Add("fear", new CheckBox("Fear", false));
+                Misc.Add("silence", new CheckBox("Silence", false));
+                Misc.Add("supperss", new CheckBox("Supperss", false));
+                Misc.Add("poly", new CheckBox("Polymorph", false));
+                Misc.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
                 KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
                 KillStealMenu.AddGroupLabel("KillSteal Settings");
@@ -144,8 +161,8 @@ namespace Ezreal7
                 KillStealMenu.AddSeparator();
                 KillStealMenu.AddGroupLabel("Ultimate Settings");
                 KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-                KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 900, 1, 5000));
-                KillStealMenu.Add("maxKsR", new Slider("Max [R] Range KillSteal", 4000, 1, 5000));
+                KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
+                KillStealMenu.Add("maxKsR", new Slider("Max [R] Distance KillSteal", 3000, 1, 5000));
                 KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
                 Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
@@ -222,6 +239,7 @@ namespace Ezreal7
             AutoHarass();
             RStun();
             Item();
+            Qsss();
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -257,6 +275,68 @@ namespace Ezreal7
                 {
                     Botrk.Cast(target);
                 }
+            }
+        }
+
+        public static void CastQss()
+        {
+            if (Qss.IsOwned() && Qss.IsReady())
+            {
+                Qss.Cast();
+            }
+
+            if (Simitar.IsOwned() && Simitar.IsReady())
+            {
+                Simitar.Cast();
+            }
+        }
+
+        private static void Qsss()
+        {
+            if (!Misc["Qss"].Cast<CheckBox>().CurrentValue) return;
+            if (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Misc["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
+            {
+                Core.DelayAction(() => CastQss(), Misc["delay"].Cast<Slider>().CurrentValue);
             }
         }
 		
