@@ -126,8 +126,6 @@ namespace Ezreal7
                 Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
                 Misc.AddGroupLabel("Ultimate On CC Settings");
                 Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
-                Misc.Add("MinR", new Slider("Min Distance Use [R]", 800, 300, 2000));
-                Misc.Add("MaxR", new Slider("Max Distance Use [R]", 2200, 300, 30000));
                 Misc.AddGroupLabel("Auto Stacks Settings");
                 Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
                 Misc.AddGroupLabel("Skin Changer");
@@ -164,7 +162,6 @@ namespace Ezreal7
                 KillStealMenu.AddGroupLabel("Ultimate Settings");
                 KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
                 KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
-                KillStealMenu.Add("maxKsR", new Slider("Max [R] Distance KillSteal", 3000, 1, 5000));
                 KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
                 Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
@@ -183,15 +180,15 @@ namespace Ezreal7
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -539,14 +536,12 @@ namespace Ezreal7
         public static void RStun()
 		{
             var Rstun = Misc["Rstun"].Cast<CheckBox>().CurrentValue;
-            var maxR = Misc["MaxR"].Cast<Slider>().CurrentValue;
-            var MinR = Misc["MinR"].Cast<Slider>().CurrentValue;
             if (Rstun && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, maxR) && !target.IsInRange(Player.Instance, MinR))
+                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, 2000) && !target.IsInRange(Player.Instance, 800))
                     {
                         R.Cast(target.Position);
                     }
@@ -572,7 +567,7 @@ namespace Ezreal7
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(R.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
@@ -604,7 +599,7 @@ namespace Ezreal7
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, maxKsR) && !target.IsInRange(Player.Instance, minKsR))
+                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 3500) && !target.IsInRange(Player.Instance, minKsR))
                         {
                             var pred = R.GetPrediction(target);
                             if (pred.HitChancePercent >= 90)
@@ -621,7 +616,7 @@ namespace Ezreal7
                         if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                         {
                             var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 80)
+                            if (pred.HitChancePercent >= 70)
                             {
                                 R.Cast(pred.CastPosition);
                             }
