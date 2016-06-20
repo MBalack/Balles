@@ -90,7 +90,7 @@ namespace Ziggs7
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
             KillStealMenu.AddGroupLabel("Ultimate KillSteal");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 100, 1, 5000));
+            KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 100, 1, 5000));
             KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual", false, KeyBind.BindTypes.HoldActive, 'T'));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
