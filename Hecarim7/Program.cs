@@ -90,7 +90,7 @@ namespace Hecarim7
             KillStealMenu.AddSeparator();
             KillStealMenu.AddLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 500, 1, 700));
+            KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 100, 1, 700));
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
