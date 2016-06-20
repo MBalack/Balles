@@ -48,7 +48,7 @@ namespace Ezreal7
         {
                 if (!_Player.ChampionName.Contains("Ezreal")) return;
                 Chat.Print("Ezreal7 Loaded!", Color.Orange);
-                Chat.Print("Please Setting Target Harass Before Playing", Color.Yellow);
+                Chat.Print("Please Setting Target Harass Before Playing", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
                 W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
@@ -63,23 +63,23 @@ namespace Ezreal7
                 Menu.AddSeparator();
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
                 ComboMenu.AddGroupLabel("Combo Settings");
-                ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
-                ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
+                ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+                ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
                 ComboMenu.AddGroupLabel("Ultimate Settings");
-                ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
+                ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
                 ComboMenu.AddSeparator();
-                ComboMenu.Add("MinRangeR", new Slider("Min Range Cast [R]", 1000, 0, 5000));
+                ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
                 ComboMenu.AddSeparator();
-                ComboMenu.Add("MaxRangeR", new Slider("Max Range Cast [R]", 3000, 0, 5000));
+                ComboMenu.Add("MaxRangeR", new Slider("Max Distance Cast [R]", 3000, 0, 5000));
                 ComboMenu.AddSeparator();
                 ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
 
                 HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
                 HarassMenu.AddGroupLabel("Harass Settings");
-                HarassMenu.Add("HarassQ", new CheckBox("Spell [Q]"));
+                HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
                 HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
                 HarassMenu.AddSeparator();
-                HarassMenu.Add("HarassW", new CheckBox("Spell [W]", false) );
+                HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
                 HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
                 HarassMenu.AddSeparator();
                 HarassMenu.AddGroupLabel("Harass On");
@@ -90,10 +90,10 @@ namespace Ezreal7
 
                 Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
 				Auto.AddGroupLabel("Auto Harass Settings");
-                Auto.Add("AutoQ", new CheckBox("Auto [Q]"));
+                Auto.Add("AutoQ", new CheckBox("Auto Harass [Q]"));
                 Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
                 Auto.AddSeparator();
-                Auto.Add("AutoW", new CheckBox("Auto [W]", false));
+                Auto.Add("AutoW", new CheckBox("Auto Harass [W]", false));
                 Auto.Add("AutomanaW", new Slider("Min Mana Auto [W]", 60));
                 Auto.AddSeparator();
                 Auto.AddGroupLabel("Auto Harass On");
@@ -107,19 +107,19 @@ namespace Ezreal7
                 LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
                 LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
                 LaneClearMenu.AddSeparator();
-                LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] LastHit If Out Range AA", false));
+                LaneClearMenu.Add("LhAA", new CheckBox("[Q] LastHit If Out Range AA", false));
                 LaneClearMenu.Add("AAMana", new Slider("Min Mana Lasthit [Q] If Out Range AA", 50));
                 LaneClearMenu.AddSeparator();
                 LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-                LaneClearMenu.Add("LastQLC", new CheckBox("Always LastHit With [Q]", false));
+                LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
                 LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
                 LaneClearMenu.AddSeparator();
-                LaneClearMenu.Add("LastAA", new CheckBox("Only [Q] LastHit If Out Range AA"));
+                LaneClearMenu.Add("LastAA", new CheckBox("[Q] LaneClear If Out Range AA"));
                 LaneClearMenu.Add("ManaLA", new Slider("Min Mana LastHit [Q] If Out Range AA", 50));
 
                 JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
                 JungleClearMenu.AddGroupLabel("JungleClear Settings");
-                JungleClearMenu.Add("QJungle", new CheckBox("Spell [Q]"));
+                JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
                 JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
                 Misc = Menu.AddSubMenu("Misc Settings", "Misc");
@@ -185,15 +185,15 @@ namespace Ezreal7
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3f, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
