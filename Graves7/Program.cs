@@ -180,19 +180,19 @@ namespace Graves7
         {
             if (Drawings["drawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = Q.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = Q.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = W.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = W.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = E.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = E.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["drawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 5f, Radius = R.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
             }
         }
 // Thanks MarioGK has allowed me to use some his logic

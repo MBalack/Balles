@@ -303,19 +303,19 @@ namespace Borki7
         {
             if (Misc["drawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Misc["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["drawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Misc["drawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = R.Range }.Draw(_Player.Position);
             }
         }
 		
