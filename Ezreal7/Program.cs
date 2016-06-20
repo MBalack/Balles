@@ -48,7 +48,6 @@ namespace Ezreal7
         {
                 if (!_Player.ChampionName.Contains("Ezreal")) return;
                 Chat.Print("Ezreal7 Loaded!", Color.Orange);
-                Chat.Print("Please Setting Target Harass Before Playing", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
                 W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
@@ -60,7 +59,7 @@ namespace Ezreal7
                 Bil = new Item(3144, 475f);
                 Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
                 Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
-                Menu.AddSeparator();
+                Menu.AddGroupLabel("Doctor7");
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
                 ComboMenu.AddGroupLabel("Combo Settings");
                 ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
@@ -125,12 +124,10 @@ namespace Ezreal7
                 Misc = Menu.AddSubMenu("Misc Settings", "Misc");
                 Misc.AddGroupLabel("AntiGap Settings");
                 Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
-                Misc.AddSeparator();
                 Misc.AddGroupLabel("Ultimate On CC Settings");
                 Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
                 Misc.Add("MinR", new Slider("Min Distance Use [R]", 800, 300, 2000));
                 Misc.Add("MaxR", new Slider("Max Distance Use [R]", 2200, 300, 30000));
-                Misc.AddSeparator();
                 Misc.AddGroupLabel("Auto Stacks Settings");
                 Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
                 Misc.AddGroupLabel("Items Settings");
