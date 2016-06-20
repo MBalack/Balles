@@ -594,7 +594,6 @@ namespace Ezreal7
                 }
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
-                var maxKsR = KillStealMenu["maxKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
                     if (target != null)
