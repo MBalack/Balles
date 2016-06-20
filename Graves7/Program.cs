@@ -51,12 +51,7 @@ namespace Graves7
 
             Menu = MainMenu.AddMenu("Graves7","Graves7");
             Menu.AddGroupLabel("Graves7");
-            Menu.AddLabel(" FEATURES ");
             Menu.AddLabel(" Please Select Target Before Play ! ");
-            Menu.AddLabel(" Use E Reset AA");
-            Menu.AddLabel(" KillSteal");
-            Menu.AddLabel(" Anti Gapcloser");
-            Menu.AddLabel(" Skin Hack ");
 
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
@@ -200,7 +195,7 @@ namespace Graves7
                 new Circle() { Color = Color.White, BorderWidth = 5f, Radius = R.Range }.Draw(Player.Instance.Position);
             }
         }
-		
+// Thanks MarioGK has allowed me to use some his logic
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
             if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && E.IsReady() && sender.IsEnemy && sender.IsVisible && sender.IsInRange(Player.Instance, E.Range))
@@ -258,19 +253,13 @@ namespace Graves7
                     }
 				}
 			}
-            if (ComboMode.CurrentValue == 1 && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(Q.Range) >= 1)
+            if (ComboMode.CurrentValue == 1 && E.IsReady() && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
             {
-                if (Selector.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos));
-                }
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
             }
-            if (ComboMode.CurrentValue == 0 && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(Q.Range) >= 1)
+            if (ComboMode.CurrentValue == 0 && E.IsReady() && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
             {
-                if (Selector.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos));
-                }
+      		    Player.CastSpell(SpellSlot.E, Game.CursorPos);
             }
             if (useR && R.IsReady() && Selector.IsValidTarget(R.Range))
             {
@@ -365,27 +354,18 @@ namespace Graves7
             var mana = ClearMenu["ELane"].Cast<Slider>().CurrentValue;
             if (useJ && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent >= manaJ)
             {
-                if (target.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos))
-                        Orbwalker.ResetAutoAttack();
-                }
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
             }
             if (useL && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= mana)
             {
-                if (target.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos))
-                        Orbwalker.ResetAutoAttack();
-                }
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
             }
             if (HarassMenu["HarassAA"].Cast<CheckBox>().CurrentValue && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= HarassMenu["ManaHarass"].Cast<Slider>().CurrentValue)
             {
-                if (target.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.E, Game.CursorPos))
-                        Orbwalker.ResetAutoAttack();
-                }
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
             }
         }
 		

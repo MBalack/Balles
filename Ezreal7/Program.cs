@@ -327,14 +327,6 @@ namespace Ezreal7
             }
         }
 
-        private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
-        {
-            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && E.IsReady() && sender.IsEnemy && sender.IsVisible && sender.IsInRange(Player.Instance, E.Range))
-            {
-                E.Cast(Player.Instance.Position.Shorten(sender.Position, E.Range));
-            }
-        }
-
         public static void LaneClear()
         {
             var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
@@ -481,6 +473,14 @@ namespace Ezreal7
                         R.Cast(target.Position);
                     }
                 }
+            }
+        }
+
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
+        {
+            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && E.IsReady() && sender.IsEnemy && sender.IsVisible && sender.IsInRange(Player.Instance, E.Range))
+            {
+                E.Cast(Player.Instance.Position.Shorten(sender.Position, E.Range));
             }
         }
 

@@ -95,7 +95,7 @@ namespace Borki
                 W.Cast(castPos);
             }
         }
-
+// Thanks MarioGK has allowed me to use some his logic
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
             if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && W.IsReady() && sender.IsEnemy && sender.IsVisible && sender.IsInRange(Player.Instance, W.Range))
