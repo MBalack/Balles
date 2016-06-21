@@ -45,89 +45,89 @@ namespace Talon7
 
         static void OnLoadingComplete(EventArgs args)
         {
-                if (!_Player.ChampionName.Contains("Talon")) return;
-                Chat.Print("Talon7 Loaded!", Color.Orange);
-                Bootstrap.Init(null);
-                Q = new Spell.Active(SpellSlot.Q);
-                W = new Spell.Skillshot(SpellSlot.W,700,SkillShotType.Cone,1,2300,80);
-                W.AllowedCollisionCount = int.MaxValue;
-                E = new Spell.Targeted(SpellSlot.E,700);
-                R= new Spell.Active(SpellSlot.R);
-                Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
-                Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
-                Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
-                Bil = new Item(3144, 475f);
-                Youmuu = new Item(3142, 10);
-                Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-                Menu = MainMenu.AddMenu("Talon7", "Talon");
-                Menu.AddSeparator();
-                ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-                ComboMenu.AddGroupLabel("Combo Settings");
-                ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));
-                ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
-                ComboMenu.Add("ComboR", new CheckBox("Always Use [R] On Combo"));
-                ComboMenu.Add("riu", new CheckBox("Use [Hydra] Reset AA"));
-                ComboMenu.AddGroupLabel("[E] Combo Settings");
-                ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
-                ComboMenu.Add("myhp", new Slider("Min MyHP For [E]", 40, 0, 100));
-                ComboMenu.AddGroupLabel("[R] Escape Settings");
-                ComboMenu.Add("autor", new CheckBox("Use [R] Escape"));
-                ComboMenu.Add("mau", new Slider("MyHP For [R] Escape", 20, 0, 100));
+            if (!_Player.ChampionName.Contains("Talon")) return;
+            Chat.Print("Talon7 Loaded!", Color.Orange);
+            Bootstrap.Init(null);
+            Q = new Spell.Active(SpellSlot.Q);
+            W = new Spell.Skillshot(SpellSlot.W, 700, SkillShotType.Cone, 1, 2300, 80);
+            W.AllowedCollisionCount = int.MaxValue;
+            E = new Spell.Targeted(SpellSlot.E, 700);
+            R = new Spell.Active(SpellSlot.R);
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
+            Tiamat = new Item(ItemId.Tiamat_Melee_Only, 400);
+            Hydra = new Item(ItemId.Ravenous_Hydra_Melee_Only, 400);
+            Bil = new Item(3144, 475f);
+            Youmuu = new Item(3142, 10);
+            Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Menu = MainMenu.AddMenu("Talon7", "Talon");
+            Menu.AddSeparator();
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
+            ComboMenu.Add("ComboR", new CheckBox("Always Use [R] On Combo"));
+            ComboMenu.Add("riu", new CheckBox("Use [Hydra] Reset AA"));
+            ComboMenu.AddGroupLabel("[E] Combo Settings");
+            ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
+            ComboMenu.Add("myhp", new Slider("Min MyHP For [E]", 40, 0, 100));
+            ComboMenu.AddGroupLabel("[R] Escape Settings");
+            ComboMenu.Add("autor", new CheckBox("Use [R] Escape"));
+            ComboMenu.Add("mau", new Slider("MyHP For [R] Escape", 20, 0, 100));
 
-                HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-                HarassMenu.AddGroupLabel("Harass Settings");
-                HarassMenu.Add("HarassQ", new CheckBox("Use [Q]", false));
-                HarassMenu.Add("HarassW", new CheckBox("Use [W]") );
-                HarassMenu.Add("ManaW", new Slider("Min Mana Harass", 40));
+            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q]", false));
+            HarassMenu.Add("HarassW", new CheckBox("Use [W]"));
+            HarassMenu.Add("ManaW", new Slider("Min Mana Harass", 40));
 
-                LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-                LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-                LaneClearMenu.Add("LaneQ", new CheckBox("Use [Q]", false));
-                LaneClearMenu.Add("LaneW", new CheckBox("Use [W]"));
-                LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear", 60));
-                LaneClearMenu.AddSeparator();
-                LaneClearMenu.AddGroupLabel("Lasthit Settings");
-                LaneClearMenu.Add("LastW", new CheckBox("Use [W] Lasthit"));
-                LaneClearMenu.Add("LastQ", new CheckBox("Use [Q] Lasthit", false));
-                LaneClearMenu.Add("LhMana", new Slider("Min Mana LaneClear", 60));
+            LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
+            LaneClearMenu.AddGroupLabel("Lane Clear Settings");
+            LaneClearMenu.Add("LaneQ", new CheckBox("Use [Q]", false));
+            LaneClearMenu.Add("LaneW", new CheckBox("Use [W]"));
+            LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear", 60));
+            LaneClearMenu.AddSeparator();
+            LaneClearMenu.AddGroupLabel("Lasthit Settings");
+            LaneClearMenu.Add("LastW", new CheckBox("Use [W] Lasthit"));
+            LaneClearMenu.Add("LastQ", new CheckBox("Use [Q] Lasthit", false));
+            LaneClearMenu.Add("LhMana", new Slider("Min Mana LaneClear", 60));
 
-                JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-                JungleClearMenu.AddGroupLabel("JungleClear Settings");
-                JungleClearMenu.Add("QJungle", new CheckBox("Use [Q]"));
-                JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
-                JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
+            JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear Settings");
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q]"));
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
+            JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
-                Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-                Misc.AddGroupLabel("AntiGap Settings");
-                Misc.Add("AntiGap", new CheckBox("Use [W] AntiGapcloser"));
-                Misc.Add("Rstun", new CheckBox("Use [W] If Enemy Has CC"));
-                Misc.AddSeparator();
-                Misc.AddGroupLabel("Drawing Settings");
-                Misc.Add("DrawW", new CheckBox("W Range"));
-                Misc.Add("DrawE", new CheckBox("E Range", false));
-                Misc.AddSeparator();
-                Misc.AddGroupLabel("Skin Changer");
-                Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
-                Misc.Add("skin.Id", new ComboBox("Skin Mode", 4, "Default", "1", "2", "3", "4"));
+            Misc = Menu.AddSubMenu("Misc Settings", "Misc");
+            Misc.AddGroupLabel("AntiGap Settings");
+            Misc.Add("AntiGap", new CheckBox("Use [W] AntiGapcloser"));
+            Misc.Add("Rstun", new CheckBox("Use [W] If Enemy Has CC"));
+            Misc.AddSeparator();
+            Misc.AddGroupLabel("Drawing Settings");
+            Misc.Add("DrawW", new CheckBox("W Range"));
+            Misc.Add("DrawE", new CheckBox("E Range", false));
+            Misc.AddSeparator();
+            Misc.AddGroupLabel("Skin Changer");
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("skin.Id", new ComboBox("Skin Mode", 4, "Default", "1", "2", "3", "4"));
 
-                KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-                KillStealMenu.AddGroupLabel("KillSteal Settings");
-                KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
-                KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
-                KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-                KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
+            KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
+            KillStealMenu.AddGroupLabel("KillSteal Settings");
+            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
+            KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
+            KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
+            KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
-                Items = Menu.AddSubMenu("Items Settings", "Items");
-                Items.AddGroupLabel("Items Settings");
-                Items.Add("you", new CheckBox("Use [Youmuu]"));
-                Items.Add("BOTRK", new CheckBox("Use [BOTRK]"));
-                Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-                Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items = Menu.AddSubMenu("Items Settings", "Items");
+            Items.AddGroupLabel("Items Settings");
+            Items.Add("you", new CheckBox("Use [Youmuu]"));
+            Items.Add("BOTRK", new CheckBox("Use [BOTRK]"));
+            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 
-                Drawing.OnDraw += Drawing_OnDraw;
-                Game.OnTick += Game_OnTick;
-                Orbwalker.OnPostAttack += ResetAttack;
-                Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnTick += Game_OnTick;
+            Orbwalker.OnPostAttack += ResetAttack;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -143,7 +143,7 @@ namespace Talon7
         }
 
         private static void Game_OnTick(EventArgs args)
-        { 
+        {
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
@@ -187,13 +187,13 @@ namespace Talon7
         }
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
-        {	
-            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player)<300)
+        {
+            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) < 300)
             {
                 W.Cast(e.Sender);
             }
         }
-		
+
         public static void Combo()
         {
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
@@ -239,11 +239,8 @@ namespace Talon7
 
             if (useQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                if (target.Type == GameObjectType.AIHeroClient)
-                {
-                    if (Player.CastSpell(SpellSlot.Q))
-                        Orbwalker.ResetAutoAttack();
-                }
+                Player.CastSpell(SpellSlot.Q);
+                Orbwalker.ResetAutoAttack();
             }
             if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
@@ -347,7 +344,7 @@ namespace Talon7
         }
 
         public static void RStun()
-		{
+        {
             var Rstun = Misc["Rstun"].Cast<CheckBox>().CurrentValue;
             if (Rstun && W.IsReady())
             {
