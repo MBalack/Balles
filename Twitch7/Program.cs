@@ -18,6 +18,8 @@ namespace Twitch7
         public static Item Botrk;
         public static Item Bil;
         public static Item Youmuu;
+        public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
+        public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
         public const float YOff = 10;
         public const float XOff = 0;
         public const float Width = 107;
@@ -47,109 +49,124 @@ namespace Twitch7
 
         static void OnLoadingComplete(EventArgs args)
         {
-                if (!_Player.ChampionName.Contains("Twitch")) return;
-                Chat.Print("Twitch7 Loaded!", Color.Orange);
-                Bootstrap.Init(null);
-                Q = new Spell.Active(SpellSlot.Q);
-                W = new Spell.Skillshot(SpellSlot.W,950,SkillShotType.Circular,250,1550,275);
-                W.AllowedCollisionCount = int.MaxValue;
-                E = new Spell.Active(SpellSlot.E,1200);
-                R= new Spell.Active(SpellSlot.R);
-                Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
-                Bil = new Item(3144, 475f);
-                Youmuu = new Item(3142, 10);
-                Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-                Menu = MainMenu.AddMenu("Twitch7", "Twitch");
-                Menu.AddSeparator();
-                ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-                ComboMenu.AddGroupLabel("Combo Settings");
-                ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
-                ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
-                ComboMenu.AddGroupLabel("Combo [E] Settings");
-                ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
-                ComboMenu.Add("MinEC", new Slider("Min Stacks Use [E]", 5, 0, 6));
-                ComboMenu.AddGroupLabel("Combo [E] On");
-                foreach (var target in EntityManager.Heroes.Enemies)
-                {
-                    ComboMenu.Add("combo" + target.ChampionName, new CheckBox("" + target.ChampionName));
-                }
-                ComboMenu.AddSeparator();
-                ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
-                ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 3, 0, 5));
+            if (!_Player.ChampionName.Contains("Twitch")) return;
+            Chat.Print("Twitch7 Loaded!", Color.Orange);
+            Bootstrap.Init(null);
+            Q = new Spell.Active(SpellSlot.Q);
+            W = new Spell.Skillshot(SpellSlot.W, 950, SkillShotType.Circular, 250, 1550, 275);
+            W.AllowedCollisionCount = int.MaxValue;
+            E = new Spell.Active(SpellSlot.E, 1200);
+            R = new Spell.Active(SpellSlot.R);
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
+            Bil = new Item(3144, 475f);
+            Youmuu = new Item(3142, 10);
+            Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Menu = MainMenu.AddMenu("Twitch7", "Twitch");
+            Menu.AddSeparator();
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
+            ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
+            ComboMenu.AddGroupLabel("Combo [E] Settings");
+            ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
+            ComboMenu.Add("MinEC", new Slider("Min Stacks Use [E]", 5, 0, 6));
+            ComboMenu.AddGroupLabel("Combo [E] On");
+            foreach (var target in EntityManager.Heroes.Enemies)
+            {
+                ComboMenu.Add("combo" + target.ChampionName, new CheckBox("" + target.ChampionName));
+            }
+            ComboMenu.AddSeparator();
+            ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
+            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 3, 0, 5));
 
-                HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-                HarassMenu.AddGroupLabel("Harass Settings");
-                HarassMenu.Add("HarassW", new CheckBox("Use [W]"));
-                HarassMenu.Add("HarassQ", new CheckBox("Use [Q]", false));
-                HarassMenu.Add("HminQ", new Slider("Min Enemies Use [Q]", 2, 0, 5));
-                HarassMenu.AddGroupLabel("Harass [E] Settings");
-                HarassMenu.Add("HarassE", new CheckBox("Use [E]"));
-                HarassMenu.Add("HminE", new Slider("Min Stacks Use [E]", 5, 0, 6));
-                HarassMenu.AddGroupLabel("Harass [E] On");
-                foreach (var target in EntityManager.Heroes.Enemies)
-                {
-                    HarassMenu.Add("haras" + target.ChampionName, new CheckBox("" + target.ChampionName));
-                }
-                HarassMenu.Add("ManaQ", new Slider("Min Mana For Harass", 40));
+            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q]", false));
+            HarassMenu.Add("HminQ", new Slider("Min Enemies Use [Q]", 2, 0, 5));
+            HarassMenu.AddGroupLabel("Harass [E] Settings");
+            HarassMenu.Add("HarassE", new CheckBox("Use [E]"));
+            HarassMenu.Add("HminE", new Slider("Min Stacks Use [E]", 5, 0, 6));
+            HarassMenu.AddGroupLabel("Harass [E] On");
+            foreach (var target in EntityManager.Heroes.Enemies)
+            {
+                HarassMenu.Add("haras" + target.ChampionName, new CheckBox("" + target.ChampionName));
+            }
+            HarassMenu.Add("ManaQ", new Slider("Min Mana For Harass", 40));
 
-                LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-                LaneClearMenu.AddGroupLabel("LaneClear Settings");
-                LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
-                LaneClearMenu.Add("ELH", new CheckBox("Only Use [E] LastHit", false));
-                LaneClearMenu.Add("mineLC", new Slider("Min Stacks Use [E]", 4, 0, 6));
-                LaneClearMenu.AddSeparator();
-                LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
-                LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 40));
+            LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
+            LaneClearMenu.AddGroupLabel("LaneClear Settings");
+            LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
+            LaneClearMenu.Add("ELH", new CheckBox("Only Use [E] LastHit", false));
+            LaneClearMenu.Add("mineLC", new Slider("Min Stacks Use [E]", 4, 0, 6));
+            LaneClearMenu.AddSeparator();
+            LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
+            LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 40));
 
-                JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-                JungleClearMenu.AddGroupLabel("JungleClear Settings");
-                JungleClearMenu.Add("EJungle", new CheckBox("Use [E]"));
-                JungleClearMenu.Add("mineJ", new Slider("Min Stacks Use [E]", 6, 0, 6));
-                JungleClearMenu.AddSeparator();
-                JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
-                JungleClearMenu.Add("MnJungle", new Slider("Min Mana For JungleClear", 30));
+            JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear Settings");
+            JungleClearMenu.Add("EJungle", new CheckBox("Use [E]"));
+            JungleClearMenu.Add("mineJ", new Slider("Min Stacks Use [E]", 6, 0, 6));
+            JungleClearMenu.AddSeparator();
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
+            JungleClearMenu.Add("MnJungle", new Slider("Min Mana For JungleClear", 30));
 
-                KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-                KillStealMenu.AddGroupLabel("KillSteal Settings");
-                KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
-                KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
-                KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
+            KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
+            KillStealMenu.AddGroupLabel("KillSteal Settings");
+            KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
+            KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
+            KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
-                Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-                Misc.AddGroupLabel("Misc Settings");
-                Misc.Add("AntiGap", new CheckBox("Use [W] AntiGapcloser"));
-                Misc.Add("FleeQ", new CheckBox("Use [Q] Flee"));
-                Misc.Add("FleeW", new CheckBox("Use [W] Flee"));
-                Misc.AddGroupLabel("Skin Changer");
-                Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
-                Misc.Add("skin.Id", new ComboBox("Skin Mode", 7, "Default", "1", "2", "3", "4", "5", "6", "7"));
-                Misc.AddGroupLabel("Draw Settings");
-                Misc.Add("DrawW", new CheckBox("[W] Range"));
-                Misc.Add("DrawE", new CheckBox("[E] Range"));
-                Misc.Add("Damage", new CheckBox("Damage Indicator"));
+            Misc = Menu.AddSubMenu("Misc Settings", "Misc");
+            Misc.AddGroupLabel("Misc Settings");
+            Misc.Add("AntiGap", new CheckBox("Use [W] AntiGapcloser"));
+            Misc.Add("FleeQ", new CheckBox("Use [Q] Flee"));
+            Misc.Add("FleeW", new CheckBox("Use [W] Flee"));
+            Misc.AddGroupLabel("Skin Changer");
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("skin.Id", new ComboBox("Skin Mode", 7, "Default", "1", "2", "3", "4", "5", "6", "7"));
+            Misc.AddGroupLabel("Draw Settings");
+            Misc.Add("DrawW", new CheckBox("[W] Range"));
+            Misc.Add("DrawE", new CheckBox("[E] Range"));
+            Misc.Add("Damage", new CheckBox("Damage Indicator"));
 
-                Items = Menu.AddSubMenu("Items Settings", "Items");
-                Items.AddGroupLabel("Items Settings");
-                Items.Add("you", new CheckBox("Use [Youmuu]"));
-                Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
-                Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-                Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items = Menu.AddSubMenu("Items Settings", "Items");
+            Items.AddGroupLabel("Items Settings");
+            Items.Add("you", new CheckBox("Use [Youmuu]"));
+            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
+            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items.AddGroupLabel("Qss Settings");
+            Items.Add("Qss", new CheckBox("Use Qss"));
+            Items.AddGroupLabel("Qss On CC");
+            Items.Add("stun", new CheckBox("Stuns"));
+            Items.Add("rot", new CheckBox("Root"));
+            Items.Add("tunt", new CheckBox("Taunt"));
+            Items.Add("snare", new CheckBox("Snare"));
+            Items.Add("charm", new CheckBox("Charm", false));
+            Items.Add("slow", new CheckBox("Slows", false));
+            Items.Add("blind", new CheckBox("Blinds", false));
+            Items.Add("fear", new CheckBox("Fear", false));
+            Items.Add("silence", new CheckBox("Silence", false));
+            Items.Add("supperss", new CheckBox("Supperss", false));
+            Items.Add("poly", new CheckBox("Polymorph", false));
+            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
-                Drawing.OnDraw += Drawing_OnDraw;
-                Drawing.OnEndScene += Damage;
-                Game.OnTick += Game_OnTick;
-                Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += Damage;
+            Game.OnTick += Game_OnTick;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
         }
 
@@ -178,6 +195,7 @@ namespace Twitch7
             }
             KillSteal();
             Item();
+            Qsss();
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -195,7 +213,69 @@ namespace Twitch7
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
-		
+
+        public static void CastQss()
+        {
+            if (Qss.IsOwned() && Qss.IsReady())
+            {
+                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+
+            if (Simitar.IsOwned() && Simitar.IsReady())
+            {
+                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+        }
+
+        private static void Qsss()
+        {
+            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
+            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
+            {
+                CastQss();
+            }
+            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
+            {
+                CastQss();
+            }
+            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            {
+                CastQss();
+            }
+            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
+            {
+                CastQss();
+            }
+            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
+            {
+                CastQss();
+            }
+            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
+            {
+                CastQss();
+            }
+            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
+            {
+                CastQss();
+            }
+            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
+            {
+                CastQss();
+            }
+            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
+            {
+                CastQss();
+            }
+            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
+            {
+                CastQss();
+            }
+            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
+            {
+                CastQss();
+            }
+        }
+
         public static void Combo()
         {
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
@@ -250,13 +330,13 @@ namespace Twitch7
             if (jungleMonsters != null)
             {
                 if (useW && W.IsReady() && W.IsInRange(jungleMonsters) && Player.Instance.ManaPercent >= mana)
-		    	{
+                {
                     W.Cast(jungleMonsters);
                 }
                 if (useE && E.IsReady() && E.IsInRange(jungleMonsters) && Player.Instance.ManaPercent >= mana && jungleMonsters.HasBuff("twitchdeadlyvenom"))
                 {
                     if (Stack(jungleMonsters) >= MinE)
-		        	{
+                    {
                         E.Cast();
                     }
                 }
@@ -312,7 +392,7 @@ namespace Twitch7
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
-            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player)<300)
+            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) < 300)
             {
                 W.Cast(e.Sender);
             }
@@ -358,7 +438,7 @@ namespace Twitch7
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent <= ManaQ)
             {
-               return;
+                return;
             }
             if (target != null)
             {
@@ -392,23 +472,15 @@ namespace Twitch7
 
         private static void Damage(EventArgs args)
         {
-            foreach (
-                var enemy in
-                    EntityManager.Heroes.Enemies.Where(e => e.IsValid && e.IsHPBarRendered && e.TotalShieldHealth() > 10)
-                )
+            foreach (var enemy in EntityManager.Heroes.Enemies.Where(e => e.IsValid && e.IsHPBarRendered && e.TotalShieldHealth() > 10))
             {
                 var damage = EDamage(enemy);
-
                 if (Misc["Damage"].Cast<CheckBox>().CurrentValue)
                 {
-                    var dmgPer = (enemy.TotalShieldHealth() - damage > 0 ? enemy.TotalShieldHealth() - damage : 0) /
-                                 enemy.TotalShieldMaxHealth();
+                    var dmgPer = (enemy.TotalShieldHealth() - damage > 0 ? enemy.TotalShieldHealth() - damage : 0) / enemy.TotalShieldMaxHealth();
                     var currentHPPer = enemy.TotalShieldHealth() / enemy.TotalShieldMaxHealth();
-                    var initPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + dmgPer * Width),
-                        (int)enemy.HPBarPosition.Y + YOff);
-                    var endPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + currentHPPer * Width) + 1,
-                        (int)enemy.HPBarPosition.Y + YOff);
-
+                    var initPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + dmgPer * Width), (int)enemy.HPBarPosition.Y + YOff);
+                    var endPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + currentHPPer * Width) + 1, (int)enemy.HPBarPosition.Y + YOff);
                     EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Aqua, Thick, initPoint, endPoint);
                 }
             }

@@ -46,134 +46,134 @@ namespace Ezreal7
 
         static void OnLoadingComplete(EventArgs args)
         {
-                if (!_Player.ChampionName.Contains("Ezreal")) return;
-                Chat.Print("Ezreal7 Loaded!", Color.Orange);
-                Bootstrap.Init(null);
-                Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
-                W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
-                W.AllowedCollisionCount = int.MaxValue;
-                E = new Spell.Skillshot(SpellSlot.E,475,SkillShotType.Linear,250,2000,100);
-                R= new Spell.Skillshot(SpellSlot.R,5000,SkillShotType.Linear,1000,2000,160);
-                R.AllowedCollisionCount = int.MaxValue;
-                Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
-                Bil = new Item(3144, 475f);
-                Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-                Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
-                Menu.AddGroupLabel("Doctor7");
-                ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-                ComboMenu.AddGroupLabel("Combo Settings");
-                ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-                ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
-                ComboMenu.AddGroupLabel("Ultimate Settings");
-                ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
-                ComboMenu.AddSeparator();
-                ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
-                ComboMenu.AddSeparator();
-                ComboMenu.Add("MaxRangeR", new Slider("Max Distance Cast [R]", 3000, 0, 5000));
-                ComboMenu.AddSeparator();
-                ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
+            if (!_Player.ChampionName.Contains("Ezreal")) return;
+            Chat.Print("Ezreal7 Loaded!", Color.Orange);
+            Bootstrap.Init(null);
+            Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
+            W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
+            W.AllowedCollisionCount = int.MaxValue;
+            E = new Spell.Skillshot(SpellSlot.E,475,SkillShotType.Linear,250,2000,100);
+            R= new Spell.Skillshot(SpellSlot.R,5000,SkillShotType.Linear,1000,2000,160);
+            R.AllowedCollisionCount = int.MaxValue;
+            Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
+            Bil = new Item(3144, 475f);
+            Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
+            Menu.AddGroupLabel("Doctor7");
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.AddGroupLabel("Ultimate Settings");
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
+            ComboMenu.AddSeparator();
+            ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
+            ComboMenu.AddSeparator();
+            ComboMenu.Add("MaxRangeR", new Slider("Max Distance Cast [R]", 3000, 0, 5000));
+            ComboMenu.AddSeparator();
+            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
 
-                HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-                HarassMenu.AddGroupLabel("Harass Settings");
-                HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
-                HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
-                HarassMenu.AddSeparator();
-                HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
-                HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
-                HarassMenu.AddSeparator();
-                HarassMenu.AddGroupLabel("Harass On");
-                foreach (var enemies in EntityManager.Heroes.Enemies)
-                {
-                    HarassMenu.Add("haras" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
-                }
+            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
+            HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
+            HarassMenu.AddSeparator();
+            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
+            HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
+            HarassMenu.AddSeparator();
+            HarassMenu.AddGroupLabel("Harass On");
+            foreach (var enemies in EntityManager.Heroes.Enemies)
+            {
+                HarassMenu.Add("haras" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
+            }
 
-                Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
-				Auto.AddGroupLabel("Auto Harass Settings");
-                Auto.Add("AutoQ", new CheckBox("Auto Harass [Q]"));
-                Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
-                Auto.AddSeparator();
-                Auto.Add("AutoW", new CheckBox("Auto Harass [W]", false));
-                Auto.Add("AutomanaW", new Slider("Min Mana Auto [W]", 60));
-                Auto.AddSeparator();
-                Auto.AddGroupLabel("Auto Harass On");
-                foreach (var enemies in EntityManager.Heroes.Enemies)
-                {
-                    Auto.Add("harass" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
-                }
+            Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
+			Auto.AddGroupLabel("Auto Harass Settings");
+            Auto.Add("AutoQ", new CheckBox("Auto Harass [Q]"));
+            Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
+            Auto.AddSeparator();
+            Auto.Add("AutoW", new CheckBox("Auto Harass [W]", false));
+            Auto.Add("AutomanaW", new Slider("Min Mana Auto [W]", 60));
+            Auto.AddSeparator();
+            Auto.AddGroupLabel("Auto Harass On");
+            foreach (var enemies in EntityManager.Heroes.Enemies)
+            {
+                Auto.Add("harass" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
+            }
 
-                LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-                LaneClearMenu.AddGroupLabel("LastHit Settings");
-                LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
-                LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
-                LaneClearMenu.AddSeparator();
-                LaneClearMenu.Add("LhAA", new CheckBox("[Q] LastHit If Out Range AA", false));
-                LaneClearMenu.Add("AAMana", new Slider("Min Mana Lasthit [Q] If Out Range AA", 50));
-                LaneClearMenu.AddSeparator();
-                LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-                LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
-                LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
-                LaneClearMenu.AddSeparator();
-                LaneClearMenu.Add("LastAA", new CheckBox("[Q] LaneClear If Out Range AA"));
-                LaneClearMenu.Add("ManaLA", new Slider("Min Mana LastHit [Q] If Out Range AA", 50));
+            LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
+            LaneClearMenu.AddGroupLabel("LastHit Settings");
+            LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
+            LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
+            LaneClearMenu.AddSeparator();
+            LaneClearMenu.Add("LhAA", new CheckBox("[Q] LastHit If Out Range AA", false));
+            LaneClearMenu.Add("AAMana", new Slider("Min Mana Lasthit [Q] If Out Range AA", 50));
+            LaneClearMenu.AddSeparator();
+            LaneClearMenu.AddGroupLabel("Lane Clear Settings");
+            LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
+            LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
+            LaneClearMenu.AddSeparator();
+            LaneClearMenu.Add("LastAA", new CheckBox("[Q] LaneClear If Out Range AA"));
+            LaneClearMenu.Add("ManaLA", new Slider("Min Mana LastHit [Q] If Out Range AA", 50));
 
-                JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-                JungleClearMenu.AddGroupLabel("JungleClear Settings");
-                JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
-                JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
+            JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear Settings");
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
+            JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
-                Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-                Misc.AddGroupLabel("AntiGap Settings");
-                Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
-                Misc.AddGroupLabel("Ultimate On CC Settings");
-                Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
-                Misc.AddGroupLabel("Auto Stacks Settings");
-                Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
-                Misc.AddGroupLabel("Skin Changer");
-                Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
-                Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
+            Misc = Menu.AddSubMenu("Misc Settings", "Misc");
+            Misc.AddGroupLabel("AntiGap Settings");
+            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
+            Misc.AddGroupLabel("Ultimate On CC Settings");
+            Misc.Add("Rstun", new CheckBox("Use [R] If Enemy Has CC"));
+            Misc.AddGroupLabel("Auto Stacks Settings");
+            Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
+            Misc.AddGroupLabel("Skin Changer");
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
-                Items = Menu.AddSubMenu("Items Settings", "Items");
-                Items.AddGroupLabel("Items Settings");
-                Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
-                Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-                Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
-                Items.AddGroupLabel("Qss Settings");
-                Items.Add("Qss", new CheckBox("Use Qss"));
-                Items.AddGroupLabel("Qss On CC");
-                Items.Add("stun", new CheckBox("Stuns"));
-                Items.Add("rot", new CheckBox("Root"));
-                Items.Add("tunt", new CheckBox("Taunt"));
-                Items.Add("snare", new CheckBox("Snare"));
-                Items.Add("charm", new CheckBox("Charm", false));
-                Items.Add("slow", new CheckBox("Slows", false));
-                Items.Add("blind", new CheckBox("Blinds", false));
-                Items.Add("fear", new CheckBox("Fear", false));
-                Items.Add("silence", new CheckBox("Silence", false));
-                Items.Add("supperss", new CheckBox("Supperss", false));
-                Items.Add("poly", new CheckBox("Polymorph", false));
-                Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
+            Items = Menu.AddSubMenu("Items Settings", "Items");
+            Items.AddGroupLabel("Items Settings");
+            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
+            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items.AddGroupLabel("Qss Settings");
+            Items.Add("Qss", new CheckBox("Use Qss"));
+            Items.AddGroupLabel("Qss On CC");
+            Items.Add("stun", new CheckBox("Stuns"));
+            Items.Add("rot", new CheckBox("Root"));
+            Items.Add("tunt", new CheckBox("Taunt"));
+            Items.Add("snare", new CheckBox("Snare"));
+            Items.Add("charm", new CheckBox("Charm", false));
+            Items.Add("slow", new CheckBox("Slows", false));
+            Items.Add("blind", new CheckBox("Blinds", false));
+            Items.Add("fear", new CheckBox("Fear", false));
+            Items.Add("silence", new CheckBox("Silence", false));
+            Items.Add("supperss", new CheckBox("Supperss", false));
+            Items.Add("poly", new CheckBox("Polymorph", false));
+            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
-                KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-                KillStealMenu.AddGroupLabel("KillSteal Settings");
-                KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
-                KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
-                KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
-                KillStealMenu.AddSeparator();
-                KillStealMenu.AddGroupLabel("Ultimate Settings");
-                KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-                KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
-                KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Key", false, KeyBind.BindTypes.HoldActive, 'T'));
+            KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
+            KillStealMenu.AddGroupLabel("KillSteal Settings");
+            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
+            KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
+            KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
+            KillStealMenu.AddSeparator();
+            KillStealMenu.AddGroupLabel("Ultimate Settings");
+            KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
+            KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
+            KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
-                Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
-                Drawings.AddGroupLabel("Drawing Settings");
-                Drawings.Add("DrawQ", new CheckBox("Q Range"));
-                Drawings.Add("DrawW", new CheckBox("W Range", false));
-                Drawings.Add("DrawE", new CheckBox("E Range", false));
-                Drawings.Add("Notifications", new CheckBox("Notifications Can Kill R"));
+            Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
+            Drawings.AddGroupLabel("Drawing Settings");
+            Drawings.Add("DrawQ", new CheckBox("Q Range"));
+            Drawings.Add("DrawW", new CheckBox("W Range", false));
+            Drawings.Add("DrawE", new CheckBox("E Range", false));
+            Drawings.Add("Notifications", new CheckBox("Notifications Can Kill R"));
 
-                Drawing.OnDraw += Drawing_OnDraw;
-                Game.OnTick += Game_OnTick;
-                Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnTick += Game_OnTick;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -277,12 +277,12 @@ namespace Ezreal7
         {
             if (Qss.IsOwned() && Qss.IsReady())
             {
-                Qss.Cast();
+                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
 
             if (Simitar.IsOwned() && Simitar.IsReady())
             {
-                Simitar.Cast();
+                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
         }
 
@@ -291,47 +291,47 @@ namespace Ezreal7
             if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
             if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
             if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
             {
-                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
         }
 		
