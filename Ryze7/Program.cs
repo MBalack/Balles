@@ -53,7 +53,7 @@ namespace Ryze
             menu = MainMenu.AddMenu("Ryze7", "Ryze");
 
             ComboMenu = menu.AddSubMenu("Combo Settings", "Combo");
-			ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
+            ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
             ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
             ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
             ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
@@ -91,7 +91,7 @@ namespace Ryze
             KsMenu.Add("KsW", new CheckBox("Spell [W]"));
             KsMenu.Add("KsE", new CheckBox("Spell [E]"));
             KsMenu.Add("KsIgnite", new CheckBox("Use [Ignite] KillSteal"));
-			
+
             Misc = menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("AntiGap Setting");
             Misc.Add("gapw", new CheckBox("AntiGap [W]"));
@@ -101,7 +101,7 @@ namespace Ryze
             Misc.AddGroupLabel("Skin Changer");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
-			
+
             Autos = menu.AddSubMenu("Stacks Settings", "Stacks");
             Autos.Add("AutoStack", new KeyBind("Auto Stack", false, KeyBind.BindTypes.PressToggle, 'T'));
             Autos.Add("MaxStack", new Slider("Keep Max Stacks", 2, 1, 5));
@@ -116,7 +116,7 @@ namespace Ryze
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
             Gapcloser.OnGapcloser += AntiGapCloser;
-		}
+        }
 
 
         private static void Game_OnTick(EventArgs args)
@@ -132,20 +132,20 @@ namespace Ryze
                 JungleClear();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-			{
+            {
                 Harass();
-			}
+            }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
-			{
+            {
                 LastHit();
-			}
+            }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-			{
-				Combo();
-			}
-                AutoStack();
-                KillSteal();
-                Dtc();
+            {
+                Combo();
+            }
+            AutoStack();
+            KillSteal();
+            Dtc();
 
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -160,14 +160,14 @@ namespace Ryze
         {
             if (Draws["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 6f, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Draws["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 6f, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
         }
-		
+
         private static void AntiGapCloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
             if (!e.Sender.IsValidTarget() || e.Sender.Type != Player.Type || !e.Sender.IsEnemy)
@@ -187,7 +187,7 @@ namespace Ryze
             {
                 Core.DelayAction(() => Q.Cast(QPred.CastPosition), ComboMenu["Human"].Cast<Slider>().CurrentValue);
             }
-		    else
+            else
             {
                 if (target.IsValidTarget(Q.Range) && Q.IsReady() && target.IsRooted && !target.IsDead)
                 {
@@ -195,7 +195,7 @@ namespace Ryze
                 }
             }
         }
-		
+
         public static int SkinId()
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
@@ -204,7 +204,7 @@ namespace Ryze
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
-		
+
         private static void AutoStack()
         {
             var stacks = Player.GetBuffCount("ryzepassivestack");
@@ -226,15 +226,14 @@ namespace Ryze
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
-
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
             Orbwalker.ForcedTarget = target;
-            if (target != null && target.IsValidTarget())
+            if (target != null)
             {
-				if (W.IsReady() || E.IsReady())
-		 	    {
-		 	       Orbwalker.DisableAttacking = true;
-				}
+                if (W.IsReady() || E.IsReady())
+                {
+                    Orbwalker.DisableAttacking = true;
+                }
                 if (useQ && Q.IsReady())
                     QCast(target);
                 else if (!Q.IsReady() && useE && E.IsReady())
@@ -404,36 +403,36 @@ namespace Ryze
                 }
             }
         }
-		
+
         public static void LaneClear()
         {
             var useQ = ClearMenu["LCQ"].Cast<CheckBox>().CurrentValue;
             var useW = ClearMenu["LCW"].Cast<CheckBox>().CurrentValue;
             var useE = ClearMenu["LCE"].Cast<CheckBox>().CurrentValue;
             var useR = ClearMenu["LCR"].Cast<CheckBox>().CurrentValue;
-            foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, _Player.Position, Q.Range))
+            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+
+            if (_Player.ManaPercent < ClearMenu["LaneClearMana"].Cast<Slider>().CurrentValue) return;
+            foreach (var minion in minions)
             {
-                if (_Player.ManaPercent > ClearMenu["LaneClearMana"].Cast<Slider>().CurrentValue)
-                {
-                if (useQ && Q.IsReady())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range))
                     Q.Cast(minion);
-                else if (!Q.IsReady() && useE && E.IsReady())
+                else if (!Q.IsReady() && useE && E.IsReady() && minion.IsValidTarget(E.Range))
                     E.Cast(minion);
-                else if (!E.IsReady() && useW && W.IsReady())
+                else if (!E.IsReady() && useW && W.IsReady() && minion.IsValidTarget(E.Range))
                     W.Cast(minion);
                 else if (!E.IsReady() && useR && R.IsReady())
                     R.Cast();
-                if (!R.IsReady() && useQ && Q.IsReady())
+                if (!R.IsReady() && useQ && Q.IsReady() && minion.IsValidTarget(Q.Range))
                     Q.Cast(minion);
-                else if (!Q.IsReady() && useE && E.IsReady())
+                else if (!Q.IsReady() && useE && E.IsReady() && minion.IsValidTarget(E.Range))
                     E.Cast(minion);
-                if (!E.IsReady() && useQ && Q.IsReady())
+                if (!E.IsReady() && useQ && Q.IsReady() && minion.IsValidTarget(Q.Range))
                     Q.Cast(minion);
-                else if (!Q.IsReady() && useW && W.IsReady())
+                else if (!Q.IsReady() && useW && W.IsReady() && minion.IsValidTarget(E.Range))
                     W.Cast(minion);
-                else if (!W.IsReady() && useQ && Q.IsReady())
+                else if (!W.IsReady() && useQ && Q.IsReady() && minion.IsValidTarget(Q.Range))
                     Q.Cast(minion);
-                }
             }
         }
 
