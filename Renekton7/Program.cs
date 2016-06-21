@@ -38,31 +38,29 @@ namespace Renekton7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Renekton")) return;
-            Chat.Print("Renekton7 Loaded!", Color.GreenYellow);
-            Chat.Print("Good Luck!", Color.Yellow);
+            Chat.Print("Renekton7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
-
             Q = new Spell.Active(SpellSlot.Q, 325);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Skillshot(SpellSlot.E, 450, SkillShotType.Linear);
             R = new Spell.Active(SpellSlot.R);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
-            Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
-            Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
+            Tiamat = new Item(ItemId.Tiamat_Melee_Only, 400);
+            Hydra = new Item(ItemId.Ravenous_Hydra_Melee_Only, 400);
+            Titanic = new Item(ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
 
             Menu = MainMenu.AddMenu("Renekton7", "Renekton");
             Menu.AddSeparator();
-			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA"));
-            ComboMenu.Add("FastW", new CheckBox("Use [W] Fast", false));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA", false));
+            ComboMenu.Add("FastW", new CheckBox("Use [W] Fast"));
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo"));
-            ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 300, 0, 450));
+            ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 250, 0, 450));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
             ComboMenu.Add("titanic", new CheckBox("Use [Titanic]"));
@@ -78,7 +76,7 @@ namespace Renekton7
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
-            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass") );
+            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
@@ -101,7 +99,7 @@ namespace Renekton7
             KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
             KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
             KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
-            KillStealMenu.Add("KsEQ", new CheckBox("Use [E-Q] KillSteal"));
+            KillStealMenu.Add("KsEQ", new CheckBox("Use [E-Q] KillSteal", false));
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
@@ -121,11 +119,11 @@ namespace Renekton7
         {
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
         }
 
@@ -137,9 +135,9 @@ namespace Renekton7
                 LaneClear();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-			{
+            {
                 Harass();
-			}
+            }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
@@ -153,11 +151,11 @@ namespace Renekton7
                 Flee();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-			{
-				Combo();
-			}
-                KillSteal();
-                Ultimate();
+            {
+                Combo();
+            }
+            KillSteal();
+            Ultimate();
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -175,7 +173,7 @@ namespace Renekton7
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
-		
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
@@ -194,7 +192,7 @@ namespace Renekton7
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
@@ -226,7 +224,6 @@ namespace Renekton7
             var Titan = ComboMenu["titanic"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
                 if (useriu && !W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
@@ -245,21 +242,10 @@ namespace Renekton7
                 {
                     Titanic.Cast();
                 }
-                if (useW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(_Player.AttackRange))
+                if (useW && W.IsReady() && target.IsValidTarget(Q.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    if (target.Type == GameObjectType.AIHeroClient)
-                    {
-                        if (Player.CastSpell(SpellSlot.W))
-                            Orbwalker.ResetAutoAttack();
-                    }
-                }
-                if (HasW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && target.IsValidTarget(_Player.AttackRange))
-                {
-                    if (target.Type == GameObjectType.AIHeroClient)
-                    {
-                        if (Player.CastSpell(SpellSlot.W))
-                            Orbwalker.ResetAutoAttack();
-                    }
+                    Player.CastSpell(SpellSlot.W);
+                    Orbwalker.ResetAutoAttack();
                 }
             }
         }
@@ -290,25 +276,30 @@ namespace Renekton7
             foreach (var minion in minions)
             {
                 if (useQ && Q.IsReady() && Q.IsInRange(minion) && Player.Instance.GetAutoAttackRange() <= minion.Distance(Player.Instance) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
-		    	{
+                {
                     Q.Cast();
                 }
                 if (useW && W.IsReady() && minion.IsValidTarget(_Player.AttackRange) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) >= minion.TotalShieldHealth())
                 {
                     W.Cast();
-	    		}
+                }
             }
         }
 
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(700, DamageType.Physical);
             if (target != null)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
+                }
+                if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                {
+                    W.Cast();
                 }
             }
         }
@@ -324,13 +315,13 @@ namespace Renekton7
             if (jungleMonsters != null)
             {
                 if (useQ && Q.IsReady() && Q.IsInRange(jungleMonsters))
-		    	{
+                {
                     Q.Cast();
                 }
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
                 {
                     W.Cast();
-	    		}
+                }
                 if (useE && E.IsReady())
                 {
                     if (!Player.HasBuff("RenekthonSliceAndDiceDelay"))
@@ -340,8 +331,8 @@ namespace Renekton7
                     if (Player.HasBuff("RenekthonSliceAndDiceDelay") && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
                     {
                         E.Cast(jungleMonsters.Position);
-	    	    	}
-	    		}
+                    }
+                }
                 if (useriu && !W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
@@ -389,7 +380,7 @@ namespace Renekton7
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
                     {
                         W.Cast();
-					}
+                    }
                 }
 
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
@@ -397,7 +388,7 @@ namespace Renekton7
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target.Position);
-					}
+                    }
                 }
 
                 if (KsEQ && E.IsReady() && Q.IsReady() && target.IsValidTarget(E.Range))
@@ -405,7 +396,7 @@ namespace Renekton7
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q) + Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target.Position);
-					}
+                    }
                 }
 
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
@@ -416,6 +407,6 @@ namespace Renekton7
                     }
                 }
             }
-		}
+        }
     }
 }
