@@ -182,61 +182,61 @@ namespace Borki7
         {
             if (Qss.IsOwned() && Qss.IsReady())
             {
-                Qss.Cast();
+                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
 
             if (Simitar.IsOwned() && Simitar.IsReady())
             {
-                Simitar.Cast();
+                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
         }
 
         private static void Qsss()
         {
-            if (!items["Qss"].Cast<CheckBox>().CurrentValue) return;
-            if (items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
+            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
+            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
+            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
+            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
+            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
+            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
+            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
+            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
+            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
+            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
-            if (items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
+            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
             {
-                Core.DelayAction(() => CastQss(), items["delay"].Cast<Slider>().CurrentValue);
+                CastQss();
             }
         }
 
