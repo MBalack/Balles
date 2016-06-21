@@ -45,8 +45,7 @@ namespace Olaf7
         static void OnLoadingComplete(EventArgs args)
         {
                 if (!_Player.ChampionName.Contains("Olaf")) return;
-                Chat.Print("Olaf7 Loaded!", Color.Red);
-                Chat.Print("Doctor7", Color.GreenYellow);
+                Chat.Print("Olaf7 Loaded!", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1550, 75);
                 Q.AllowedCollisionCount = int.MaxValue;
@@ -59,8 +58,7 @@ namespace Olaf7
                 Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
                 Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
                 Menu = MainMenu.AddMenu("Olaf7", "Olaf");
-                Menu.AddGroupLabel("Olaf7");
-                Menu.AddLabel(" Leave Feedback For Any Bugs ");
+                Menu.AddGroupLabel("Doctor7");
 
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
                 ComboMenu.AddGroupLabel("Combo Settings");
@@ -153,11 +151,11 @@ namespace Olaf7
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
         }
 
@@ -259,10 +257,7 @@ namespace Olaf7
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
-            var jungle =
-                EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, Q.Range)
-                    .OrderByDescending(a => a.MaxHealth)
-                    .FirstOrDefault();
+            var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (jungle != null)
             {
                 if (Player.Instance.ManaPercent >= JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue)
@@ -391,11 +386,7 @@ namespace Olaf7
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
-                        var Qpred = Q.GetPrediction(target);
-                        if (Qpred.HitChancePercent >= 70)
-                        {
-                            Q.Cast(Qpred.CastPosition);
-                        }
+                        Q.Cast(target);
                     }
                 }
 
