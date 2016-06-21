@@ -10,6 +10,9 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
+using Font = SharpDX.Direct3D9.Font;
+using SharpDX;
+using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace Ryze
@@ -22,10 +25,7 @@ namespace Ryze
         public static Spell.Active R;
         public static Item Seraph;
         public static Spell.Targeted Ignite;
-        public static AIHeroClient Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        private static Font Tahoma16B;
         public static Menu menu, ComboMenu, HarassMenu, JungleMenu, ClearMenu, LastHitMenu, KsMenu, Autos, Draws, Misc;
         public static AIHeroClient _Player
         {
@@ -50,8 +50,8 @@ namespace Ryze
             R = new Spell.Active(SpellSlot.R);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Seraph = new Item(3040);
+            Tahoma16B = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             menu = MainMenu.AddMenu("Ryze7", "Ryze");
-
             ComboMenu = menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
             ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
@@ -106,6 +106,7 @@ namespace Ryze
             Autos.Add("AutoStack", new KeyBind("Auto Stack", false, KeyBind.BindTypes.PressToggle, 'T'));
             Autos.Add("MaxStack", new Slider("Keep Max Stacks", 2, 1, 5));
             Autos.Add("StackMana", new Slider("Min Mana AutoStack", 70, 0, 100));
+            Autos.Add("DrawSt", new CheckBox("Draw Stacks"));
 
             Draws = menu.AddSubMenu("Drawings Settings", "Draw");
             Draws.AddSeparator(10);
@@ -166,11 +167,19 @@ namespace Ryze
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
+            if (Autos["DrawSt"].Cast<CheckBox>().CurrentValue)
+            {
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (Autos["AutoStack"].Cast<KeyBind>().CurrentValue)
+                {
+                    DrawFont(Tahoma16B, "Auto Stacks : Enable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
+                }
+            }
         }
 
         private static void AntiGapCloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
-            if (!e.Sender.IsValidTarget() || e.Sender.Type != Player.Type || !e.Sender.IsEnemy)
+            if (!e.Sender.IsValidTarget() || e.Sender.Type != _Player.Type || !e.Sender.IsEnemy)
             {
                 return;
             }
@@ -207,15 +216,15 @@ namespace Ryze
 
         private static void AutoStack()
         {
-            var stacks = Player.GetBuffCount("ryzepassivestack");
+            var stacks = _Player.GetBuffCount("ryzepassivestack");
             var mana = Autos["StackMana"].Cast<Slider>().CurrentValue;
             var ats = Autos["AutoStack"].Cast<KeyBind>().CurrentValue;
             var max = Autos["MaxStack"].Cast<Slider>().CurrentValue;
-            if (ats && Player.CountEnemiesInRange(Q.Range) <= 0 && !Player.IsRecalling() && _Player.ManaPercent >= mana)
+            if (ats && _Player.CountEnemiesInRange(Q.Range) <= 0 && !_Player.IsRecalling() && _Player.ManaPercent >= mana)
             {
                 if (Q.IsReady() && stacks <= max && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range)))
                 {
-                    Q.Cast(Player.ServerPosition.Extend(Game.CursorPos, Q.Range).To3D());
+                    Q.Cast(_Player.ServerPosition.Extend(Game.CursorPos, Q.Range).To3D());
                 }
             }
         }
@@ -240,7 +249,7 @@ namespace Ryze
                     Core.DelayAction(() => E.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 else if (!E.IsReady() && useW && W.IsReady())
                     Core.DelayAction(() => W.Cast(target), ComboMenu["Human"].Cast<Slider>().CurrentValue);
-                else if (!E.IsReady() && useR && R.IsReady() && Player.CountEnemiesInRange(W.Range + 200) >= 1)
+                else if (!E.IsReady() && useR && R.IsReady() && _Player.CountEnemiesInRange(W.Range + 200) >= 1)
                     Core.DelayAction(() => R.Cast(), ComboMenu["Human"].Cast<Slider>().CurrentValue);
                 if (!R.IsReady() && useQ && Q.IsReady())
                     QCast(target);
@@ -287,13 +296,18 @@ namespace Ryze
 
         private static void Dtc()
         {
-            if (!Player.IsDead && Misc["dts"].Cast<CheckBox>().CurrentValue)
+            if (!_Player.IsDead && Misc["dts"].Cast<CheckBox>().CurrentValue)
             {
-                if (Seraph.IsOwned() && Seraph.IsReady() && Player.HealthPercent <= Misc["Hp"].Cast<Slider>().CurrentValue && Player.Position.CountEnemiesInRange(600) >= 1)
+                if (Seraph.IsOwned() && Seraph.IsReady() && _Player.HealthPercent <= Misc["Hp"].Cast<Slider>().CurrentValue && _Player.Position.CountEnemiesInRange(600) >= 1)
                 {
                     Seraph.Cast();
                 }
             }
+        }
+
+        public static void DrawFont(Font vFont, string vText, float jx, float jy, ColorBGRA jc)
+        {
+            vFont.DrawText(null, vText, (int)jx, (int)jy, jc);
         }
 
         public static void Harass()
@@ -381,7 +395,7 @@ namespace Ryze
 
         public static void LastHit()
         {
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(Player)).FirstOrDefault(m => m.IsValidTarget(Q.Range));
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(_Player)).FirstOrDefault(m => m.IsValidTarget(Q.Range));
             var useQ = LastHitMenu["LHQ"].Cast<CheckBox>().CurrentValue;
             var useW = LastHitMenu["LHW"].Cast<CheckBox>().CurrentValue;
             var useE = LastHitMenu["LHE"].Cast<CheckBox>().CurrentValue;
@@ -438,7 +452,7 @@ namespace Ryze
 
         public static void JungleClear()
         {
-            var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.ServerPosition, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.ServerPosition, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             var useQ = JungleMenu["JQ"].Cast<CheckBox>().CurrentValue;
             var useW = JungleMenu["JW"].Cast<CheckBox>().CurrentValue;
             var useE = JungleMenu["JE"].Cast<CheckBox>().CurrentValue;
