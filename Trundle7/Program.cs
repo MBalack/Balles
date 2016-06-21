@@ -222,7 +222,7 @@ namespace Trundle7
                 }
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && E2dis <= target.Distance(Player.Instance))
                 {
-                    E.Cast(target.Position + 50);
+                    E.Cast(target.Position);
                 }
                 if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(450))
                 {
@@ -338,7 +338,7 @@ namespace Trundle7
                 }
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
                 {
-                    E.Cast(target);
+                    E.Cast(target.Position);
                 }
             }
         }
