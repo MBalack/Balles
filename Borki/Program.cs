@@ -182,59 +182,59 @@ namespace Borki7
         {
             if (Qss.IsOwned() && Qss.IsReady())
             {
-                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
+                Core.DelayAction(() => Qss.Cast(), items["delay"].Cast<Slider>().CurrentValue);
             }
 
             if (Simitar.IsOwned() && Simitar.IsReady())
             {
-                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
+                Core.DelayAction(() => Simitar.Cast(), items["delay"].Cast<Slider>().CurrentValue);
             }
         }
 
         private static void Qsss()
         {
-            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
-            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
+            if (!items["Qss"].Cast<CheckBox>().CurrentValue) return;
+            if (items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             {
                 CastQss();
             }
-            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
+            if (items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
             {
                 CastQss();
             }
-            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            if (items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             {
                 CastQss();
             }
-            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
+            if (items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
             {
                 CastQss();
             }
-            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
+            if (items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
             {
                 CastQss();
             }
-            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
+            if (items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
             {
                 CastQss();
             }
-            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
+            if (items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
             {
                 CastQss();
             }
-            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
+            if (items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
             {
                 CastQss();
             }
-            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
+            if (items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             {
                 CastQss();
             }
-            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
+            if (items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             {
                 CastQss();
             }
-            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
+            if (items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
             {
                 CastQss();
             }
