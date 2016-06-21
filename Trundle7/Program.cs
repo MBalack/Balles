@@ -66,6 +66,11 @@ namespace Trundle7
             ComboMenu.AddGroupLabel("Ultimate Health Settings");
             ComboMenu.Add("ultiR", new CheckBox("Use [R] My Health"));
             ComboMenu.Add("MinR", new Slider("Min Health Use [R]", 60));
+            ComboMenu.AddGroupLabel("Use [R] On");
+            foreach (var target in EntityManager.Heroes.Enemies)
+            {
+                ComboMenu.Add("useRCombo" + target.ChampionName, new CheckBox("" + target.ChampionName));
+            }
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -141,6 +146,7 @@ namespace Trundle7
 
         private static void Game_OnTick(EventArgs args)
         {
+            Orbwalker.ForcedTarget = null;
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -222,11 +228,14 @@ namespace Trundle7
                 }
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && E2dis <= target.Distance(Player.Instance))
                 {
-                    E.Cast(target.Position + 20);
+                    E.Cast(target);
                 }
                 if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(450))
                 {
-                    R.Cast(target);
+                    if (ComboMenu["useRCombo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
+                    {
+                        R.Cast(target);
+                    }
                 }
             }
         }
@@ -274,10 +283,11 @@ namespace Trundle7
                 {
                     Titanic.Cast();
                 }
-                if (useQ && Q.IsReady() && target.IsValidTarget(_Player.AttackRange) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQ && Q.IsReady() && target.IsValidTarget(325) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Player.CastSpell(SpellSlot.Q);
                     Orbwalker.ResetAutoAttack();
+                    Orbwalker.ForcedTarget = target;
                 }
             }
         }
@@ -291,7 +301,7 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(_Player.AttackRange) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
@@ -310,7 +320,7 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(_Player.AttackRange) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
@@ -332,13 +342,13 @@ namespace Trundle7
                     Q.Cast();
                     Orbwalker.ForcedTarget = target;
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && W.IsInRange(target) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast(target);
                 }
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
                 {
-                    E.Cast(target.Position);
+                    E.Cast(target);
                 }
             }
         }
@@ -389,7 +399,7 @@ namespace Trundle7
             }
             if (W.IsReady())
             {
-                W.Cast(_Player.Position);
+                Player.CastSpell(SpellSlot.W, Game.CursorPos);
             }
         }
 
