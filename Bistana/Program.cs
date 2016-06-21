@@ -143,26 +143,6 @@ namespace Bristana
             }
         }
 
-        private static void JungleClear()
-        {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
-            if (monster != null)
-            {
-                if (Q.IsReady() && JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range))
-                {
-                    Q.Cast();
-                }
-                if (W.IsReady() && JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(W.Range))
-                {
-                    W.Cast(monster.ServerPosition);
-                }
-                if (E.IsReady() && JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range) && _Player.ManaPercent > JungleMenu["manaJung"].Cast<Slider>().CurrentValue)
-                {
-                    E.Cast(monster);
-                }
-            }
-        }
-
         private static void Flee()
         {
             if (W.IsReady())
@@ -277,24 +257,44 @@ namespace Bristana
 
         private static void LaneClear()
         {
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Player.Instance.Position, _Player.AttackRange).FirstOrDefault(a => !a.IsDead);
-            var tower = EntityManager.Turrets.Enemies.FirstOrDefault(a => !a.IsDead && a.Distance(_Player) < _Player.AttackRange);
-            if (tower != null)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(Player)).FirstOrDefault(m => m.IsValidTarget(E.Range));
+            var turret = EntityManager.Turrets.Enemies.FirstOrDefault(t => !t.IsDead && t.Distance(_Player) < _Player.AttackRange);
+            if (turret != null)
             {
-                if (LaneMenu["ClearTower"].Cast<CheckBox>().CurrentValue && E.IsReady() && tower.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
+                if (LaneMenu["ClearTower"].Cast<CheckBox>().CurrentValue && E.IsReady() && turret.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
                 {
-                    E.Cast(tower);
+                    E.Cast(turret);
                 }
             }
             if (minion != null)
             {
-                if (LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue && E.IsReady() && !tower.IsValidTarget(E.Range) && minion.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
+                if (LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue && E.IsReady() && !turret.IsValidTarget(E.Range) && minion.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
                 {
                     E.Cast(minion);
                 }
                 if (LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue && Q.IsReady() && minion.IsValidTarget(E.Range))
                 {
                     Q.Cast();
+                }
+            }
+        }
+
+        private static void JungleClear()
+        {
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(m => m.MaxHealth).FirstOrDefault();
+            if (monster != null)
+            {
+                if (Q.IsReady() && JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range))
+                {
+                    Q.Cast();
+                }
+                if (W.IsReady() && JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(W.Range))
+                {
+                    W.Cast(monster.ServerPosition);
+                }
+                if (E.IsReady() && JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range) && _Player.ManaPercent > JungleMenu["manaJung"].Cast<Slider>().CurrentValue)
+                {
+                    E.Cast(monster);
                 }
             }
         }
@@ -317,11 +317,11 @@ namespace Bristana
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (Misc["drawAA"].Cast<CheckBox>().CurrentValue)
+            if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
-            if (Misc["drawW"].Cast<CheckBox>().CurrentValue)
+            if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
@@ -420,8 +420,8 @@ namespace Bristana
             Misc.Add("antiKZ", new CheckBox("Anti Kha'Zix"));
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
             Misc.AddGroupLabel("Drawings Settings");
-            Misc.Add("drawAA", new CheckBox("Draw E"));
-            Misc.Add("drawW", new CheckBox("Draw W", false));
+            Misc.Add("DrawE", new CheckBox("Draw E"));
+            Misc.Add("DrawW", new CheckBox("Draw W", false));
             Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
