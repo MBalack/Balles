@@ -222,7 +222,7 @@ namespace Trundle7
                 }
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && E2dis <= target.Distance(Player.Instance))
                 {
-                    E.Cast(target.Position);
+                    E.Cast(target.Position + 20);
                 }
                 if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(450))
                 {
