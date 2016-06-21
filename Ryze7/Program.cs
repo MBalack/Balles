@@ -122,7 +122,7 @@ namespace Ryze
         private static void Game_OnTick(EventArgs args)
         {
             Orbwalker.DisableAttacking = false;
-
+            Orbwalker.ForcedTarget = null;
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();

@@ -379,14 +379,14 @@ namespace Ezreal7
 
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
-            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
-            if (jungleMonsters != null)
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
+            if (monster != null)
             {
-                if (useQ && Q.IsReady() && Q.IsInRange(jungleMonsters) && Player.Instance.ManaPercent >= mana)
+                if (useQ && Q.IsReady() && Q.IsInRange(monster) && Player.Instance.ManaPercent >= mana)
 		    	{
-                    if (Player.Instance.GetAutoAttackRange() >= jungleMonsters.Distance(Player.Instance))
+                    if (Player.Instance.GetAutoAttackRange() >= monster.Distance(Player.Instance))
                     {
-                        Q.Cast(jungleMonsters);
+                        Q.Cast(monster);
                     }
                 }
             }
