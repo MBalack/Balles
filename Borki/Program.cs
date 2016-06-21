@@ -88,41 +88,10 @@ namespace Borki7
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
-		
-        private static void Flee()
-        {
-            if (W.IsReady())
-            {
-                var cursorPos = Game.CursorPos;
-                var castPos = Player.Instance.Position.Distance(cursorPos) <= W.Range ? cursorPos : Player.Instance.Position.Extend(cursorPos, W.Range).To3D();
-                W.Cast(castPos);
-            }
-        }
-		
-        private static void JungleClear()
-        {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(ObjectManager.Player.ServerPosition, Q.Range).FirstOrDefault(x => x.IsValidTarget(Q.Range));
-            if (monster != null)
-            {
-                if (Q.IsReady() && JungleMenu["JungleQ"].Cast<CheckBox>().CurrentValue && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && monster.IsValidTarget(Q.Range))
-                {
-                    Q.Cast(monster);
-                }
-                if (R.IsReady() && JungleMenu["JungleR"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(R.Range) && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && R.Handle.Ammo > JungleMenu["RocketJung"].Cast<Slider>().CurrentValue)
-                {
-                    R.Cast(monster);
-                }
-                if (E.IsReady() && JungleMenu["JungleE"].Cast<CheckBox>().CurrentValue && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && monster.IsValidTarget(E.Range))
-                {
-                    E.Cast();
-                }
-            }
-        }
 
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
-            var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(R.Range));
             if (target != null)
             {
                 if (SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue && Q.IsReady() && target.IsValidTarget(Q.Range))
@@ -277,6 +246,36 @@ namespace Borki7
             if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && W.IsReady() && sender.IsEnemy && sender.IsVisible && sender.IsInRange(Player.Instance, 450))
             {
                 W.Cast(Player.Instance.Position.Shorten(sender.Position, W.Range));
+            }
+        }
+
+        private static void Flee()
+        {
+            if (W.IsReady())
+            {
+                var cursorPos = Game.CursorPos;
+                var castPos = Player.Instance.Position.Distance(cursorPos) <= W.Range ? cursorPos : Player.Instance.Position.Extend(cursorPos, W.Range).To3D();
+                W.Cast(castPos);
+            }
+        }
+
+        private static void JungleClear()
+        {
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.ServerPosition, Q.Range).FirstOrDefault(x => x.IsValidTarget(Q.Range));
+            if (monster != null)
+            {
+                if (Q.IsReady() && JungleMenu["JungleQ"].Cast<CheckBox>().CurrentValue && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && monster.IsValidTarget(Q.Range))
+                {
+                    Q.Cast(monster);
+                }
+                if (R.IsReady() && JungleMenu["JungleR"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(R.Range) && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && R.Handle.Ammo > JungleMenu["RocketJung"].Cast<Slider>().CurrentValue)
+                {
+                    R.Cast(monster);
+                }
+                if (E.IsReady() && JungleMenu["JungleE"].Cast<CheckBox>().CurrentValue && _Player.ManaPercent >= JungleMenu["manaJung"].Cast<Slider>().CurrentValue && monster.IsValidTarget(E.Range))
+                {
+                    E.Cast();
+                }
             }
         }
 
