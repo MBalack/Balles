@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Bristana")]
+[assembly: AssemblyTitle("Bistana")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Bristana")]
-[assembly: AssemblyCopyright("Copyright ©  Microsoft")]
+[assembly: AssemblyProduct("Bistana")]
+[assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("64c153ca-0ae7-4e19-97b4-8b7c51af6dca")]
+[assembly: Guid("6206fde8-a9e6-48a3-bab2-1de642594522")]
 
 // Version information for an assembly consists of the following four values:
 //

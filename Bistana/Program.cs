@@ -23,7 +23,9 @@ namespace Bristana
         public static Spell.Targeted R;
         public static Item Botrk;
         public static Item Bil;
-        
+        public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
+        public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
+
         public static Menu Menu,
         SpellMenu,
         JungleMenu,
@@ -67,7 +69,8 @@ namespace Bristana
             }
             KillSteal();
             Item();
-			
+            Qsss();
+
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -77,7 +80,69 @@ namespace Bristana
             }
 
         }
-		
+
+        public static void CastQss()
+        {
+            if (Qss.IsOwned() && Qss.IsReady())
+            {
+                Qss.Cast();
+            }
+
+            if (Simitar.IsOwned() && Simitar.IsReady())
+            {
+                Simitar.Cast();
+            }
+        }
+
+        private static void Qsss()
+        {
+            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
+            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
+            {
+                Core.DelayAction(() => CastQss(), Items["delay"].Cast<Slider>().CurrentValue);
+            }
+        }
+
         private static void JungleClear()
         {
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
@@ -97,7 +162,7 @@ namespace Bristana
                 }
             }
         }
-		
+
         private static void Flee()
         {
             if (W.IsReady())
@@ -105,9 +170,9 @@ namespace Bristana
                 var cursorPos = Game.CursorPos;
                 var castPos = Player.Instance.Position.Distance(cursorPos) <= W.Range ? cursorPos : Player.Instance.Position.Extend(cursorPos, W.Range).To3D();
                 W.Cast(castPos);
-			}
-		}
-		
+            }
+        }
+
         public static int SkinId()
         {
             return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
@@ -132,7 +197,7 @@ namespace Bristana
 
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
-            if(Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player)<300)
+            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 300)
             {
                 R.Cast(args.Sender);
             }
@@ -140,7 +205,6 @@ namespace Bristana
 
         public static void Item()
         {
-
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
@@ -176,7 +240,7 @@ namespace Bristana
                 }
             }
         }
-		
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
@@ -200,7 +264,7 @@ namespace Bristana
         {
             var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie && e.HealthPercent <= 25);
             foreach (var target2 in target)
-	    	{
+            {
                 if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
                     if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
@@ -255,11 +319,11 @@ namespace Bristana
         {
             if (Misc["drawAA"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Misc["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -273,24 +337,23 @@ namespace Bristana
                 }
             }
         }
-		
+
         private static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Tristana")) return;
-            Chat.Print("Bristana Loaded!", Color.GreenYellow);
-            Chat.Print("Good Luck!", Color.GreenYellow);
+            Chat.Print("Bristana Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
             E = new Spell.Targeted(SpellSlot.E, 550);
             R = new Spell.Targeted(SpellSlot.R, 550);
-            Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
 
             Menu = MainMenu.AddMenu("Bristana", "Bristana");
             Menu.AddGroupLabel("Bristana");
             Menu.AddLabel(" Good Luck! ");
-            
+
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Combo [Q]"));
@@ -321,7 +384,7 @@ namespace Bristana
             LaneMenu.Add("ClearE", new CheckBox("Laneclear [E]", false));
             LaneMenu.Add("ClearTower", new CheckBox("Laneclear [E] Turret", false));
             LaneMenu.Add("manaFarm", new Slider("Min Mana For LaneClear", 50, 0, 100));
-			
+
             JungleMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleMenu.AddGroupLabel("JungleClear Settings");
             JungleMenu.Add("jungleQ", new CheckBox("JungleClear [Q]"));
@@ -334,6 +397,21 @@ namespace Bristana
             Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
             Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
             Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items.AddGroupLabel("Qss Settings");
+            Items.Add("Qss", new CheckBox("Use Qss"));
+            Items.AddGroupLabel("Qss On CC");
+            Items.Add("stun", new CheckBox("Stuns"));
+            Items.Add("rot", new CheckBox("Root"));
+            Items.Add("tunt", new CheckBox("Taunt"));
+            Items.Add("snare", new CheckBox("Snare"));
+            Items.Add("charm", new CheckBox("Charm", false));
+            Items.Add("slow", new CheckBox("Slows", false));
+            Items.Add("blind", new CheckBox("Blinds", false));
+            Items.Add("fear", new CheckBox("Fear", false));
+            Items.Add("silence", new CheckBox("Silence", false));
+            Items.Add("supperss", new CheckBox("Supperss", false));
+            Items.Add("poly", new CheckBox("Polymorph", false));
+            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Draw");
             Misc.AddGroupLabel("Anti Gapcloser");
@@ -345,11 +423,10 @@ namespace Bristana
             Misc.Add("drawAA", new CheckBox("Draw E"));
             Misc.Add("drawW", new CheckBox("Draw W", false));
             Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
-			
+
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
             Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
-
 
             Game.OnTick += Game_OnTick;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -357,6 +434,6 @@ namespace Bristana
             Interrupter.OnInterruptableSpell += Interupt;
             GameObject.OnCreate += GameObject_OnCreate;
 
-		}
+        }
     }
 }
