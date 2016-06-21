@@ -257,7 +257,7 @@ namespace Bristana
 
         private static void LaneClear()
         {
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(Player)).FirstOrDefault(m => m.IsValidTarget(E.Range));
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(_Player)).FirstOrDefault(m => m.IsValidTarget(E.Range));
             var turret = EntityManager.Turrets.Enemies.FirstOrDefault(t => !t.IsDead && t.Distance(_Player) < _Player.AttackRange);
             if (turret != null)
             {
