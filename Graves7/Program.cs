@@ -347,7 +347,6 @@ namespace Graves7
                 if (Selector != null)
                 {
                     var Wpred = W.GetPrediction(Selector);
-				    foreach (var qenemies in enemies)
 					{
                         if (Wpred.HitChance >= HitChance.Medium)
                         {
