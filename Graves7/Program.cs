@@ -9,13 +9,15 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
+using Font = SharpDX.Direct3D9.Font;
+using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace Graves7
 {
     internal static class Program
     {
-        private static Menu Menu, ComboMenu, HarassMenu, ClearMenu, JungleMenu, Drawings, KillStealMenu, Skin, Misc;
+        private static Menu Menu, ComboMenu, HarassMenu, ClearMenu, JungleMenu, Drawings, KillStealMenu, Items, Misc;
         public static AIHeroClient PlayerInstance
         {
             get { return Player.Instance; }
@@ -24,6 +26,10 @@ namespace Graves7
         {
             get { return ObjectManager.Player; }
         }
+        public static Item Botrk;
+        public static Item Bil;
+        public static Item Youmuu;
+        public static Font Thm;
         public static Spell.Skillshot Q;
         public static Spell.Skillshot W;
         public static Spell.Skillshot E;
@@ -48,30 +54,35 @@ namespace Graves7
             E = new Spell.Skillshot(SpellSlot.E, 425, SkillShotType.Linear);
             R = new Spell.Skillshot(SpellSlot.R, 1500, SkillShotType.Linear, 250, 2100, 100);
             R.AllowedCollisionCount = int.MaxValue;
+            Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
+            Bil = new Item(3144, 475f);
+            Youmuu = new Item(3142, 10);
 
             Menu = MainMenu.AddMenu("Graves7","Graves7");
             Menu.AddGroupLabel("Graves7");
-            Menu.AddLabel(" Please Select Target Before Play ! ");
+            Menu.AddGroupLabel("Doctor7");
+            Menu.AddGroupLabel(" Please Select Target Before Play ! ");
 
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.AddLabel("Use [Q] On");
-            foreach (var enemies in EntityManager.Heroes.Enemies)
+            foreach (var Selector in EntityManager.Heroes.Enemies)
             {
-                ComboMenu.Add("combo" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
+                ComboMenu.Add("combo" + Selector.ChampionName, new CheckBox("" + Selector.ChampionName));
             }
             ComboMenu.AddSeparator();        
-			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E]", 1, 0, 1));
+			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E] Reload", 1, 0, 1));
             ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R]", false));
-            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
+            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "HarassMenu");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.AddLabel("Harass [Q] On");
-            foreach (var enemies in EntityManager.Heroes.Enemies)
+            foreach (var Selector in EntityManager.Heroes.Enemies)
             {
-                HarassMenu.Add("haras" + enemies.ChampionName, new CheckBox("" + enemies.ChampionName));
+                HarassMenu.Add("haras" + Selector.ChampionName, new CheckBox("" + Selector.ChampionName));
             }
             HarassMenu.Add("HarassMana", new Slider("Min Mana Harass [Q]", 50));
             HarassMenu.AddSeparator();
@@ -105,20 +116,23 @@ namespace Graves7
             KillStealMenu.AddLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
             KillStealMenu.Add("minKsR", new Slider("Min [R] Range KillSteal", 100, 1, 1500));
-            KillStealMenu.Add("maxKsR", new Slider("Max [R] Range KillSteal", 1500, 1, 1500));
-			
-            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
+            KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'T'));
+
+            Items = Menu.AddSubMenu("Items Settings", "Items");
+            Items.AddGroupLabel("Items Settings");
+            Items.Add("you", new CheckBox("Use [Youmuu]"));
+            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
+            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 			
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-            Misc.AddLabel("AntiGap Settings");
-            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
-            Misc.Add("AntiGapW", new CheckBox("Use [W] AntiGapcloser"));
-            Misc.AddSeparator();
-            Misc.AddLabel("Spells On CC Settings");
-            Misc.Add("QStun", new CheckBox("Use [Q] If Enemy Has CC"));
-
+            Misc.AddLabel("Misc Settings");
+            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGap"));
+            Misc.Add("AntiGapW", new CheckBox("Use [W] AntiGap"));
+            Misc.Add("QStun", new CheckBox("Use [Q] Immoblie"));
+            Misc.AddLabel("Skin Changer");
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
             Drawings = Menu.AddSubMenu("Drawings Settings", "DrawingMenu");
             Drawings.AddGroupLabel("Drawings");
@@ -126,7 +140,6 @@ namespace Graves7
             Drawings.Add("drawW", new CheckBox("[W] Range", false));
             Drawings.Add("drawE", new CheckBox("[E] Range", false));
             Drawings.Add("drawR", new CheckBox("[R] Range"));
-
 
             Game.OnTick += Game_OnTick;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -158,7 +171,8 @@ namespace Graves7
             }
 			    KillSteal();
                 QStun();
-            if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
+                Item();
+            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
                 {
@@ -169,11 +183,11 @@ namespace Graves7
 		
         public static int SkinId()
         {
-            return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
+            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
         public static bool checkSkin()
         {
-            return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
+            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 		
         private static void Drawing_OnDraw(EventArgs args)
@@ -193,6 +207,45 @@ namespace Graves7
             if (Drawings["drawR"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.White, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
+            }
+            if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
+            {
+                var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (target.IsValidTarget(R.Range) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
+                {
+                    DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
+                }
+            }
+        }
+
+        public static void DrawFont(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
+        {
+            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+        }
+
+        public static void Item()
+        {
+
+            var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
+            var yous = Items["you"].Cast<CheckBox>().CurrentValue;
+            var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
+            var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            if (target != null)
+            {
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                {
+                    Bil.Cast(target);
+                }
+                else if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                {
+                    Botrk.Cast(target);
+                }
+                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(550) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    Youmuu.Cast();
+                }
             }
         }
 // Thanks MarioGK has allowed me to use some his logic
@@ -225,16 +278,13 @@ namespace Graves7
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
-            var enemies = EntityManager.Heroes.Enemies.OrderByDescending
-                (a => a.HealthPercent).Where(a => !a.IsMe && a.IsValidTarget() && a.Distance(_Player) <= 800);
             if (Selector == null)
             {
                 return;
             }
             if (Q.IsReady() && Selector.IsValidTarget(Q.Range))
-            foreach (var qenemies in enemies)
             {
-                if (ComboMenu["combo" + qenemies.ChampionName].Cast<CheckBox>().CurrentValue)
+                if (ComboMenu["combo" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
                 {
                     var predQ = Q.GetPrediction(Selector);
                     if (predQ.HitChance >= HitChance.Medium)
@@ -277,16 +327,13 @@ namespace Graves7
             var mana = HarassMenu["HarassMana"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
             var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            var enemies = EntityManager.Heroes.Enemies.OrderByDescending
-                (a => a.HealthPercent).Where(a => !a.IsMe && a.IsValidTarget() && a.Distance(_Player) <= 950);
             if (Selector == null)
             {
                 return;
             }
             if (Q.IsReady() && Player.Instance.ManaPercent >= ManaW && Selector.IsValidTarget(Q.Range))
-            foreach (var henemies in enemies)
             {
-                if (HarassMenu["haras" + henemies.ChampionName].Cast<CheckBox>().CurrentValue)
+                if (HarassMenu["haras" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
                 {
                     var predQ = Q.GetPrediction(Selector);
                     if (predQ.HitChance >= HitChance.Medium)
@@ -395,7 +442,7 @@ namespace Graves7
 		{
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(1200) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie && (e.HealthPercent <= 25)))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
@@ -422,15 +469,29 @@ namespace Graves7
                 }
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
-                var maxKsR = KillStealMenu["maxKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, maxKsR) && !target.IsInRange(Player.Instance, minKsR))
+                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, R.Range) && !target.IsInRange(Player.Instance, minKsR))
                         {
                             var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 50)
+                            if (pred.HitChancePercent >= 70)
+                            {
+                                R.Cast(pred.CastPosition);
+                            }
+                        }
+                    }
+                }
+
+                if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                {
+                    if (target != null)
+                    {
+                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                        {
+                            var pred = R.GetPrediction(target);
+                            if (pred.HitChancePercent >= 70)
                             {
                                 R.Cast(pred.CastPosition);
                             }
