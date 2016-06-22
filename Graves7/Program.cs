@@ -60,9 +60,7 @@ namespace Graves7
             Youmuu = new Item(3142, 10);
 
             Menu = MainMenu.AddMenu("Graves7","Graves7");
-            Menu.AddGroupLabel("Graves7");
             Menu.AddGroupLabel("Doctor7");
-            Menu.AddGroupLabel(" Please Select Target Before Play ! ");
 
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
@@ -136,10 +134,12 @@ namespace Graves7
 
             Drawings = Menu.AddSubMenu("Drawings Settings", "DrawingMenu");
             Drawings.AddGroupLabel("Drawings");
-            Drawings.Add("drawQ", new CheckBox("[Q] Range"));
-            Drawings.Add("drawW", new CheckBox("[W] Range", false));
-            Drawings.Add("drawE", new CheckBox("[E] Range", false));
-            Drawings.Add("drawR", new CheckBox("[R] Range"));
+            Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
+            Drawings.Add("DrawW", new CheckBox("[W] Range", false));
+            Drawings.Add("DrawE", new CheckBox("[E] Range", false));
+            Drawings.Add("DrawR", new CheckBox("[R] Range"));
+            Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
+            Drawings.Add("Notifications", new CheckBox("Notifications Can Kill [R]"));
 
             Game.OnTick += Game_OnTick;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -192,21 +192,23 @@ namespace Graves7
 		
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (Drawings["drawQ"].Cast<CheckBox>().CurrentValue)
+            if (Drawings["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
+                return;
+            if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue && Q.IsReady())
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = Q.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(Player.Instance.Position);
             }
-            if (Drawings["drawW"].Cast<CheckBox>().CurrentValue)
+            if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = W.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(Player.Instance.Position);
             }
-            if (Drawings["drawE"].Cast<CheckBox>().CurrentValue)
+            if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue && E.IsReady())
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = E.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(Player.Instance.Position);
             }
-            if (Drawings["drawR"].Cast<CheckBox>().CurrentValue)
+            if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
             }
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -242,7 +244,7 @@ namespace Graves7
                 {
                     Botrk.Cast(target);
                 }
-                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(550) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(650) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Youmuu.Cast();
                 }
@@ -293,15 +295,9 @@ namespace Graves7
                     }
                 }
 			}
-            var Wpred = W.GetPrediction(Selector);
             if (useW && W.IsReady() && Selector.IsValidTarget(W.Range))
      	    {
-                {				
-                    if (Wpred.HitChance >= HitChance.Medium)
-                    {
-                        W.Cast(Wpred.CastPosition);
-                    }
-				}
+                W.Cast(Selector);
 			}
             if (ComboMode.CurrentValue == 1 && E.IsReady() && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
             {
@@ -346,13 +342,7 @@ namespace Graves7
             {
                 if (Selector != null)
                 {
-                    var Wpred = W.GetPrediction(Selector);
-					{
-                        if (Wpred.HitChance >= HitChance.Medium)
-                        {
-                            W.Cast(Wpred.CastPosition);
-                        }
-					}
+                   W.Cast(Selector);
 				}
             }
 		}
