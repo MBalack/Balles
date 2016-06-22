@@ -364,22 +364,22 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             if (monster != null)
             {
-                if (useQ && Q.IsReady() && monster.IsValidTarget(_Player.AttackRange))
+                if (useQ && Q.IsReady() && monster.IsValidTarget(325))
                 {
                     Q.Cast();
                     Orbwalker.ForcedTarget = monster;
                 }
-                if (useW && W.IsReady() && monster.IsValidTarget(W.Range - 300))
+                if (useW && W.IsReady() && W.IsInRange(monster))
                 {
                     W.Cast(monster);
                 }
                 if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && monster.IsValidTarget(_Player.AttackRange))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && monster.IsValidTarget(325))
                     {
                         Hydra.Cast();
                     }
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && monster.IsValidTarget(_Player.AttackRange))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && monster.IsValidTarget(325))
                     {
                         Tiamat.Cast();
                     }
