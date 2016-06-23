@@ -506,7 +506,7 @@ namespace Ezreal7
             var automana = Auto["AutomanaQ"].Cast<Slider>().CurrentValue;
             var automanaw = Auto["AutomanaW"].Cast<Slider>().CurrentValue;
             var Selector = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            if (key && Selector.IsValidTarget(W.Range) && !Tru() && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            if (key && Selector.IsValidTarget(W.Range) && !Tru(_Player.Position) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 if (useQ && Q.IsReady() && automana <= Player.Instance.ManaPercent)
                 {
@@ -557,10 +557,9 @@ namespace Ezreal7
             }
         }
 
-        public static bool Tru()
+        public static bool Tru(Vector3 position)
         {
-            var player = Player.Instance;
-            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.Team != _Player.Team && turret.Health > 0 && turret.Distance(_Player) < 1000);
+            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950) && turret.IsEnemy);
         }
 
         public static void KillSteal()
