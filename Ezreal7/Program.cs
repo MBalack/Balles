@@ -93,13 +93,13 @@ namespace Ezreal7
             Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
 			Auto.AddGroupLabel("Auto Harass Settings");
             Auto.Add("Key", new KeyBind("Auto Harass", false, KeyBind.BindTypes.PressToggle, 'H'));
-            Auto.Add("AutoQ", new CheckBox("Auto Harass [Q]"));
+            Auto.Add("AutoQ", new CheckBox("Use [Q]"));
             Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
             Auto.AddSeparator();
-            Auto.Add("AutoW", new CheckBox("Auto Harass [W]", false));
+            Auto.Add("AutoW", new CheckBox("Use [W]", false));
             Auto.Add("AutomanaW", new Slider("Min Mana Auto [W]", 60));
             Auto.AddSeparator();
-            Auto.AddGroupLabel("Auto Harass On");
+            Auto.AddGroupLabel("Autu Harass On");
             foreach (var target in EntityManager.Heroes.Enemies)
             {
                 Auto.Add("harass" + target.ChampionName, new CheckBox("" + target.ChampionName));
@@ -110,15 +110,15 @@ namespace Ezreal7
             LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
             LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
             LaneClearMenu.AddSeparator();
-            LaneClearMenu.Add("LhAA", new CheckBox("[Q] LastHit If Out Range AA", false));
-            LaneClearMenu.Add("AAMana", new Slider("Min Mana Lasthit [Q] If Out Range AA", 50));
+            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] LastHit Out Range AA", false));
+            LaneClearMenu.Add("AAMana", new Slider("Mana [Q] Out Range AA", 50));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
             LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
             LaneClearMenu.AddSeparator();
-            LaneClearMenu.Add("LastAA", new CheckBox("[Q] LaneClear If Out Range AA"));
-            LaneClearMenu.Add("ManaLA", new Slider("Min Mana LastHit [Q] If Out Range AA", 50));
+            LaneClearMenu.Add("LastAA", new CheckBox("Only [Q] LaneClear Out Range AA"));
+            LaneClearMenu.Add("ManaLA", new Slider("Mana [Q] Out Range AA", 50));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
