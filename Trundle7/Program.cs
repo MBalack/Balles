@@ -44,7 +44,7 @@ namespace Trundle7
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 0, 2000, 900);
-            E = new Spell.Skillshot(SpellSlot.E, 900, SkillShotType.Circular, 500, int.MaxValue, 80);
+            E = new Spell.Skillshot(SpellSlot.E, 1000, SkillShotType.Circular, 500, int.MaxValue, 80);
             R = new Spell.Targeted(SpellSlot.R, 650);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Tiamat = new Item(ItemId.Tiamat_Melee_Only, 400);
@@ -62,7 +62,7 @@ namespace Trundle7
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("Edis", new Slider("Min Distance Use [E]", 300, 0, 1000));
+            ComboMenu.Add("ekc", new Slider("Min Distance Use [E]", 300, 1, 1000));
             ComboMenu.AddGroupLabel("Ultimate Health Settings");
             ComboMenu.Add("ultiR", new CheckBox("Use [R] My Health"));
             ComboMenu.Add("MinR", new Slider("Min Health Use [R]", 60));
@@ -217,7 +217,7 @@ namespace Trundle7
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
+            var E2dis = ComboMenu["ekc"].Cast<Slider>().CurrentValue;
             var useR = ComboMenu["ultiR"].Cast<CheckBox>().CurrentValue;
             var minR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             if (target != null)
