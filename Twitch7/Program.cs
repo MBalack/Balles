@@ -123,7 +123,7 @@ namespace Twitch7
             Misc.Add("FleeQ", new CheckBox("Use [Q] Flee"));
             Misc.Add("FleeW", new CheckBox("Use [W] Flee"));
             Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 7, "Default", "1", "2", "3", "4", "5", "6", "7"));
             Misc.AddGroupLabel("Draw Settings");
             Misc.Add("DrawW", new CheckBox("[W] Range"));
