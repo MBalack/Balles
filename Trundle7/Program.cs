@@ -226,7 +226,7 @@ namespace Trundle7
                 {
                     W.Cast(target);
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && E2dis <= target.Distance(Player.Instance))
+                if (useE && E.IsReady() && E.IsInRange(target) && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target);
                 }
@@ -301,7 +301,7 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(400) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
@@ -320,7 +320,7 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(350) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
@@ -355,7 +355,6 @@ namespace Trundle7
 
         public static void JungleClear()
         {
-
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
@@ -367,13 +366,12 @@ namespace Trundle7
                 if (useQ && Q.IsReady() && monster.IsValidTarget(325))
                 {
                     Q.Cast();
-                    Orbwalker.ForcedTarget = monster;
                 }
                 if (useW && W.IsReady() && W.IsInRange(monster))
                 {
                     W.Cast(monster);
                 }
-                if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                if (useriu && !Q.IsReady())
                 {
                     if (Hydra.IsOwned() && Hydra.IsReady() && monster.IsValidTarget(325))
                     {
