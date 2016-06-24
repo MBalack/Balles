@@ -367,7 +367,7 @@ namespace Ziggs7
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(Q3.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(Q3.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {

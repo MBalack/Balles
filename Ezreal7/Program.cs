@@ -566,7 +566,7 @@ namespace Ezreal7
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie && (e.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {

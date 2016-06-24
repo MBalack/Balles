@@ -365,7 +365,7 @@ namespace Renekton7
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsEQ = KillStealMenu["KsEQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {

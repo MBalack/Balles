@@ -242,7 +242,7 @@ namespace Bristana
 
         private static void KillSteal()
         {
-            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie && e.HealthPercent <= 25);
+            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
             foreach (var target2 in target)
             {
                 if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)

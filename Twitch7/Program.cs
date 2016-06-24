@@ -20,6 +20,8 @@ namespace Twitch7
         public static Item Youmuu;
         public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
         public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
+        public static readonly int[] SDamage = {0, 15, 20, 25, 30, 35};
+        public static readonly int[] BDamage = {0, 20, 35, 50, 65, 80};
         public const float YOff = 10;
         public const float XOff = 0;
         public const float Width = 107;
@@ -53,7 +55,7 @@ namespace Twitch7
             Chat.Print("Twitch7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
-            W = new Spell.Skillshot(SpellSlot.W, 950, SkillShotType.Circular, 250, 1550, 275);
+            W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 250, 1550, 275);
             W.AllowedCollisionCount = int.MaxValue;
             E = new Spell.Active(SpellSlot.E, 1200);
             R = new Spell.Active(SpellSlot.R);
@@ -96,20 +98,25 @@ namespace Twitch7
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LaneClear Settings");
-            LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
             LaneClearMenu.Add("ELH", new CheckBox("Only Use [E] LastHit", false));
-            LaneClearMenu.Add("mineLC", new Slider("Min Stacks Use [E]", 4, 0, 6));
-            LaneClearMenu.AddSeparator();
             LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 40));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
-            JungleClearMenu.Add("EJungle", new CheckBox("Use [E]"));
-            JungleClearMenu.Add("mineJ", new Slider("Min Stacks Use [E]", 6, 0, 6));
-            JungleClearMenu.AddSeparator();
-            JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
             JungleClearMenu.Add("MnJungle", new Slider("Min Mana For JungleClear", 30));
+            JungleClearMenu.AddGroupLabel("[E] Settings");
+            JungleClearMenu.Add("EDragon", new CheckBox("Use [E] Ks"));
+            JungleClearMenu.AddSeparator();
+            JungleClearMenu.Add("jungleSRU_Baron", new CheckBox("Baron"));
+            JungleClearMenu.Add("jungleSRU_Dragon_Elder", new CheckBox("Elder Dragon"));
+            JungleClearMenu.Add("jungleSRU_Dragon_Air", new CheckBox("Air Dragon"));
+            JungleClearMenu.Add("jungleSRU_Dragon_Earth", new CheckBox("Fire Dragon"));
+            JungleClearMenu.Add("jungleSRU_Dragon_Fire", new CheckBox("Earth Dragon"));
+            JungleClearMenu.Add("jungleSRU_Dragon_Water", new CheckBox("Water Dragon"));
+            JungleClearMenu.Add("jungleSRU_Red", new CheckBox("Red"));
+            JungleClearMenu.Add("jungleSRU_Blue", new CheckBox("Blue"));
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
@@ -122,6 +129,9 @@ namespace Twitch7
             Misc.Add("AntiGap", new CheckBox("Use [W] AntiGapcloser"));
             Misc.Add("FleeQ", new CheckBox("Use [Q] Flee"));
             Misc.Add("FleeW", new CheckBox("Use [W] Flee"));
+            Misc.AddGroupLabel("Use [E] Enemy Out Range");
+            Misc.Add("ERanh", new CheckBox("Use [E] If Enemy Escape", false));
+            Misc.Add("ERanhs", new Slider("Min Stacks Use [E]", 6, 1, 6));
             Misc.AddGroupLabel("Skin Changer");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 7, "Default", "1", "2", "3", "4", "5", "6", "7"));
@@ -287,11 +297,11 @@ namespace Twitch7
             var MinE = ComboMenu["MinEC"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(800))
+                if (useQ && Q.IsReady() && W.IsInRange(target))
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
                     var Wpred = W.GetPrediction(target);
                     if (Wpred.HitChance >= HitChance.Medium)
@@ -299,49 +309,47 @@ namespace Twitch7
                         W.Cast(Wpred.CastPosition);
                     }
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && E.IsInRange(target) && target.HasBuff("twitchdeadlyvenom"))
                 {
-                    if (ComboMenu["combo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
+                    if (ComboMenu["combo" + target.ChampionName].Cast<CheckBox>().CurrentValue && Stack(target) >= MinE)
                     {
-                        if (Stack(target) >= MinE)
-                        {
-                            E.Cast();
-                        }
+                        E.Cast();
                     }
                 }
-                if (useR && R.IsReady())
+                if (useR && R.IsReady() && _Player.Position.CountEnemiesInRange(W.Range) >= MinR)
                 {
-                    if (_Player.Position.CountEnemiesInRange(W.Range) >= MinR)
-                    {
-                        R.Cast();
-                    }
+                    R.Cast();
                 }
             }
         }
 
         public static void JungleClear()
         {
-
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
-            var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
-            var MinE = JungleClearMenu["mineJ"].Cast<Slider>().CurrentValue;
-            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
-            if (jungleMonsters != null)
+            var Edra = JungleClearMenu["EDragon"].Cast<CheckBox>().CurrentValue;
+            var monsters = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, W.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var baby = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, E.Range).Where(b => E.IsInRange(b) && b.Health < EDamage(b) && babi.Contains(b.BaseSkinName));
+            if (monsters != null)
             {
-                if (useW && W.IsReady() && W.IsInRange(jungleMonsters) && Player.Instance.ManaPercent >= mana)
+                if (useW && W.IsReady() && W.IsInRange(monsters) && Player.Instance.ManaPercent >= mana)
                 {
-                    W.Cast(jungleMonsters);
+                    W.Cast(monsters);
                 }
-                if (useE && E.IsReady() && E.IsInRange(jungleMonsters) && Player.Instance.ManaPercent >= mana && jungleMonsters.HasBuff("twitchdeadlyvenom"))
+            }
+            foreach (var m in baby)
+            {
+                if (Edra && JungleClearMenu["jungle" + m.BaseSkinName].Cast<CheckBox>().CurrentValue)
                 {
-                    if (Stack(jungleMonsters) >= MinE)
-                    {
-                        E.Cast();
-                    }
+                    E.Cast();
                 }
             }
         }
+
+        public static string[] babi =
+        {
+            "SRU_Blue", "SRU_Red", "SRU_Baron", "SRU_Dragon_Elder", "SRU_Dragon_Air", "SRU_Dragon_Earth", "SRU_Dragon_Fire", "SRU_Dragon_Water"
+        };
 
         public static void Item()
         {
@@ -379,13 +387,9 @@ namespace Twitch7
             }
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
-                    var Wpred = W.GetPrediction(target);
-                    if (Wpred.HitChance >= HitChance.Medium)
-                    {
-                        W.Cast(Wpred.CastPosition);
-                    }
+                    W.Cast(target);
                 }
             }
         }
@@ -401,26 +405,18 @@ namespace Twitch7
         public static void LaneClear()
         {
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var MinE = LaneClearMenu["mineLC"].Cast<Slider>().CurrentValue;
             var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
-            var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var lhE = LaneClearMenu["ELH"].Cast<CheckBox>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(W.Range))
                 .FirstOrDefault(unit => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(unit) < W.Radius) > 2);
+            if (Player.Instance.ManaPercent < mana) return;
             if (minion != null)
             {
-                if (Player.Instance.ManaPercent >= mana)
+                if (lhE && minion.Health < EDamage(minion) && minion.HasBuff("twitchdeadlyvenom"))
                 {
-                    if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && Stack(minion) >= MinE)
-                    {
-                        E.Cast();
-                    }
-                    else if (lhE && minion.Health < EDamage(minion))
-                    {
-                        E.Cast();
-                    }
+                    E.Cast();
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && Player.Instance.ManaPercent >= mana && minion.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(minion) && Player.Instance.ManaPercent >= mana)
                 {
                     W.Cast(minion);
                 }
@@ -431,10 +427,10 @@ namespace Twitch7
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            var MinE = HarassMenu["HminE"].Cast<Slider>().CurrentValue;
             var MinQ = HarassMenu["HminQ"].Cast<Slider>().CurrentValue;
+            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
+            var MinE = HarassMenu["HminE"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent <= ManaQ)
             {
@@ -442,14 +438,14 @@ namespace Twitch7
             }
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && E.IsInRange(target))
                 {
                     if (_Player.Position.CountEnemiesInRange(700) >= MinQ)
                     {
                         Q.Cast();
                     }
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
                     var Wpred = W.GetPrediction(target);
                     if (Wpred.HitChance >= HitChance.Medium)
@@ -457,14 +453,11 @@ namespace Twitch7
                         W.Cast(Wpred.CastPosition);
                     }
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && E.IsInRange(target) && target.HasBuff("twitchdeadlyvenom"))
                 {
-                    if (HarassMenu["haras" + target.ChampionName].Cast<CheckBox>().CurrentValue)
+                    if (HarassMenu["haras" + target.ChampionName].Cast<CheckBox>().CurrentValue && Stack(target) >= MinE)
                     {
-                        if (Stack(target) >= MinE)
-                        {
-                            E.Cast();
-                        }
+                        E.Cast();
                     }
                 }
             }
@@ -475,27 +468,20 @@ namespace Twitch7
             foreach (var enemy in EntityManager.Heroes.Enemies.Where(e => e.IsValid && e.IsHPBarRendered && e.TotalShieldHealth() > 10))
             {
                 var damage = EDamage(enemy);
-                if (Misc["Damage"].Cast<CheckBox>().CurrentValue)
+                if (Misc["Damage"].Cast<CheckBox>().CurrentValue && E.IsReady() && enemy.HasBuff("twitchdeadlyvenom"))
                 {
-                    var dmgPer = (enemy.TotalShieldHealth() - damage > 0 ? enemy.TotalShieldHealth() - damage : 0) / enemy.TotalShieldMaxHealth();
+                    var dmgPer = (enemy.TotalShieldHealth() - damage > 0 ? enemy.TotalShieldHealth() - damage : 0) / (enemy.MaxHealth + enemy.AllShield + enemy.AttackShield + enemy.MagicShield);
                     var currentHPPer = enemy.TotalShieldHealth() / enemy.TotalShieldMaxHealth();
                     var initPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + dmgPer * Width), (int)enemy.HPBarPosition.Y + YOff);
                     var endPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + currentHPPer * Width) + 1, (int)enemy.HPBarPosition.Y + YOff);
-                    EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Aqua, Thick, initPoint, endPoint);
+                    EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Orange, Thick, initPoint, endPoint);
                 }
             }
         }
-
-        public static float EDamage(Obj_AI_Base target)
+        private static float EDamage(Obj_AI_Base target)
         {
-            var stacks = target.HasBuff("twitchdeadlyvenom");
-            var get = target.GetBuffCount("twitchdeadlyvenom");
-            if (!stacks || !E.IsLearned) return 0f;
-            return  _Player.CalculateDamageOnUnit(target, DamageType.True,(float)
-                (new[] { 15, 20, 25, 30, 35 }[E.Level -1] * get +
-                0.2 * _Player.FlatMagicDamageMod + 
-                0.25 * _Player.FlatPhysicalDamageMod +
-                new[] { 20, 35, 50, 65, 80 }[E.Level -1]));
+            var stacks = Stack(target);
+            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, BDamage[E.Level] + stacks * (0.2f * _Player.FlatMagicDamageMod + 0.25f * _Player.FlatPhysicalDamageMod + SDamage[E.Level]));
         }
 
         private static int Stack(Obj_AI_Base obj)
@@ -515,9 +501,11 @@ namespace Twitch7
         {
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            var Eranh = Misc["ERanh"].Cast<CheckBox>().CurrentValue;
+            var Eranhs = Misc["ERanhs"].Cast<Slider>().CurrentValue;
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
-                if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (KsE && E.IsReady() && target.IsValidTarget(E.Range) && target.HasBuff("twitchdeadlyvenom"))
                 {
                     if (target.Health + target.AttackShield < EDamage(target))
                     {
@@ -534,6 +522,17 @@ namespace Twitch7
                             W.Cast(Wpred.CastPosition);
                         }
                     }
+                }
+                if (Eranh && E.IsReady() && target.HasBuff("twitchdeadlyvenom"))
+                {
+                    if (Stack(target) >= Eranhs && 900 <= target.Distance(Player.Instance))
+                    {
+                        E.Cast();
+                    }
+                }
+                if (E.IsReady() && Player.Instance.HealthPercent <= 15)
+                {
+                    E.Cast();
                 }
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady() && target.IsValidTarget(Ignite.Range))
                 {
