@@ -481,7 +481,7 @@ namespace Twitch7
         private static float EDamage(Obj_AI_Base target)
         {
             var stacks = Stack(target);
-            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, BDamage[E.Level] + stacks * (0.2f * _Player.FlatMagicDamageMod + 0.25f * _Player.FlatPhysicalDamageMod + SDamage[E.Level]));
+            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, BDamage[E.Level] + stacks * (0.25f * _Player.FlatPhysicalDamageMod + 0.2f * _Player.FlatMagicDamageMod + SDamage[E.Level]));
         }
 
         private static int Stack(Obj_AI_Base obj)
