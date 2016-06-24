@@ -227,9 +227,9 @@ namespace Kayle7
             {
                 if (useR2 && !Player.Instance.IsInShopRange() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(_Player.Position)))
                 {
-                    if (target.HealthPercent <= almin)
+                    if (Ulti["useRon" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
-                        if (Ulti["useRon" + target.ChampionName].Cast<CheckBox>().CurrentValue)
+                        if (target.HealthPercent <= almin)
                         {
                             R.Cast(target);
                         }
@@ -249,9 +249,9 @@ namespace Kayle7
             {
                 if (useW2 && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
                 {
-                    if (target.HealthPercent <= almin)
+                    if (Heal["useWon" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
-                        if (Heal["useWon" + target.ChampionName].Cast<CheckBox>().CurrentValue)
+                        if (target.HealthPercent <= almin)
                         {
                             W.Cast(target);
                         }
