@@ -123,7 +123,6 @@ namespace Ryze
         private static void Game_OnTick(EventArgs args)
         {
             Orbwalker.DisableAttacking = false;
-            Orbwalker.ForcedTarget = null;
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -236,7 +235,6 @@ namespace Ryze
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
-            Orbwalker.ForcedTarget = target;
             if (target != null)
             {
                 if (W.IsReady() || E.IsReady())
@@ -317,7 +315,6 @@ namespace Ryze
             var useE = HarassMenu["HE"].Cast<CheckBox>().CurrentValue;
 
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
-            Orbwalker.ForcedTarget = target;
             if (target != null && target.IsValidTarget() && _Player.ManaPercent > HarassMenu["HarassMana"].Cast<Slider>().CurrentValue)
             {
                 if (useQ && Q.IsReady())
@@ -366,28 +363,25 @@ namespace Ryze
             var useQ = KsMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var useW = KsMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var useE = KsMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            foreach (AIHeroClient e in EntityManager.Heroes.Enemies)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(W.Range) && !hero.IsDead && !hero.IsZombie))
             {
-                if (e.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && _Player.GetSpellDamage(target, SpellSlot.Q) >= target.Health)
                 {
-                    if (useQ && Q.IsReady() && (_Player.GetSpellDamage(e, SpellSlot.Q) >= e.Health))
+                    Q.Cast(target);
+                }
+                if (useW && W.IsReady() && _Player.GetSpellDamage(target, SpellSlot.W) >= target.Health)
+                {
+                    W.Cast(target);
+                }
+                if (useE && E.IsReady() && _Player.GetSpellDamage(target, SpellSlot.E) >= target.Health)
+                {
+                    E.Cast(target);
+                }
+                if (Ignite != null && KsMenu["KsIgnite"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
+                {
+                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
-                        Q.Cast(e);
-                    }
-                    if (useW && W.IsReady() && (_Player.GetSpellDamage(e, SpellSlot.W) >= e.Health))
-                    {
-                        W.Cast(e);
-                    }
-                    if (useE && E.IsReady() && (_Player.GetSpellDamage(e, SpellSlot.E) >= e.Health))
-                    {
-                        E.Cast(e);
-                    }
-                    if (Ignite != null && KsMenu["KsIgnite"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
-                    {
-                        if (e.Health < _Player.GetSummonerSpellDamage(e, DamageLibrary.SummonerSpells.Ignite))
-                        {
-                            Ignite.Cast(e);
-                        }
+                        Ignite.Cast(target);
                     }
                 }
             }
