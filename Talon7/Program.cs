@@ -244,12 +244,12 @@ namespace Talon7
             }
             if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                 {
                     Hydra.Cast();
                 }
 
-                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
                 {
                     Tiamat.Cast();
                 }
@@ -263,7 +263,7 @@ namespace Talon7
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
             if ((jungleMonsters != null && Player.Instance.ManaPercent >= JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue))
             {
-                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(150))
+                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(300))
                 {
                     Q.Cast();
                 }
@@ -280,18 +280,16 @@ namespace Talon7
             var useW = LaneClearMenu["LaneW"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["LaneQ"].Cast<CheckBox>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (Player.Instance.ManaPercent >= mana)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(300))
                 {
-                    if (useQ && Q.IsReady() && minion.IsValidTarget(150))
-                    {
-                        Q.Cast();
-                    }
-                    if (useW && W.IsReady() && minion.IsValidTarget(W.Range))
-                    {
-                        W.Cast(minion);
-                    }
+                    Q.Cast();
+                }
+                if (useW && W.IsReady() && minion.IsValidTarget(W.Range))
+                {
+                    W.Cast(minion);
                 }
             }
         }
@@ -310,7 +308,7 @@ namespace Talon7
                 {
                     Bil.Cast(target);
                 }
-                else if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                if (item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp)
                 {
                     Botrk.Cast(target);
                 }
@@ -327,18 +325,16 @@ namespace Talon7
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            if (Player.Instance.ManaPercent < ManaW) return;
             if (target != null)
             {
-                if (Player.Instance.ManaPercent >= ManaW)
+                if (useQ && Q.IsReady() && target.IsValidTarget(325))
                 {
-                    if (useQ && Q.IsReady() && target.IsValidTarget(200))
-                    {
-                        Q.Cast();
-                    }
-                    if (useW && W.IsReady() && target.IsValidTarget(W.Range))
-                    {
-                        W.Cast(target);
-                    }
+                    Q.Cast();
+                }
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                {
+                    W.Cast(target);
                 }
             }
         }
@@ -351,8 +347,7 @@ namespace Talon7
                 var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Knockup))
+                    if (target.IsRooted || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
                         W.Cast(target.Position);
                     }
@@ -367,13 +362,13 @@ namespace Talon7
             var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth()));
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(W.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.W) >= m.TotalShieldHealth()));
-            if (Player.Instance.ManaPercent > mana)
+            if (Player.Instance.ManaPercent < mana) return;
+            if (minion != null || minions != null)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(200))
                 {
                     Q.Cast();
                 }
-
                 if (useW && W.IsReady() && minions.IsValidTarget(W.Range))
                 {
                     W.Cast(minions);
@@ -386,7 +381,7 @@ namespace Talon7
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(700) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(W.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsW && W.IsReady())
                 {
@@ -399,7 +394,7 @@ namespace Talon7
                     }
                 }
 
-                if (KsR && R.IsReady() && target.IsValidTarget(300))
+                if (KsR && R.IsReady() && target.IsValidTarget(325))
                 {
                     if (target != null)
                     {
