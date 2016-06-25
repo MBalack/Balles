@@ -107,18 +107,14 @@ namespace Ezreal7
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LastHit Settings");
-            LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit"));
+            LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit", false));
+            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
             LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
-            LaneClearMenu.AddSeparator();
-            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] LastHit Out Range AA", false));
-            LaneClearMenu.Add("AAMana", new Slider("Mana [Q] Out Range AA", 50));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
             LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
+            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
-            LaneClearMenu.AddSeparator();
-            LaneClearMenu.Add("LastAA", new CheckBox("Only [Q] LaneClear Out Range AA"));
-            LaneClearMenu.Add("ManaLA", new Slider("Mana [Q] Out Range AA", 50));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
@@ -179,6 +175,7 @@ namespace Ezreal7
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -200,7 +197,7 @@ namespace Ezreal7
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                if (target.IsValidTarget(1800) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
+                if (target.IsValidTarget(1600) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                 {
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
@@ -418,9 +415,7 @@ namespace Ezreal7
         public static void LaneClear()
         {
             var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var laneQAA = LaneClearMenu["ManaLA"].Cast<Slider>().CurrentValue;
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
-            var useAA = LaneClearMenu["LastAA"].Cast<CheckBox>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
             if (minions != null)
             {
@@ -431,12 +426,23 @@ namespace Ezreal7
                         Q.Cast(minions);
                     }
                 }
-                else if (Player.Instance.ManaPercent >= laneQAA && Player.Instance.GetAutoAttackRange() <= minions.Distance(Player.Instance))
+            }
+        }
+
+        private static void Orbwalker_CantLasthit(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
+        {
+            var useCant = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
+            var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var useAA = LaneClearMenu["LhAA"].Cast<CheckBox>().CurrentValue;
+            var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
+            var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
+            || (useAA  && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)&& Player.Instance.ManaPercent >= LhM);
+            if (target == null) return;
+            if (unit && E.IsReady() && target.IsValidTarget(Q.Range - 150))
+            {
+                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= target.TotalShieldHealth())
                 {
-                    if (useAA && Q.IsReady())
-                    {
-                        Q.Cast(minions);
-                    }
+                    Q.Cast(target);
                 }
             }
         }
@@ -475,8 +481,6 @@ namespace Ezreal7
         public static void LastHit()
         {
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
-            var useAA = LaneClearMenu["LhAA"].Cast<CheckBox>().CurrentValue;
-            var LAA = LaneClearMenu["AAMana"].Cast<Slider>().CurrentValue;
             var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
             if (minion != null)
@@ -484,13 +488,6 @@ namespace Ezreal7
                 if (Player.Instance.ManaPercent >= LhM && _Player.GetAutoAttackDamage(minion) < minion.TotalShieldHealth())
                 {
                     if (useQ && Q.IsReady())
-                    {
-                        Q.Cast(minion);
-                    }
-                }
-                else if (Player.Instance.ManaPercent >= LAA && Player.Instance.GetAutoAttackRange() <= minion.Distance(Player.Instance))
-                {
-                    if (useAA && Q.IsReady())
                     {
                         Q.Cast(minion);
                     }
@@ -541,7 +538,7 @@ namespace Ezreal7
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, 2000) && !target.IsInRange(Player.Instance, 800))
+                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, 1600) && !target.IsInRange(Player.Instance, 800))
                     {
                         R.Cast(target.Position);
                     }
