@@ -98,7 +98,6 @@ namespace XinZhao7
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
             JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
             JungleClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
-            JungleClearMenu.Add("itemJC", new CheckBox("Use [Items] JungleClear"));
             JungleClearMenu.Add("ManaJC", new Slider("Mana For JungleClear", 30));
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
@@ -199,7 +198,7 @@ namespace XinZhao7
                     var endPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + currentHPPer * Width) + 1,
                         (int)enemy.HPBarPosition.Y + YOff);
 
-                    EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Aqua, Thick, initPoint, endPoint);
+                    EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Orange, Thick, initPoint, endPoint);
                 }
             }
         }
@@ -238,7 +237,7 @@ namespace XinZhao7
                 {
                     Bil.Cast(target);
                 }
-                if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
@@ -267,14 +266,14 @@ namespace XinZhao7
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(250))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(250))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
                     {
                         Tiamat.Cast();
                     }
@@ -347,18 +346,6 @@ namespace XinZhao7
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range))
                 {
                     E.Cast(jungleMonsters);
-                }
-                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-                {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(250))
-                    {
-                        Hydra.Cast();
-                    }
-
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && jungleMonsters.IsValidTarget(250))
-                    {
-                        Tiamat.Cast();
-                    }
                 }
             }
         }
