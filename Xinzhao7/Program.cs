@@ -226,11 +226,11 @@ namespace XinZhao7
                 {
                     E.Cast(target);
                 }
-                if (useQ && Q.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
@@ -269,12 +269,12 @@ namespace XinZhao7
             {
                 if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(250))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(250))
                     {
                         Tiamat.Cast();
                     }
@@ -295,11 +295,11 @@ namespace XinZhao7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(_Player.AttackRange) && minions.Count() >= 3)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(250) && minions.Count() >= 3)
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(_Player.AttackRange))
+                if (useW && W.IsReady() && minion.IsValidTarget(250))
                 {
                     W.Cast();
                 }
@@ -314,11 +314,11 @@ namespace XinZhao7
             var target = TargetSelector.GetTarget(_Player.AttackRange, DamageType.Physical);
             if (target != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
@@ -336,11 +336,11 @@ namespace XinZhao7
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
+                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(250))
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(250))
                 {
                     W.Cast();
                 }
@@ -350,12 +350,12 @@ namespace XinZhao7
                 }
                 if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(250))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && jungleMonsters.IsValidTarget(_Player.AttackRange))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && jungleMonsters.IsValidTarget(250))
                     {
                         Tiamat.Cast();
                     }
@@ -402,7 +402,7 @@ namespace XinZhao7
         {
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(R.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
