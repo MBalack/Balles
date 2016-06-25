@@ -51,7 +51,7 @@ namespace Talon7
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 700, SkillShotType.Cone, 1, 2300, 80);
             W.AllowedCollisionCount = int.MaxValue;
-            E = new Spell.Targeted(SpellSlot.E, 600);
+            E = new Spell.Targeted(SpellSlot.E, 700);
             R = new Spell.Active(SpellSlot.R);
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Tiamat = new Item(ItemId.Tiamat_Melee_Only, 400);
@@ -70,7 +70,7 @@ namespace Talon7
             ComboMenu.AddGroupLabel("[E] Combo Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
             ComboMenu.Add("myhp", new Slider("Min MyHP For [E]", 40, 0, 100));
-            ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 600));
+            ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 700));
             ComboMenu.AddGroupLabel("[R] Escape Settings");
             ComboMenu.Add("autor", new CheckBox("Use [R] Escape"));
             ComboMenu.Add("mau", new Slider("MyHP For [R] Escape", 20, 0, 100));
