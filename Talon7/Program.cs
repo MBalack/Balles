@@ -94,8 +94,9 @@ namespace Talon7
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
-            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q]"));
-            JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
+            JungleClearMenu.Add("itemJC", new CheckBox("Use [Items] JungleClear"));
             JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
@@ -262,8 +263,11 @@ namespace Talon7
         {
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
+            var useriu = JungleClearMenu["itemJC"].Cast<CheckBox>().CurrentValue;
+            var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
-            if ((jungleMonsters != null && Player.Instance.ManaPercent >= JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue))
+            if (Player.Instance.ManaPercent < mana) return;
+            if (jungleMonsters != null)
             {
                 if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(300))
                 {
@@ -272,6 +276,18 @@ namespace Talon7
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(500))
                 {
                     W.Cast(jungleMonsters);
+                }
+                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                {
+                    if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(250))
+                    {
+                        Hydra.Cast();
+                    }
+
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && jungleMonsters.IsValidTarget(250))
+                    {
+                        Tiamat.Cast();
+                    }
                 }
             }
         }
