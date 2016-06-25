@@ -222,14 +222,15 @@ namespace Kayle7
         {
             var almin = Ulti["Alhp"].Cast<Slider>().CurrentValue;
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
-            var target = EntityManager.Heroes.Allies.Where(hero => hero.IsValidTarget(R.Range) && !hero.IsDead && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsZombie).OrderBy(hero => hero.Health).FirstOrDefault();
-            if (target != null)
+            var target = EntityManager.Heroes.Allies.OrderByDescending
+                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("Recall"));
+            foreach (var target2 in target)
             {
-                if (useR2 && !Player.Instance.IsInShopRange() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(_Player.Position)))
+                if (useR2 && !Player.Instance.IsInShopRange() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
                 {
-                    if (Ulti["useRon" + target.ChampionName].Cast<CheckBox>().CurrentValue && target.HealthPercent <= almin)
+                    if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && target2.HealthPercent <= almin)
                     {
-                        R.Cast(target);
+                        R.Cast(target2);
                     }
                 }
             }
@@ -240,15 +241,16 @@ namespace Kayle7
             var almin = Heal["AlW"].Cast<Slider>().CurrentValue;
             var useW2 = Heal["healW2"].Cast<CheckBox>().CurrentValue;
             var mana = Heal["ManaHeal"].Cast<Slider>().CurrentValue;
-            var target = EntityManager.Heroes.Allies.Where(hero => hero.IsValidTarget(R.Range) && !hero.IsDead && !hero.IsZombie && !hero.HasBuff("kindredrnodeathbuff")).OrderBy(hero => hero.Health).FirstOrDefault();
+            var target = EntityManager.Heroes.Allies.OrderByDescending
+                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= W.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Recall"));
             if (Player.Instance.ManaPercent <= mana) return;
-            if (target != null)
+            foreach (var target2 in target)
             {
                 if (useW2 && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
                 {
-                    if (Heal["useWon" + target.ChampionName].Cast<CheckBox>().CurrentValue && target.HealthPercent <= almin)
+                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && target2.HealthPercent <= almin)
                     {
-                        W.Cast(target);
+                        W.Cast(target2);
                     }
                 }
             }
