@@ -16,20 +16,18 @@ namespace Olaf7
     {
         public static Menu Menu, ComboMenu, HarassMenu, LaneClearMenu, LastHitMenu, JungleClearMenu, Misc, KillStealMenu, Skin, Drawings;
         public static Item Botrk;
+        public static Item Bil;
         public static Item Hydra;
         public static Item Tiamat;
         public static Item Titanic;
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
-        private static float HealthPercent()
-        {
-            return (PlayerInstance.Health / PlayerInstance.MaxHealth) * 100;
-        }
+        public static GameObject Axe { get; set; }
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
+        }
+        private static float HealthPercent()
+        {
+            return (Player.Instance.Health / Player.Instance.MaxHealth) * 100;
         }
         public static Spell.Skillshot Q;
         public static Spell.Active W;
@@ -54,6 +52,7 @@ namespace Olaf7
                 R= new Spell.Active(SpellSlot.R);
                 Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
                 Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
+                Bil = new Item(3144, 475f);
                 Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
                 Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
                 Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
@@ -65,7 +64,11 @@ namespace Olaf7
                 ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));
                 ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
                 ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
-                ComboMenu.Add("item", new CheckBox("Use [Item]"));
+                ComboMenu.AddGroupLabel("Items Settings");
+                ComboMenu.Add("item", new CheckBox("Use [BOTRK]"));
+                ComboMenu.Add("hyd", new CheckBox("Use [Hydra] Reset AA"));
+                ComboMenu.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+                ComboMenu.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 
                 HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
                 HarassMenu.AddGroupLabel("Harass Settings");
@@ -77,16 +80,14 @@ namespace Olaf7
                 LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
                 LaneClearMenu.AddGroupLabel("LaneClear Settings");
                 LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]"));
-                LaneClearMenu.Add("minq", new Slider("Min Minions Use [Q]", 3, 1, 6));
-                LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
-                LaneClearMenu.Add("Wlc", new Slider("Health For [W] LaneClear", 80));
                 LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
                 LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
+                LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
+                LaneClearMenu.Add("Wlc", new Slider("Health For [W] LaneClear", 80));
 
                 LastHitMenu = Menu.AddSubMenu("LastHit Settings", "LastHit");
                 LastHitMenu.AddGroupLabel("LastHit Settings");
                 LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
-                LastHitMenu.Add("LastAA", new CheckBox("Only [E] If Out AA Range", false));
                 LastHitMenu.Add("LastQ", new CheckBox("Use [Q] LastHit", false));
                 LastHitMenu.Add("LhMana", new Slider("Min Mana For LastHit", 60));
 
@@ -141,10 +142,14 @@ namespace Olaf7
                 Drawings.AddGroupLabel("Drawing Settings");
                 Drawings.Add("DrawQ", new CheckBox("Q Range"));
                 Drawings.Add("DrawE", new CheckBox("E Range", false));
+                Drawings.Add("Axe", new CheckBox("Axe Draw"));
 
                 Drawing.OnDraw += Drawing_OnDraw;
                 Game.OnTick += Game_OnTick;
+                Orbwalker.OnPostAttack += ResetAttack;
                 Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+                GameObject.OnCreate += GameObject_OnCreate;
+                GameObject.OnDelete += GameObject_OnDelete;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -156,6 +161,10 @@ namespace Olaf7
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+            if (Drawings["Axe"].Cast<CheckBox>().CurrentValue && Axe != null)
+            {
+                new Circle() { Color = Color.GreenYellow, BorderWidth = 6, Radius = 70 }.Draw(Axe.Position);
             }
         }
 
@@ -210,11 +219,14 @@ namespace Olaf7
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var item = ComboMenu["item"].Cast<CheckBox>().CurrentValue;
+            var Minhp = ComboMenu["ihp"].Cast<Slider>().CurrentValue;
+            var Minhpp = ComboMenu["ihpp"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
+                var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
          	    {
-                    Q.Cast(target);
+                    Q.Cast(pos.To3DWorld());
 	    		}
                 if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
          	    {				
@@ -224,19 +236,33 @@ namespace Olaf7
                 {
                     E.Cast(target);
                 }
-                if (Player.Instance.HealthPercent <= 50 || target.HealthPercent < 50 && item && Botrk.IsReady() && Botrk.IsOwned())
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
+                {
+                    Bil.Cast(target);
+                }
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
-                if (item && Hydra.IsOwned() && Hydra.IsReady() && Hydra.IsInRange(target))
+            }
+        }
+
+        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        {
+            var item = ComboMenu["hyd"].Cast<CheckBox>().CurrentValue;
+            if ((item && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+            {
+                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                 {
                     Hydra.Cast();
                 }
-                else if (item && Tiamat.IsOwned() && Tiamat.IsReady() && Tiamat.IsInRange(target))
+
+                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
                 {
                     Tiamat.Cast();
                 }
-                if (item && target.IsValidTarget() && Titanic.IsReady())
+
+                if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
                 {
                     Titanic.Cast();
                 }
@@ -253,28 +279,22 @@ namespace Olaf7
 
         public static void JungleClear()
         {
-
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
+            var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (jungle != null)
             {
-                if (Player.Instance.ManaPercent >= JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue)
+                if (useQ && Q.IsReady() && Q.IsInRange(jungle) && Player.Instance.ManaPercent >= mana)
                 {
-                    if (useQ && Q.IsReady())
-                    {
-                        Q.Cast(jungle);
-                    }
-                    if (useW && W.IsReady())
-                    {
-                        W.Cast();
-                    }
+                    Q.Cast(jungle);
                 }
-            }
-            if (jungle != null)
-            {
-                if (useE && E.IsReady())
+                if (useW && W.IsReady() && jungle.IsValidTarget(325) && Player.Instance.ManaPercent >= mana)
+                {
+                    W.Cast();
+                }
+                if (useE && E.IsReady() && E.IsInRange(jungle))
                 {
                     E.Cast(jungle);
                 }
@@ -288,7 +308,6 @@ namespace Olaf7
             var useE = LaneClearMenu["ClearE"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var manaW = LaneClearMenu["Wlc"].Cast<Slider>().CurrentValue;
-            var MinQ = LaneClearMenu["minq"].Cast<Slider>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
@@ -300,7 +319,7 @@ namespace Olaf7
                 {
                     E.Cast(minion);
                 }
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && minions.Count() > MinQ)
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && minions.Count() > 3)
                 {
                     Q.Cast(minion);
                 }
@@ -316,11 +335,12 @@ namespace Olaf7
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (target != null)
             {
+                var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaQ)
      	        {
-                    Q.Cast(target);
+                    Q.Cast(pos.To3DWorld());
 		    	}
-                if (useW && W.IsReady() && target.IsValidTarget(300) && Player.Instance.ManaPercent >= ManaQ)
+                if (useW && W.IsReady() && target.IsValidTarget(325) && Player.Instance.ManaPercent >= ManaQ)
                 {				
                     W.Cast();
 		    	}
@@ -334,25 +354,16 @@ namespace Olaf7
         public static void LastHit()
         {
             var useE = LastHitMenu["LastE"].Cast<CheckBox>().CurrentValue;
-            var useAA = LastHitMenu["LastAA"].Cast<CheckBox>().CurrentValue;
             var useQ = LastHitMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var LhM = LastHitMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(E.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.E) >= m.TotalShieldHealth()));
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth()));
-            foreach (var minionq in minions)
+            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > LhM && minionq.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > LhM && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
-                    Q.Cast(minionq);
+                    Q.Cast(minion);
                 }
-            }
-            if (minion == null) return;
-            {
-                if (useE && E.IsReady())
-                {
-                    E.Cast(minion);
-                }
-                if (useAA && E.IsReady() && Player.Instance.GetAutoAttackRange() <= minion.Distance(Player.Instance))
+                if (useE && E.IsReady() && Player.Instance.GetSpellDamage(minion, SpellSlot.E) >= minion.TotalShieldHealth())
                 {
                     E.Cast(minion);
                 }
@@ -362,17 +373,31 @@ namespace Olaf7
         public static void RStun()
 		{
             var Rstun = Drawings["QStun"].Cast<CheckBox>().CurrentValue;
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (Rstun && Q.IsReady())
             {
-                var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Knockup))
+                    if (target.IsRooted || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
-                        Q.Cast(target.Position);
+                        Q.Cast(target);
                     }
                 }
+            }
+        }
+
+        public static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        {
+            if (sender.Name == "olaf_axe_totem_team_id_green.troy")
+            {
+                Axe = sender;
+            }
+        }
+        public static void GameObject_OnDelete(GameObject sender, EventArgs args)
+        {
+            if (sender.Name == "olaf_axe_totem_team_id_green.troy")
+            {
+                Axe = null;
             }
         }
 
@@ -384,9 +409,10 @@ namespace Olaf7
             {
                 if (KsQ && Q.IsReady())
                 {
+                    var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
-                        Q.Cast(target);
+                        Q.Cast(pos.To3DWorld());
                     }
                 }
 
@@ -409,7 +435,6 @@ namespace Olaf7
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
-            var Enemies = _Player.CountEnemiesInRange(700);
             var cc = (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             || (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             || (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
@@ -428,7 +453,7 @@ namespace Olaf7
             || (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             || (Misc["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
-            if (R.IsReady() && ulti && cc && Enemies >= 1)
+            if (R.IsReady() && ulti && cc && _Player.CountEnemiesInRange(800) >= 1)
             {
                 Core.DelayAction(() => R.Cast(), Misc["delay"].Cast<Slider>().CurrentValue);
             }

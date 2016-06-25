@@ -68,7 +68,6 @@ namespace XinZhao7
             ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 600));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
-            ComboMenu.Add("titanic", new CheckBox("Use [Titanic]"));
             ComboMenu.Add("BOTRK", new CheckBox("Use [Botrk]"));
             ComboMenu.Add("ihp", new Slider("My HP Use BOTRK", 50));
             ComboMenu.Add("ihpp", new Slider("Enemy HP Use BOTRK", 50));
@@ -262,7 +261,6 @@ namespace XinZhao7
 
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
-            var Titan = ComboMenu["titanic"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
@@ -277,10 +275,10 @@ namespace XinZhao7
                     {
                         Tiamat.Cast();
                     }
-                }
-                if (Titan && target.IsValidTarget() && Titanic.IsReady())
-                {
-                    Titanic.Cast();
+                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
+                    {
+                        Titanic.Cast();
+                    }
                 }
             }
         }

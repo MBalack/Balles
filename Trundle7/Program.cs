@@ -262,32 +262,30 @@ namespace Trundle7
 
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
-            var Titan = Items["titanic"].Cast<CheckBox>().CurrentValue;
             var useriu = Items["hydra"].Cast<CheckBox>().CurrentValue;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
                 if (useriu && !W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(_Player.AttackRange))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
                     {
                         Tiamat.Cast();
                     }
-                }
-                if (Titan && target.IsValidTarget() && Titanic.IsReady())
-                {
-                    Titanic.Cast();
+                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
+                    {
+                        Titanic.Cast();
+                    }
                 }
                 if (useQ && Q.IsReady() && target.IsValidTarget(325) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Player.CastSpell(SpellSlot.Q);
                     Orbwalker.ResetAutoAttack();
-                    Orbwalker.ForcedTarget = target;
                 }
             }
         }

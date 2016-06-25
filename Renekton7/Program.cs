@@ -63,7 +63,6 @@ namespace Renekton7
             ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 250, 0, 450));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
-            ComboMenu.Add("titanic", new CheckBox("Use [Titanic]"));
 
             Ulti = Menu.AddSubMenu("Ultimate Settings", "Ulti");
             Ulti.AddGroupLabel("Ultimate Health Settings");
@@ -220,7 +219,6 @@ namespace Renekton7
 
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
-            var Titan = ComboMenu["titanic"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var laneW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
@@ -239,10 +237,10 @@ namespace Renekton7
                     {
                         Tiamat.Cast();
                     }
-                }
-                if (Titan && target.IsValidTarget() && Titanic.IsReady())
-                {
-                    Titanic.Cast();
+                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
+                    {
+                        Titanic.Cast();
+                    }
                 }
                 if (useW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
