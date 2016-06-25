@@ -93,7 +93,6 @@ namespace Trundle7
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
             JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
-            JungleClearMenu.Add("itemJC", new CheckBox("Use [Items] JungleClear"));
             JungleClearMenu.Add("MJC", new Slider("Min Mana JungleClear", 30));
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
@@ -226,11 +225,12 @@ namespace Trundle7
                 {
                     W.Cast(target);
                 }
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useE && E.IsReady() && E.IsInRange(target) && E2dis <= target.Distance(Player.Instance))
                 {
-                    E.Cast(target);
+                    E.Cast(pos.To3DWorld());
                 }
-                if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(450))
+                if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(R.Range))
                 {
                     if (ComboMenu["useRCombo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -264,15 +264,20 @@ namespace Trundle7
         {
             var useriu = Items["hydra"].Cast<CheckBox>().CurrentValue;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var LaneQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
+            var JungleQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
+            var Jmana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
+            var Hmana = HarassMenu["MHR"].Cast<Slider>().CurrentValue;
+            var Lmana = LaneClearMenu["MLC"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useriu && !W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
                 {
                     if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                     {
                         Hydra.Cast();
                     }
-
                     if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
                     {
                         Tiamat.Cast();
@@ -282,27 +287,41 @@ namespace Trundle7
                         Titanic.Cast();
                     }
                 }
-                if (useQ && Q.IsReady() && target.IsValidTarget(325) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    Player.CastSpell(SpellSlot.Q);
+                    Q.Cast();
                     Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+                if (HasQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > Hmana)
+                {
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+                if (JungleQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent > Jmana)
+                {
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+                if (LaneQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent > Lmana)
+                {
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
             }
         }
 
         private static void LaneClear()
         {
-            var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
             var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["MLC"].Cast<Slider>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(400) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
-                {
-                    Q.Cast();
-                }
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
                 {
                     W.Cast(minion);
@@ -327,7 +346,6 @@ namespace Trundle7
 
         private static void Harass()
         {
-            var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["MHR"].Cast<Slider>().CurrentValue;
@@ -335,50 +353,29 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(_Player.AttackRange) && !target.IsDead && !target.IsZombie)
-                {
-                    Q.Cast();
-                    Orbwalker.ForcedTarget = target;
-                }
                 if (useW && W.IsReady() && W.IsInRange(target) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast(target);
                 }
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
                 {
-                    E.Cast(target);
+                    E.Cast(pos.To3DWorld());
                 }
             }
         }
 
         public static void JungleClear()
         {
-            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
-            var useriu = JungleClearMenu["itemJC"].Cast<CheckBox>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
             if (Player.Instance.ManaPercent < mana) return;
             if (monster != null)
             {
-                if (useQ && Q.IsReady() && monster.IsValidTarget(325))
-                {
-                    Q.Cast();
-                }
                 if (useW && W.IsReady() && W.IsInRange(monster))
                 {
                     W.Cast(monster);
-                }
-                if (useriu && !Q.IsReady())
-                {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && monster.IsValidTarget(325))
-                    {
-                        Hydra.Cast();
-                    }
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && monster.IsValidTarget(325))
-                    {
-                        Tiamat.Cast();
-                    }
                 }
             }
         }
@@ -388,9 +385,10 @@ namespace Trundle7
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null)
             {
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, 80);
                 if (E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    E.Cast(target);
+                    E.Cast(pos.To3DWorld());
                 }
             }
             if (W.IsReady())
