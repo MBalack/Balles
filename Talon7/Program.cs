@@ -96,7 +96,6 @@ namespace Talon7
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
             JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
-            JungleClearMenu.Add("itemJC", new CheckBox("Use [Items] JungleClear"));
             JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
@@ -201,22 +200,17 @@ namespace Talon7
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var hp = ComboMenu["myhp"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useE && E.IsReady() && E.IsInRange(target) && disE <= target.Distance(Player.Instance) && Player.Instance.HealthPercent >= hp)
-                {
-                    E.Cast(target);
-                }
-                if (useW && W.IsReady() && target.IsValidTarget(700))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     W.Cast(target);
                 }
-                if (useR && R.IsReady() && target.IsValidTarget(300))
+                if (useE && E.IsReady() && E.IsInRange(target) && disE <= target.Distance(Player.Instance) && Player.Instance.HealthPercent >= hp)
                 {
-                    R.Cast();
+                    E.Cast(target);
                 }
             }
         }
@@ -225,10 +219,9 @@ namespace Talon7
         {
             var useR = ComboMenu["autor"].Cast<CheckBox>().CurrentValue;
             var mau = ComboMenu["mau"].Cast<Slider>().CurrentValue;
-            var Enemies = _Player.Position.CountEnemiesInRange(500);
             if (useR && R.IsReady())
             {
-                if (Player.Instance.HealthPercent < mau && Enemies >= 1)
+                if (Player.Instance.HealthPercent < mau && _Player.Position.CountEnemiesInRange(500) >= 1)
                 {
                     R.Cast();
                 }
@@ -238,17 +231,37 @@ namespace Talon7
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["riu"].Cast<CheckBox>().CurrentValue;
+            var jungQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
+            var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
+            var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
 
             if (useQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                if (Q.Cast())
-                {
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
+                Q.Cast();
+                Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useR && R.IsReady() && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            {
+                R.Cast();
+                Orbwalker.ResetAutoAttack();
+            }
+            if (jungQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent > mana)
+            {
+                Q.Cast();
+                Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+            }
+            if (HasQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
+            {
+                Q.Cast();
+                Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+            }
+            if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
             {
                 if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                 {
@@ -264,33 +277,15 @@ namespace Talon7
 
         public static void JungleClear()
         {
-            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
-            var useriu = JungleClearMenu["itemJC"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
             if (Player.Instance.ManaPercent < mana) return;
             if (jungleMonsters != null)
             {
-                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(300))
-                {
-                    Q.Cast();
-                }
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(500))
                 {
                     W.Cast(jungleMonsters);
-                }
-                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-                {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && jungleMonsters.IsValidTarget(250))
-                    {
-                        Hydra.Cast();
-                    }
-
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && jungleMonsters.IsValidTarget(250))
-                    {
-                        Tiamat.Cast();
-                    }
                 }
             }
         }
@@ -342,17 +337,12 @@ namespace Talon7
 
         public static void Harass()
         {
-            var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (Player.Instance.ManaPercent < ManaW) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(325))
-                {
-                    Q.Cast();
-                }
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     W.Cast(target);
@@ -383,18 +373,29 @@ namespace Talon7
             var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth()));
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(W.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.W) >= m.TotalShieldHealth()));
-            if (Player.Instance.ManaPercent < mana) return;
-            if (minion != null || minions != null)
+            if (Player.Instance.ManaPercent > mana)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(200))
                 {
                     Q.Cast();
                 }
+
                 if (useW && W.IsReady() && minions.IsValidTarget(W.Range))
                 {
                     W.Cast(minions);
                 }
             }
+        }
+
+        public static float WDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+                (float)(new[] { 0, 60, 110, 160, 210, 260 }[Program.R.Level] + 0.6f * _Player.FlatPhysicalDamageMod));
+        }
+        public static float RDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+                (float)(new[] { 0, 240, 340, 440 }[Program.R.Level] + 0.75f * _Player.FlatPhysicalDamageMod));
         }
 
         public static void KillSteal()
@@ -408,18 +409,18 @@ namespace Talon7
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
+                        if (target.Health + target.AttackShield < WDamage(target))
                         {
                             W.Cast(target);
                         }
                     }
                 }
 
-                if (KsR && R.IsReady() && target.IsValidTarget(325))
+                if (KsR && R.IsReady() && target.IsValidTarget(500))
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                        if (target.Health + target.AttackShield < RDamage(target))
                         {
                             R.Cast();
                         }
