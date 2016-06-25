@@ -242,8 +242,11 @@ namespace Talon7
 
             if (useQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                Player.CastSpell(SpellSlot.Q);
-                Orbwalker.ResetAutoAttack();
+                if (Q.Cast())
+                {
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
             }
             if (useriu && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
