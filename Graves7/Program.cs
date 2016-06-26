@@ -93,6 +93,7 @@ namespace Graves7
             ClearMenu = Menu.AddSubMenu("Laneclear Settings", "LaneClearMenu");
             ClearMenu.AddGroupLabel("Laneclear Settings");
             ClearMenu.Add("QClear", new CheckBox("Use [Q]"));
+            ClearMenu.Add("minQ", new Slider("Min Hit Minion [Q]", 3, 1, 6));		
             ClearMenu.Add("ClearMana", new Slider("Min Mana For [Q] LaneClear", 70));
             ClearMenu.Add("LaneAA", new CheckBox("Use [E] Reset AA", false));
             ClearMenu.Add("ELane", new Slider("Min Mana For [E] LaneClear", 70));			
@@ -129,7 +130,7 @@ namespace Graves7
             Misc.Add("AntiGapW", new CheckBox("Use [W] AntiGap"));
             Misc.Add("QStun", new CheckBox("Use [Q] Immoblie"));
             Misc.AddLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
             Drawings = Menu.AddSubMenu("Drawings Settings", "DrawingMenu");
@@ -351,10 +352,12 @@ namespace Graves7
         {
             var useQ = ClearMenu["QClear"].Cast<CheckBox>().CurrentValue;
             var ManaQ = ClearMenu["ClearMana"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var MinQ = ClearMenu["minQ"].Cast<Slider>().CurrentValue;
+            var minionQ = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
+            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, Q.Width, (int) Q.Range);
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > ManaQ && minions.Count() >= 3)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > ManaQ && quang.HitNumber >= MinQ)
                 {
                     Q.Cast(minion);
                 }

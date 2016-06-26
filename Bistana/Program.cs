@@ -341,7 +341,7 @@ namespace Bristana
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                if (target.IsValidTarget(R.Range) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
+                if (target.IsValidTarget(1000) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                 {
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
