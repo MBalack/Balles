@@ -11,6 +11,8 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
+using Font = SharpDX.Direct3D9.Font;
+using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace Bristana
@@ -23,6 +25,7 @@ namespace Bristana
         public static Spell.Targeted R;
         public static Item Botrk;
         public static Item Bil;
+        public static Font Thm;
         public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
         public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
 
@@ -299,19 +302,28 @@ namespace Bristana
             }
         }
 
+        public static void DrawFont(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
+        {
+            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
+        }
+
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            var renga = EntityManager.Heroes.Enemies.Find(r => r.ChampionName.Equals("Rengar"));
-            var khazix = EntityManager.Heroes.Enemies.Find(r => r.ChampionName.Equals("Khazix"));
+            var renga = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Rengar"));
+            var khazix = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Khazix"));
             if (renga != null)
             {
-                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < R.Range)
+                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
+                {
                     R.Cast(renga);
+                {
             }
             if (khazix != null)
             {
-                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 400)
+                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
+                {
                     R.Cast(khazix);
+                {
             }
         }
 
@@ -328,12 +340,10 @@ namespace Bristana
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
-                if (target.IsValidTarget(R.Range))
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (target.IsValidTarget(R.Range) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                 {
-                    if (Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health)
-                    {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, Color.Red, " Useeeeee RRRRRRRR Cannnnnnnn Killlllllllll: " + target.ChampionName);
-                    }
+                    DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
         }
@@ -349,11 +359,10 @@ namespace Bristana
             R = new Spell.Targeted(SpellSlot.R, 550);
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
-
+            Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Menu = MainMenu.AddMenu("Bristana", "Bristana");
             Menu.AddGroupLabel("Bristana");
             Menu.AddLabel(" Good Luck! ");
-
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Combo [Q]"));
