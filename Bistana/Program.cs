@@ -355,8 +355,8 @@ namespace Bristana
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
-            E = new Spell.Targeted(SpellSlot.E, 550);
-            R = new Spell.Targeted(SpellSlot.R, 550);
+            E = new Spell.Targeted(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
+            R = new Spell.Targeted(SpellSlot.R, (uint)Player.Instance.GetAutoAttackRange());
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
