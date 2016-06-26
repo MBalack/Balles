@@ -355,7 +355,7 @@ namespace Graves7
             var MinQ = ClearMenu["minQ"].Cast<Slider>().CurrentValue;
             var minionQ = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, Q.Width, (int) Q.Range);
-            foreach (var minion in minions)
+            foreach (var minion in minionQ)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > ManaQ && quang.HitNumber >= MinQ)
                 {
