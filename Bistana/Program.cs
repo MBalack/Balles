@@ -316,14 +316,14 @@ namespace Bristana
                 if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
                 {
                     R.Cast(renga);
-                {
+                }
             }
             if (khazix != null)
             {
                 if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
                 {
                     R.Cast(khazix);
-                {
+                }
             }
         }
 
