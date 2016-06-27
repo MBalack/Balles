@@ -37,14 +37,12 @@ namespace Hecarim7
             if (!_Player.ChampionName.Contains("Hecarim")) return;
             Chat.Print("Hecarim7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
-
 			Q = new Spell.Active(SpellSlot.Q, 350);
             W = new Spell.Active(SpellSlot.W, 525);
             E = new Spell.Active(SpellSlot.E, 450);
             R= new Spell.Skillshot(SpellSlot.R, 1000, SkillShotType.Linear, 250, 800, 200);
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-
 			Menu = MainMenu.AddMenu("Hecarim7", "Hecarim");
             Menu.AddSeparator();
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
@@ -119,7 +117,6 @@ namespace Hecarim7
 
         private static void Game_OnTick(EventArgs args)
         {
-
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -159,7 +156,7 @@ namespace Hecarim7
 		
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(700, DamageType.Mixed);
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
@@ -179,16 +176,12 @@ namespace Hecarim7
                 {
                     E.Cast();
                 }
-            }
-            var Selector = TargetSelector.GetTarget(R.Range, DamageType.Magical);
-            if (Selector != null)
-            {
-                if (useR && R.IsReady() && Selector.IsValidTarget(R.Range))
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    var pred = R.GetPrediction(Selector);
-                    if (pred.CastPosition.CountEnemiesInRange(R.Width) >= MinR && pred.HitChance >= HitChance.High)
+                    var RPred = R.GetPrediction(target);
+                    if (RPred.CastPosition.CountEnemiesInRange(R.Width) >= MinR && RPred.HitChance >= HitChance.High)
                     {
-                        R.Cast(pred.CastPosition);
+                        R.Cast(RPred.CastPosition);
                     }
 		    	}
 	    	}
@@ -221,7 +214,7 @@ namespace Hecarim7
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(700, DamageType.Mixed);
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
             if (target != null)
             {
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent > ManaQ && target.IsValidTarget(Q.Range))
@@ -240,9 +233,12 @@ namespace Hecarim7
             var useQ = Auto["AutoQ"].Cast<CheckBox>().CurrentValue;
             var mana = Auto["ManaQ"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Mixed);
-            if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range))
+            if (target != null)
             {
-                Q.Cast();
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range))
+                {
+                    Q.Cast();
+                }
             }
         }
 
@@ -263,26 +259,26 @@ namespace Hecarim7
         public static float RDamage(Obj_AI_Base target)
         {
             return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 150, 250, 350 }[Program.R.Level] + 1.0f * _Player.FlatMagicDamageMod));
+                (float)(new[] { 0, 150, 250, 350 }[R.Level] + 1.0f * _Player.FlatMagicDamageMod));
         }
 
         public static float QDamage(Obj_AI_Base target)
         {
             return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 35, 60, 90, 120, 200 }[Program.Q.Level] + 0.5f * _Player.FlatPhysicalDamageMod + 0.0f * _Player.FlatMagicDamageMod
-                    ));
+                (float)(new[] { 0, 35, 60, 90, 120, 200 }[Q.Level] + 0.4f * _Player.FlatPhysicalDamageMod));
         }
 
         private static void KillSteal()
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
+            var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < QDamage(target))
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast();
                     }
@@ -295,19 +291,11 @@ namespace Hecarim7
                         W.Cast();
 					}
                 }
-                var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
-                    if (target != null)
+                    if (target.Health + target.AttackShield < RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
                     {
-                        if (target.Health + target.AttackShield < RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
-                        {
-                            var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 10)
-                            {
-                                R.Cast(pred.CastPosition);
-                            }
-                        }
+                        R.Cast(target);
                     }
                 }
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())

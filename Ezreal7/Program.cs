@@ -123,13 +123,13 @@ namespace Ezreal7
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("AntiGap Settings");
-            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser"));
+            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser", false));
             Misc.AddGroupLabel("Ultimate On CC Settings");
             Misc.Add("Rstun", new CheckBox("Use [R] Enemy Immobile"));
             Misc.AddGroupLabel("Auto Stacks Settings");
             Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
             Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
             Items = Menu.AddSubMenu("Items Settings", "Items");
@@ -440,7 +440,7 @@ namespace Ezreal7
             if (target == null) return;
             if (unit && E.IsReady() && target.IsValidTarget(Q.Range - 150))
             {
-                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= target.TotalShieldHealth())
+                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay))
                 {
                     Q.Cast(target);
                 }
