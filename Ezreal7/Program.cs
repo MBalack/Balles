@@ -438,7 +438,7 @@ namespace Ezreal7
             var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
             || (useAA  && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)&& Player.Instance.ManaPercent >= LhM);
             if (target == null) return;
-            if (unit && E.IsReady() && target.IsValidTarget(Q.Range - 150))
+            if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
                 if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay))
                 {
