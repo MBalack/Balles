@@ -79,7 +79,8 @@ namespace Olaf7
 
                 LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
                 LaneClearMenu.AddGroupLabel("LaneClear Settings");
-                LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]"));
+                LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
+                LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
                 LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
                 LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
                 LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
@@ -87,8 +88,9 @@ namespace Olaf7
 
                 LastHitMenu = Menu.AddSubMenu("LastHit Settings", "LastHit");
                 LastHitMenu.AddGroupLabel("LastHit Settings");
-                LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
                 LastHitMenu.Add("LastQ", new CheckBox("Use [Q] LastHit", false));
+                LastHitMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
+                LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
                 LastHitMenu.Add("LhMana", new Slider("Min Mana For LastHit", 60));
 
 
@@ -100,7 +102,6 @@ namespace Olaf7
                 JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear", 30));
 
                 Misc = Menu.AddSubMenu("Ultimate Settings", "Misc");
-                Misc.AddGroupLabel("Ultimate Setting");
                 Misc.Add("Ulti", new CheckBox("Use Ultimate"));
                 Misc.AddGroupLabel("Use [R] On");
                 Misc.Add("stun", new CheckBox("Stuns"));
@@ -121,6 +122,9 @@ namespace Olaf7
                 Misc.Add("knockback", new CheckBox("Knock Backs", false));
                 Misc.Add("nearsight", new CheckBox("NearSight", false));
                 Misc.Add("poly", new CheckBox("Polymorph", false));
+                Misc.AddGroupLabel("Ultimate Setting");
+                Misc.Add("healulti", new Slider("Min Health Use [R]", 60));
+                Misc.Add("Rulti", new Slider("Min Enemies Around Use [R]", 1, 1, 5));
                 Misc.AddGroupLabel("Ultimate Delay");
                 Misc.Add("delay", new Slider("Humanizer Delay", 0, 0, 1000));
 
@@ -150,6 +154,7 @@ namespace Olaf7
                 Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
                 GameObject.OnCreate += GameObject_OnCreate;
                 GameObject.OnDelete += GameObject_OnDelete;
+                Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -164,7 +169,7 @@ namespace Olaf7
             }
             if (Drawings["Axe"].Cast<CheckBox>().CurrentValue && Axe != null)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 6, Radius = 70 }.Draw(Axe.Position);
+                new Circle() { Color = Color.GreenYellow, BorderWidth = 6, Radius = 100 }.Draw(Axe.Position);
             }
         }
 
@@ -189,6 +194,10 @@ namespace Olaf7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
+            }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+            {
+                Flee();
             }
             KillSteal();
             RStun();
@@ -225,14 +234,14 @@ namespace Olaf7
             {
                 var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
-         	    {
+                {
                     Q.Cast(pos.To3DWorld());
-	    		}
+                }
                 if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
          	    {				
                     W.Cast();
 	    		}
-                if (E.IsReady() && useE && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast(target);
                 }
@@ -326,6 +335,36 @@ namespace Olaf7
             }
         }
 
+        private static void Orbwalker_CantLasthit(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
+        {
+            var useCant = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
+            var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var useAA = LastHitMenu["LhAA"].Cast<CheckBox>().CurrentValue;
+            var LhM = LastHitMenu["LhMana"].Cast<Slider>().CurrentValue;
+            var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
+            || (useAA  && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)&& Player.Instance.ManaPercent >= LhM);
+            if (target == null) return;
+            if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
+            {
+                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay))
+                {
+                    Q.Cast(target);
+                }
+            }
+        }
+
+        private static void Flee()
+        {
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            if (target != null)
+            {
+                if (Q.IsReady() && target.IsValidTarget(Q.Range))
+                {
+                    Q.Cast(target.Position);
+                }
+            }
+        }
+
         public static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
@@ -336,10 +375,10 @@ namespace Olaf7
             if (target != null)
             {
                 var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaQ)
-     	        {
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Player.Instance.ManaPercent >= ManaQ)
+                {
                     Q.Cast(pos.To3DWorld());
-		    	}
+                }
                 if (useW && W.IsReady() && target.IsValidTarget(325) && Player.Instance.ManaPercent >= ManaQ)
                 {				
                     W.Cast();
@@ -435,6 +474,8 @@ namespace Olaf7
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
+            var heal = Misc["healulti"].Cast<Slider>().CurrentValue;
+            var minR = Misc["Rulti"].Cast<Slider>().CurrentValue;
             var cc = (Misc["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
             || (Misc["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
             || (Misc["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
@@ -453,7 +494,7 @@ namespace Olaf7
             || (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             || (Misc["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
-            if (R.IsReady() && ulti && cc && _Player.CountEnemiesInRange(800) >= 1)
+            if (R.IsReady() && ulti && cc && _Player.CountEnemiesInRange(800) >= minR && Player.Instance.HealthPercent <= heal)
             {
                 Core.DelayAction(() => R.Cast(), Misc["delay"].Cast<Slider>().CurrentValue);
             }
