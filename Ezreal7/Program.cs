@@ -531,10 +531,10 @@ namespace Ezreal7
             var Rstun = Misc["Rstun"].Cast<CheckBox>().CurrentValue;
             if (Rstun && R.IsReady())
             {
-                var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+                var target = TargetSelector.GetTarget(1600, DamageType.Physical);
                 if (target != null)
                 {
-                    if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) && target.IsInRange(Player.Instance, 1600) && !target.IsInRange(Player.Instance, 800))
+                    if ((!target.IsInRange(Player.Instance, 800)) && (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup)))
                     {
                         R.Cast(target.Position);
                     }
