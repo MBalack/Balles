@@ -129,8 +129,8 @@ namespace Ezreal7
             Misc.Add("Rstun", new CheckBox("Use [R] Enemy Immobile"));
             Misc.AddGroupLabel("Auto Stacks Settings");
             Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
-            Misc.Add("Stackk", new CheckBox("Auto Stacks If Enemies Around = 0"));
-            Misc.Add("Stackkm", new Slider("Min Mana Auto Stack", 30));
+            Misc.Add("Stackk", new CheckBox("Auto Stacks If Enemies Around = 0", false));
+            Misc.Add("Stackkm", new Slider("Min Mana Auto Stack", 80));
             Misc.AddGroupLabel("Skin Changer");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
