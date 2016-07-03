@@ -633,7 +633,7 @@ namespace Ezreal7
             }
             var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
             if (Misc["Stackk"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
-            (_Player.CountEnemiesInRange(Q.Range) <= 0 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range)) && (Tear.IsOwned() || Manamune.IsOwned()))
+            (_Player.CountEnemiesInRange(Q.Range) <= 0 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range)) && (Tear.IsOwned() || Manamune.IsOwned())))
             {
                 Q.Cast(Game.CursorPos);
             }
