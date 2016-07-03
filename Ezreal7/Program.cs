@@ -129,6 +129,8 @@ namespace Ezreal7
             Misc.Add("Rstun", new CheckBox("Use [R] Enemy Immobile"));
             Misc.AddGroupLabel("Auto Stacks Settings");
             Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
+            Misc.Add("Stackk", new CheckBox("Auto Stacks If Enemies Around = 0"));
+            Misc.Add("Stackkm", new Slider("Min Mana Auto Stack", 30));
             Misc.AddGroupLabel("Skin Changer");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
@@ -626,6 +628,12 @@ namespace Ezreal7
 		{	
             if (Misc["Stack"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
             (Player.Instance.IsInShopRange()) && (Tear.IsOwned() || Manamune.IsOwned()))
+            {
+                Q.Cast(Game.CursorPos);
+            }
+            var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
+            if (Misc["Stackk"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
+            (_Player.CountEnemiesInRange(Q.Range) <= 0 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range)) && (Tear.IsOwned() || Manamune.IsOwned()))
             {
                 Q.Cast(Game.CursorPos);
             }
