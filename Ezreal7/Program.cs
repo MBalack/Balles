@@ -440,7 +440,7 @@ namespace Ezreal7
             var useAA = LaneClearMenu["LhAA"].Cast<CheckBox>().CurrentValue;
             var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
-            || (useAA  && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit)&& Player.Instance.ManaPercent >= LhM);
+            || (useAA && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= LhM);
             if (target == null) return;
             if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
