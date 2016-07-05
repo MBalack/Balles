@@ -75,7 +75,7 @@ namespace Ezreal7
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
             ComboMenu.AddSeparator();
             ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
-            ComboMenu.AddLabel("Recommended Range 1000");
+            ComboMenu.AddLabel("Recommended Distance 1000");
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -165,7 +165,7 @@ namespace Ezreal7
             KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
             KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
-            KillStealMenu.AddLabel("Recommended Range 900");
+            KillStealMenu.AddLabel("Recommended Distance 900");
             KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
             Drawings = Menu.AddSubMenu("Draw Settings", "Draw");

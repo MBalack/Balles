@@ -10,13 +10,14 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
+using SharpDX;
 using Color = System.Drawing.Color;
 
 namespace Hecarim7
 {
     internal class Program
     {
-        public static Menu Menu, ComboMenu, HarassMenu, Auto, LaneClearMenu, KillStealMenu, Skin, Drawings;
+        public static Menu Menu, ComboMenu, HarassMenu, Auto, JungleClearMenu, LaneClearMenu, KillStealMenu, Skin, Drawings;
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -46,72 +47,81 @@ namespace Hecarim7
 			Menu = MainMenu.AddMenu("Hecarim7", "Hecarim");
             Menu.AddSeparator();
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-            ComboMenu.AddSeparator();
-            ComboMenu.AddLabel("Combo Settings");
-            ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
-            ComboMenu.Add("ComboW", new CheckBox("Spell [W]"));
-            ComboMenu.Add("ComboE", new CheckBox("Spell [E]"));
-            ComboMenu.AddSeparator();
-            ComboMenu.Add("ComboR", new CheckBox("Spell [R]"));
-            ComboMenu.AddSeparator();
+            ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 3, 0, 5));
+            ComboMenu.AddGroupLabel("Interrupt Settings");
+            ComboMenu.Add("inter", new CheckBox("Use [R] Interrupt"));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-            HarassMenu.AddLabel("Harass Settings");
-            HarassMenu.Add("HarassQ", new CheckBox("Spell [Q]"));
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
             HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
             HarassMenu.AddSeparator();
-            HarassMenu.Add("HarassW", new CheckBox("Spell [W]", false) );
-            HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
+            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
+            HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]", 40));
                 
 			Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
-			Auto.AddLabel("Auto Harass Settings");
+			Auto.AddGroupLabel("Auto Harass Settings");
             Auto.Add("AutoQ", new CheckBox("Auto [Q]"));
             Auto.Add("ManaQ", new Slider("Min Mana Auto [Q]", 60));
 
+            JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear Settings");
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
+            JungleClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
+            JungleClearMenu.Add("JungleMana", new Slider("Min Mana JungleClear", 20));		
+
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-            LaneClearMenu.AddLabel("LastHit Settings");
-            LaneClearMenu.Add("LastQ", new CheckBox("Spell [Q] LastHit"));
+            LaneClearMenu.AddGroupLabel("LastHit Settings");
+            LaneClearMenu.Add("LastQ", new CheckBox("Use [Q] LastHit"));
             LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
             LaneClearMenu.AddSeparator();
-            LaneClearMenu.AddLabel("Lane Clear Settings");
-            LaneClearMenu.Add("LastQLC", new CheckBox("LaneClear With [Q]"));
+            LaneClearMenu.AddGroupLabel("Lane Clear Settings");
+            LaneClearMenu.Add("LastQLC", new CheckBox("Always [Q] LaneClear (Keep Passive Q)"));
+            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] Killable Minion", false));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana [Q] LaneClear", 50));
-            LaneClearMenu.Add("LastWLC", new CheckBox("LaneClear With [W]"));
+            LaneClearMenu.Add("LastWLC", new CheckBox("Use [W] LaneClear"));
             LaneClearMenu.Add("ManaLCW", new Slider("Min Mana [W] LaneClear", 70));			
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-            KillStealMenu.AddLabel("KillSteal Settings");
+            KillStealMenu.AddGroupLabel("KillSteal Settings");
             KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
             KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
             KillStealMenu.AddSeparator();
-            KillStealMenu.AddLabel("Ultimate Settings");
+            KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
             KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 100, 1, 700));
+            KillStealMenu.AddGroupLabel("Recommended Distance 600");
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
+            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
+            Skin.Add("skin.Id", new ComboBox("Skin Mode", 4, "Default", "1", "2", "3", "4", "5"));
 
             Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
             Drawings.AddGroupLabel("Drawing Settings");
-            Drawings.Add("DrawQ", new CheckBox("Q Range"));
-            Drawings.Add("DrawW", new CheckBox("W Range", false));
+            Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
+            Drawings.Add("DrawW", new CheckBox("[W] Range", false));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
+            Interrupter.OnInterruptableSpell += Interupt;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = W.Range }.Draw(_Player.Position);
             }
         }
 
@@ -125,6 +135,10 @@ namespace Hecarim7
 			{
                 Harass();
 			}
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+            {
+                JungleClear();
+            }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
 			{
                 LastHit();
@@ -135,7 +149,6 @@ namespace Hecarim7
 			}
                 KillSteal();
                 AutoQ();
-				
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -179,7 +192,7 @@ namespace Hecarim7
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     var RPred = R.GetPrediction(target);
-                    if (RPred.CastPosition.CountEnemiesInRange(R.Width) >= MinR && RPred.HitChance >= HitChance.High)
+                    if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR && RPred.HitChance >= HitChance.High)
                     {
                         R.Cast(RPred.CastPosition);
                     }
@@ -193,15 +206,45 @@ namespace Hecarim7
             var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var laneWMN = LaneClearMenu["ManaLCW"].Cast<Slider>().CurrentValue;
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
+            var useQ = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
             var useWLH = LaneClearMenu["LastWLC"].Cast<CheckBox>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
-                if (useQLH && Q.IsReady() && Player.Instance.ManaPercent > laneQMN && minion.IsValidTarget(Q.Range) && minions.Count() >= 3)
+                if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > laneQMN)
                 {
                     Q.Cast();
                 }
-                if (useWLH && W.IsReady() && Player.Instance.ManaPercent > laneWMN && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
+                else if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion) && Player.Instance.ManaPercent > laneQMN)
+                {
+                    Q.Cast();
+                }
+                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && Player.Instance.ManaPercent > laneWMN && minions.Count() >= 3)
+                {
+                    W.Cast();
+                }
+            }
+        }
+
+        public static void JungleClear()
+        {
+            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
+            var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
+            var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
+            var mana = JungleClearMenu["JungleMana"].Cast<Slider>().CurrentValue;
+            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(R.Range));
+            if (Player.Instance.ManaPercent <= mana) return;
+            if (jungleMonsters != null)
+            {
+                if (useQ && Q.IsReady() && Q.IsInRange(jungleMonsters))
+                {
+                    Q.Cast();
+                }
+                if (useE && E.IsReady() && jungleMonsters.IsValidTarget(800))
+                {
+                    E.Cast();
+                }
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
@@ -228,6 +271,19 @@ namespace Hecarim7
             }
         }
 
+        public static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
+        {
+            var Inter = ComboMenu["inter"].Cast<CheckBox>().CurrentValue;
+            if (!sender.IsEnemy || !(sender is AIHeroClient) || Player.Instance.IsRecalling())
+            {
+                return;
+            }
+            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
+            {
+                R.Cast(sender.Position);
+            }
+        }
+
         private static void AutoQ()
         {
             var useQ = Auto["AutoQ"].Cast<CheckBox>().CurrentValue;
@@ -235,11 +291,16 @@ namespace Hecarim7
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Mixed);
             if (target != null)
             {
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && !Tru(_Player.Position) && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
                     Q.Cast();
                 }
             }
+        }
+
+        public static bool Tru(Vector3 position)
+        {
+            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950) && turret.IsEnemy);
         }
 
         private static void LastHit()
@@ -265,7 +326,7 @@ namespace Hecarim7
         public static float QDamage(Obj_AI_Base target)
         {
             return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 35, 60, 90, 120, 200 }[Q.Level] + 0.4f * _Player.FlatPhysicalDamageMod));
+                (float)(new[] { 0, 35, 60, 85, 110, 130 }[Q.Level] + 0.4f * _Player.FlatPhysicalDamageMod));
         }
 
         private static void KillSteal()
@@ -274,7 +335,7 @@ namespace Hecarim7
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(R.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
