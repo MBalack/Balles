@@ -240,21 +240,22 @@ namespace Sejuani7
             var useWLH = LaneClearMenu["LastWLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["LaneE"].Cast<CheckBox>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            if (Player.Instance.ManaPercent < laneQMN) return;
             foreach (var minion in minions)
             {
-                if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > laneQMN)
+                if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range))
                 {
                     Q.Cast(minion);
                 }
-                else if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion) && Player.Instance.ManaPercent > laneQMN)
+                else if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion))
                 {
                     Q.Cast(minion);
                 }
-                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && Player.Instance.ManaPercent > laneQMN && minions.Count() >= 3)
+                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
                 {
                     W.Cast();
                 }
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && Player.Instance.ManaPercent > laneQMN && minions.Count() >= 3 && minion.HasBuff("SejuaniFrost"))
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3 && minion.HasBuff("SejuaniFrost"))
                 {
                     E.Cast();
                 }
@@ -295,13 +296,14 @@ namespace Sejuani7
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
+            if (Player.Instance.ManaPercent < ManaQ) return;
             if (target != null)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
                     Q.Cast(target);
                 }
-                if (useW && W.IsReady() && Player.Instance.ManaPercent > ManaQ && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
