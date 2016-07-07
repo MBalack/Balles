@@ -64,7 +64,6 @@ namespace Twitch7
             Youmuu = new Item(3142, 10);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Menu = MainMenu.AddMenu("Twitch7", "Twitch");
-            Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));
@@ -525,7 +524,7 @@ namespace Twitch7
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range) && target.HasBuff("twitchdeadlyvenom"))
                 {
-                    if (target.Health + target.AttackShield < EDamage(target))
+                    if (target.Health + target.AttackShield <= EDamage(target))
                     {
                         E.Cast();
                     }
