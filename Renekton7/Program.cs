@@ -226,22 +226,6 @@ namespace Renekton7
             var jungW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if ((useriu && !W.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
-                {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
-                    {
-                        Hydra.Cast();
-                    }
-
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
-                    {
-                        Tiamat.Cast();
-                    }
-                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
-                    {
-                        Titanic.Cast();
-                    }
-                }
                 if (useW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     W.Cast();
@@ -265,6 +249,22 @@ namespace Renekton7
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+                if ((useriu && !W.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+                {
+                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                    {
+                        Hydra.Cast();
+                    }
+
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
+                    {
+                        Tiamat.Cast();
+                    }
+                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
+                    {
+                        Titanic.Cast();
+                    }
                 }
             }
         }

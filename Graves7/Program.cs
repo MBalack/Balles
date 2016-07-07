@@ -69,7 +69,8 @@ namespace Graves7
             {
                 ComboMenu.Add("combo" + Selector.ChampionName, new CheckBox("" + Selector.ChampionName));
             }
-            ComboMenu.AddSeparator();        
+            ComboMenu.AddSeparator();
+            ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
 			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E] Reload", 1, 0, 1));
             ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R]", false));
@@ -278,6 +279,7 @@ namespace Graves7
         public static void Combo()
         {
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
+            var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
@@ -300,13 +302,16 @@ namespace Graves7
      	    {
                 W.Cast(Selector);
 			}
-            if (ComboMode.CurrentValue == 1 && E.IsReady() && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
+            if (useE && E.IsReady())
             {
-                Player.CastSpell(SpellSlot.E, Game.CursorPos);
-            }
-            if (ComboMode.CurrentValue == 0 && E.IsReady() && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
-            {
-      		    Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                if (ComboMode.CurrentValue == 1 && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
+                {
+                    Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                }
+                if (ComboMode.CurrentValue == 0 && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
+                {
+      	    	    Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                }
             }
             if (useR && R.IsReady() && Selector.IsValidTarget(R.Range))
             {
@@ -341,10 +346,7 @@ namespace Graves7
 			}
             if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && Selector.IsValidTarget(W.Range))
             {
-                if (Selector != null)
-                {
-                   W.Cast(Selector);
-				}
+               W.Cast(Selector);
             }
 		}
 
@@ -370,10 +372,7 @@ namespace Graves7
             var useW = JungleMenu["WJungleClear"].Cast<CheckBox>().CurrentValue;
             var jungMana = JungleMenu["JungleMana"].Cast<Slider>().CurrentValue;
             var jungManaW = JungleMenu["JungleManaW"].Cast<Slider>().CurrentValue;
-            var monster =
-                EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, Q.Range)
-                    .OrderByDescending(a => a.MaxHealth)
-                    .FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (monster == null) return;
             if (Q.IsReady() && useQ && monster.Distance(_Player) <= Q.Range && _Player.ManaPercent > jungMana)
             {
