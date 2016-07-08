@@ -203,7 +203,7 @@ namespace Sejuani7
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var disQ = ComboMenu["DisQ"].Cast<Slider>().CurrentValue;
@@ -217,7 +217,7 @@ namespace Sejuani7
                 {
                     Q.Cast(target);
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
                     W.Cast();
                 }
@@ -225,9 +225,10 @@ namespace Sejuani7
                 {
                     E.Cast();
                 }
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
+                var targetR = TargetSelector.GetTarget(R.Range, DamageType.Magical);
+                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
                 {
-                    var RPred = R.GetPrediction(target);
+                    var RPred = R.GetPrediction(targetR);
                     if (RPred.CastPosition.CountEnemiesInRange(400) >= MinR && RPred.HitChance >= HitChance.High)
                     {
                         R.Cast(RPred.CastPosition);
@@ -317,7 +318,7 @@ namespace Sejuani7
             var disE = HarassMenu["DisE2"].Cast<Slider>().CurrentValue;
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Magical);
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent < ManaQ) return;
             if (target != null)
             {
@@ -325,7 +326,7 @@ namespace Sejuani7
                 {
                     Q.Cast(target);
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
                     W.Cast();
                 }
