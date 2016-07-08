@@ -348,15 +348,23 @@ namespace Bristana
             }
         }
 
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            uint level = (uint)Player.Instance.Level;
+            E = new Spell.Targeted(SpellSlot.E, 600 + level * 7);
+            R = new Spell.Targeted(SpellSlot.R, 600 + level * 7);
+        }
+
         private static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Tristana")) return;
             Chat.Print("Bristana Loaded!", Color.Orange);
             Bootstrap.Init(null);
+            uint level = (uint)Player.Instance.Level;
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
-            E = new Spell.Targeted(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
-            R = new Spell.Targeted(SpellSlot.R, (uint)Player.Instance.GetAutoAttackRange());
+            E = new Spell.Targeted(SpellSlot.E, 600 + level * 7);
+            R = new Spell.Targeted(SpellSlot.R, 600 + level * 7);
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
@@ -438,6 +446,7 @@ namespace Bristana
             Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
 
             Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
             Interrupter.OnInterruptableSpell += Interupt;
