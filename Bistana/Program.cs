@@ -331,11 +331,11 @@ namespace Bristana
         {
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -434,7 +434,7 @@ namespace Bristana
             Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
 
             Game.OnTick += Game_OnTick;

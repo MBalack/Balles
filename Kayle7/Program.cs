@@ -47,7 +47,7 @@ namespace Kayle7
             Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Targeted(SpellSlot.W, 900);
-            E = new Spell.Active(SpellSlot.E, 575);
+            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
             R = new Spell.Targeted(SpellSlot.R, 900);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
@@ -123,15 +123,15 @@ namespace Kayle7
         {
             if (Misc["DrawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = R.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = R.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Red, BorderWidth = 3, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawIE"].Cast<CheckBox>().CurrentValue)
             {
@@ -142,10 +142,7 @@ namespace Kayle7
                 }
                 else
                 {
-                    if (!Player.HasBuff("JudicatorRighteousFury"))
-                    {
-                        DrawFont(thm, "Righteous Fury : Off", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
-                    }
+                    DrawFont(thm, "Righteous Fury : Off", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
                 }
             }
         }
