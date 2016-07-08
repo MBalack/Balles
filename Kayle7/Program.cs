@@ -47,7 +47,7 @@ namespace Kayle7
             Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Targeted(SpellSlot.W, 900);
-            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
+            E = new Spell.Active(SpellSlot.E, 525);
             R = new Spell.Targeted(SpellSlot.R, 900);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
