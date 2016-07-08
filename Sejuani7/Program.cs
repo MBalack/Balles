@@ -29,6 +29,7 @@ namespace Sejuani7
         public static Spell.Active W;
         public static Spell.Active E;
         public static Spell.Skillshot R;
+        public static Spell.Skillshot F;
         public static Spell.Targeted Ignite;
 
         static void Main(string[] args)
@@ -47,13 +48,16 @@ namespace Sejuani7
             E = new Spell.Active(SpellSlot.E, 1000);
             R = new Spell.Skillshot(SpellSlot.R, 1200, SkillShotType.Linear, 250, 1600, 110);
             R.AllowedCollisionCount = -1;
+            F = new Spell.Skillshot(_Player.GetSpellSlotFromName("summonerflash"), 425, SkillShotType.Linear, 0, int.MaxValue, 60);
+            F.AllowedCollisionCount = int.MaxValue;
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-            Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Ignite = new Spell.Targeted(_Player.GetSpellSlotFromName("summonerdot"), 600);
             Menu = MainMenu.AddMenu("Sejuani7", "Sejuani");
             Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("ComboFQ", new KeyBind("[Q] + [Flash] Target ", false, KeyBind.BindTypes.HoldActive, 'T'));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("DisQ", new Slider("Use [Q] If Enemy Distance >", 10, 0, 650));
             ComboMenu.AddLabel("[Q] Distance < 125 = Always [Q]");
@@ -178,6 +182,7 @@ namespace Sejuani7
                 Flee();
             }
             KillSteal();
+            FlashQ();
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -227,6 +232,23 @@ namespace Sejuani7
                     {
                         R.Cast(RPred.CastPosition);
                     }
+                }
+            }
+        }
+
+        private static void FlashQ()
+        {
+            var targetF = TargetSelector.SelectedTarget;
+            var useFQ = ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue;
+            if (targetF != null)
+            {
+                if (useFQ && Q.IsReady() && F.IsReady() && targetF.IsValidTarget(1000))
+                {
+                    Player.CastSpell(SpellSlot.Q, targetF.Position);
+                }
+                if (Player.HasBuff("SejuaniArcticAssault") && targetF.IsValidTarget(425))
+                {
+                    Player.CastSpell(_Player.GetSpellSlotFromName("summonerflash"), targetF.Position);
                 }
             }
         }
