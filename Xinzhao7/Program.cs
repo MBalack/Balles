@@ -333,11 +333,11 @@ namespace XinZhao7
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(250))
+                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(325))
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(250))
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
@@ -374,7 +374,6 @@ namespace XinZhao7
                 else
                 {
                     fl = EntityManager.Heroes.Enemies.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
-
                     if (fl != default(Obj_AI_Base))
                     {
                         E.Cast(fl);
@@ -396,7 +395,6 @@ namespace XinZhao7
                         E.Cast(target);
                     }
                 }
-
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     if (target.Health + target.AttackShield < RDamage(target))
@@ -404,7 +402,6 @@ namespace XinZhao7
                         R.Cast();
                     }
                 }
-
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))

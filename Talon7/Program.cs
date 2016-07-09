@@ -69,13 +69,13 @@ namespace Talon7
             ComboMenu.Add("riu", new CheckBox("Use [Hydra] Reset AA"));
             ComboMenu.AddGroupLabel("[E] Combo Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
-            ComboMenu.Add("myhp", new Slider("Min MyHP For [E]", 40, 0, 100));
+            ComboMenu.Add("myhp", new Slider("MyHP Use [E] >", 40, 0, 100));
             ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 700));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("autor", new CheckBox("Use [R] Escape"));
-            ComboMenu.Add("mau", new Slider("MyHP For [R] Escape", 20, 0, 100));
-            ComboMenu.Add("rcount", new CheckBox("Use [R] Count Enemies" , false));
-            ComboMenu.Add("cou", new Slider("Min Enemies Around Use [R]", 2, 1, 5));
+            ComboMenu.Add("mau", new Slider("MyHP Use [R] Escape <", 20, 0, 100));
+            ComboMenu.Add("rcount", new CheckBox("Use [R] Aoe" , false));
+            ComboMenu.Add("cou", new Slider("Min Enemies Around Use [R] Aoe", 2, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -202,6 +202,7 @@ namespace Talon7
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
+            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var hp = ComboMenu["myhp"].Cast<Slider>().CurrentValue;
             if (target != null)
@@ -213,6 +214,10 @@ namespace Talon7
                 if (useE && E.IsReady() && E.IsInRange(target) && disE <= target.Distance(Player.Instance) && Player.Instance.HealthPercent >= hp)
                 {
                     E.Cast(target);
+                }
+                if (useR && R.IsReady() && !Q.IsReady() && target.IsValidTarget(325))
+                {
+                    R.Cast();
                 }
             }
         }
@@ -230,7 +235,7 @@ namespace Talon7
                     R.Cast();
                 }
             }
-            if (Rcount && R.IsReady() && _Player.Position.CountEnemiesInRange(W.Range) >= MinR)
+            if (Rcount && R.IsReady() && _Player.Position.CountEnemiesInRange(400) >= MinR)
             {
                 R.Cast();
             }
@@ -330,23 +335,17 @@ namespace Talon7
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["riu"].Cast<CheckBox>().CurrentValue;
             var jungQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
 
-            if (useQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Q.Cast();
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if (useR && R.IsReady() && !Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-            {
-                R.Cast();
-                Orbwalker.ResetAutoAttack();
             }
             if (jungQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent > mana)
             {
@@ -354,7 +353,7 @@ namespace Talon7
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if (HasQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
+            if (HasQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
             {
                 Q.Cast();
                 Orbwalker.ResetAutoAttack();

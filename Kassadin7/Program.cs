@@ -149,11 +149,11 @@ namespace Kassadin7
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
                 if (ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue)
                 {
-                    DrawFont(thm, "Harass Under Turret : Disable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
+                    DrawFont(thm, "Use R Under Turret : Disable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
                 }
                 else
                 {
-                    DrawFont(thm, "Harass Under Turret : Enable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.Red);
+                    DrawFont(thm, "Use R Under Turret : Enable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.Red);
                 }
             }
         }
@@ -249,20 +249,23 @@ namespace Kassadin7
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var JungleW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
-            if (useW && W.IsReady() && target.IsValidTarget(175) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
-                Player.CastSpell(SpellSlot.W);
+                W.Cast();
                 Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if (HasW && W.IsReady() && target.IsValidTarget(175) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            if (HasW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
-                Player.CastSpell(SpellSlot.W);
+                W.Cast();
                 Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if (JungleW && W.IsReady() && target.IsValidTarget(175) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+            if (JungleW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
-                Player.CastSpell(SpellSlot.W);
+                W.Cast();
                 Orbwalker.ResetAutoAttack();
+                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
         }
 
