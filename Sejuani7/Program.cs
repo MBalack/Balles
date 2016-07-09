@@ -204,6 +204,9 @@ namespace Sejuani7
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
+            var targetR = TargetSelector.GetTarget(R.Range, DamageType.Magical);
+            var targetE = TargetSelector.GetTarget(E.Range, DamageType.Magical);
+            var targetW = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(W.Range));
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var disQ = ComboMenu["DisQ"].Cast<Slider>().CurrentValue;
@@ -211,28 +214,24 @@ namespace Sejuani7
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            if (target != null)
+            if (target != null && useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
+                Q.Cast(target);
+            }
+            if (targetW != null && useW && W.IsReady())
+            {
+                W.Cast();
+            }
+            if (targetE != null && useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost"))
+            {
+                E.Cast();
+            }
+            if (targetR != null && useR && R.IsReady() && targetR.IsValidTarget(R.Range))
+            {
+                var RPred = R.GetPrediction(targetR);
+                if (RPred.CastPosition.CountEnemiesInRange(400) >= MinR && RPred.HitChance >= HitChance.High)
                 {
-                    Q.Cast(target);
-                }
-                if (useW && W.IsReady() && W.IsInRange(target))
-                {
-                    W.Cast();
-                }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost"))
-                {
-                    E.Cast();
-                }
-                var targetR = TargetSelector.GetTarget(R.Range, DamageType.Magical);
-                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
-                {
-                    var RPred = R.GetPrediction(targetR);
-                    if (RPred.CastPosition.CountEnemiesInRange(400) >= MinR && RPred.HitChance >= HitChance.High)
-                    {
-                        R.Cast(RPred.CastPosition);
-                    }
+                    R.Cast(RPred.CastPosition);
                 }
             }
         }
@@ -319,21 +318,20 @@ namespace Sejuani7
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(E.Range, DamageType.Magical);
+            var targetE = TargetSelector.GetTarget(E.Range, DamageType.Magical);
+            var targetW = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(W.Range));
             if (Player.Instance.ManaPercent < ManaQ) return;
-            if (target != null)
+            if (target != null && useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
-                {
-                    Q.Cast(target);
-                }
-                if (useW && W.IsReady() && W.IsInRange(target))
-                {
-                    W.Cast();
-                }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost") && !Q.IsReady())
-                {
-                    E.Cast();
-                }
+                Q.Cast(target);
+            }
+            if (targetW != null && useW && W.IsReady())
+            {
+                W.Cast();
+            }
+            if (targetE != null && useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost"))
+            {
+                E.Cast();
             }
         }
 
