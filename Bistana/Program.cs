@@ -73,7 +73,6 @@ namespace Bristana
             KillSteal();
             Item();
             Qsss();
-
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -90,7 +89,6 @@ namespace Bristana
             {
                 Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
-
             if (Simitar.IsOwned() && Simitar.IsReady())
             {
                 Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
