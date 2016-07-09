@@ -40,7 +40,7 @@ namespace Hecarim7
             Bootstrap.Init(null);
 			Q = new Spell.Active(SpellSlot.Q, 350);
             W = new Spell.Active(SpellSlot.W, 525);
-            E = new Spell.Active(SpellSlot.E, 450);
+            E = new Spell.Active(SpellSlot.E);
             R= new Spell.Skillshot(SpellSlot.R, 1000, SkillShotType.Linear, 250, 800, 200);
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
@@ -96,8 +96,8 @@ namespace Hecarim7
             KillStealMenu.AddSeparator();
             KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 100, 1, 700));
-            KillStealMenu.AddGroupLabel("Recommended Distance 600");
+            KillStealMenu.Add("minKsR", new Slider("Use [R] KillSteal If Enemy Distance >", 100, 1, 1000));
+            KillStealMenu.AddGroupLabel("Distance < 125 = Always ,Recommended Distance 500");
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
@@ -170,6 +170,8 @@ namespace Hecarim7
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
+            var targetQ = TargetSelector.GetTarget(Q.Range, DamageType.Mixed);
+            var targetW = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
@@ -177,15 +179,7 @@ namespace Hecarim7
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
-                {
-                    Q.Cast();
-                }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
-                {
-                    W.Cast();
-                }
-                if (useE && E.IsReady() && target.IsValidTarget(800))
+                if (useE && E.IsReady() && target.IsValidTarget(R.Range))
                 {
                     E.Cast();
                 }
@@ -198,6 +192,20 @@ namespace Hecarim7
                     }
 		    	}
 	    	}
+            if (targetQ != null)
+            {
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                {
+                    Q.Cast();
+                }
+            }
+            if (targetW != null)
+            {
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                {
+                    W.Cast();
+                }
+            }
         }
 
 
@@ -344,7 +352,6 @@ namespace Hecarim7
                         Q.Cast();
                     }
                 }
-
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))

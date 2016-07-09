@@ -60,7 +60,7 @@ namespace Renekton7
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo"));
-            ComboMenu.Add("Edis", new Slider("Distance Use [E2]", 250, 0, 450));
+            ComboMenu.Add("Edis", new Slider("Use [E2] If Enemy Distance >", 250, 0, 450));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
 
@@ -175,6 +175,7 @@ namespace Renekton7
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var targetE = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
@@ -182,10 +183,6 @@ namespace Renekton7
             var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
-                {
-                    E.Cast(target.Position);
-                }
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
@@ -194,9 +191,16 @@ namespace Renekton7
                 {
                     W.Cast();
                 }
-                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= target.Distance(Player.Instance))
+            }
+            if (targetE != null)
+            {
+                if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && targetE.IsValidTarget(E.Range) && 200 <= targetE.Distance(Player.Instance))
                 {
-                    E.Cast(target.Position);
+                    E.Cast(targetE.Position);
+                }
+                if (useE2 && E.IsReady() && targetE.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= targetE.Distance(Player.Instance))
+                {
+                    E.Cast(targetE.Position);
                 }
             }
         }
@@ -303,7 +307,7 @@ namespace Renekton7
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var target = TargetSelector.GetTarget(700, DamageType.Physical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (target != null)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
