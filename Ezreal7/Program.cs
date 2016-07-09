@@ -355,7 +355,8 @@ namespace Ezreal7
 		
         public static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var targetR = TargetSelector.GetTarget(2500, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
@@ -379,10 +380,12 @@ namespace Ezreal7
                         W.Cast(Wpred.CastPosition);
                     }
 	    		}
-
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, MinRangeR))
+            }
+            if (targetR != null)
+     	    {
+                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range) && targetR.IsInRange(Player.Instance, 2500) && !targetR.IsInRange(Player.Instance, MinRangeR))
                 {
-                    var pred = R.GetPrediction(target);
+                    var pred = R.GetPrediction(targetR);
                     if (pred.CastPosition.CountEnemiesInRange(R.Width) > MinR && pred.HitChance >= HitChance.High)
                     {
                         R.Cast(pred.CastPosition);
@@ -559,7 +562,7 @@ namespace Ezreal7
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2500) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
@@ -572,7 +575,6 @@ namespace Ezreal7
                         }
                     }
                 }
-
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
@@ -588,29 +590,23 @@ namespace Ezreal7
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
-                    if (target != null)
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, minKsR))
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 3500) && !target.IsInRange(Player.Instance, minKsR))
+                        var pred = R.GetPrediction(target);
+                        if (pred.HitChancePercent >= 80)
                         {
-                            var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 90)
-                            {
-                                R.Cast(pred.CastPosition);
-                            }
+                            R.Cast(pred.CastPosition);
                         }
                     }
                 }
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target != null)
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                        var pred = R.GetPrediction(target);
+                        if (pred.HitChancePercent >= 70)
                         {
-                            var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 70)
-                            {
-                                R.Cast(pred.CastPosition);
-                            }
+                            R.Cast(pred.CastPosition);
                         }
                     }
                 }

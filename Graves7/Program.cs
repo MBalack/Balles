@@ -282,7 +282,7 @@ namespace Graves7
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
+            var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (Selector == null)
             {
                 return;
@@ -446,7 +446,6 @@ namespace Graves7
                         }
                     }
                 }
-
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
@@ -462,30 +461,23 @@ namespace Graves7
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
-                    if (target != null)
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, R.Range) && !target.IsInRange(Player.Instance, minKsR))
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, R.Range) && !target.IsInRange(Player.Instance, minKsR))
+                        var pred = R.GetPrediction(target);
+                        if (pred.HitChancePercent >= 70)
                         {
-                            var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 70)
-                            {
-                                R.Cast(pred.CastPosition);
-                            }
+                            R.Cast(pred.CastPosition);
                         }
                     }
                 }
-
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target != null)
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
-                        if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                        var pred = R.GetPrediction(target);
+                        if (pred.HitChancePercent >= 70)
                         {
-                            var pred = R.GetPrediction(target);
-                            if (pred.HitChancePercent >= 70)
-                            {
-                                R.Cast(pred.CastPosition);
-                            }
+                            R.Cast(pred.CastPosition);
                         }
                     }
                 }
