@@ -38,7 +38,7 @@ namespace Renekton7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Renekton")) return;
-            Chat.Print("Renekton7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Renekton Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q, 325);
             W = new Spell.Active(SpellSlot.W);
@@ -49,7 +49,7 @@ namespace Renekton7
             Hydra = new Item(ItemId.Ravenous_Hydra_Melee_Only, 400);
             Titanic = new Item(ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
 
-            Menu = MainMenu.AddMenu("Renekton7", "Renekton");
+            Menu = MainMenu.AddMenu("Renekton", "Renekton");
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddSeparator();

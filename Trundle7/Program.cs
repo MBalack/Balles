@@ -40,7 +40,7 @@ namespace Trundle7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Trundle")) return;
-            Chat.Print("Trundle7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Trundle Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 0, 2000, 900);
@@ -53,7 +53,7 @@ namespace Trundle7
             Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
 
-            Menu = MainMenu.AddMenu("Trundle7", "Trundle");
+            Menu = MainMenu.AddMenu("Trundle", "Trundle");
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddSeparator();

@@ -45,7 +45,7 @@ namespace XinZhao7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("XinZhao")) return;
-            Chat.Print("Xinzhao7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Xinzhao Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Active(SpellSlot.W);
@@ -57,15 +57,14 @@ namespace XinZhao7
             Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
-            Menu = MainMenu.AddMenu("Xinzhao7", "Xinzhao");
+            Menu = MainMenu.AddMenu("Xinzhao", "Xinzhao");
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-            ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 600));
+            ComboMenu.Add("DisE", new Slider("Use [E] If Enemy Distance >", 250, 0, 600));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
             ComboMenu.Add("BOTRK", new CheckBox("Use [Botrk]"));

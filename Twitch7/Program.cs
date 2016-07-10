@@ -52,7 +52,7 @@ namespace Twitch7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Twitch")) return;
-            Chat.Print("Twitch7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Twitch Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 250, 1550, 275);
@@ -63,7 +63,7 @@ namespace Twitch7
             Bil = new Item(3144, 475f);
             Youmuu = new Item(3142, 10);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Twitch7", "Twitch");
+            Menu = MainMenu.AddMenu("Twitch", "Twitch");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Spell [Q]"));

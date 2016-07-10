@@ -45,7 +45,7 @@ namespace Graves7
         {
             if(Player.Instance.Hero != Champion.Graves)
                 return;
-            Chat.Print("Graves7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Graves Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 850, SkillShotType.Linear, 250, 2000, 60);
             Q.AllowedCollisionCount = int.MaxValue;
@@ -58,10 +58,8 @@ namespace Graves7
             Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
             Youmuu = new Item(3142, 10);
-
-            Menu = MainMenu.AddMenu("Graves7","Graves7");
+            Menu = MainMenu.AddMenu("Graves","Graves7");
             Menu.AddGroupLabel("Doctor7");
-
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.AddLabel("Use [Q] On");

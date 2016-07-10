@@ -46,7 +46,7 @@ namespace Talon7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Talon")) return;
-            Chat.Print("Talon7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Talon Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 700, SkillShotType.Cone, 1, 2300, 80);
@@ -59,7 +59,7 @@ namespace Talon7
             Bil = new Item(3144, 475f);
             Youmuu = new Item(3142, 10);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Talon7", "Talon");
+            Menu = MainMenu.AddMenu("Talon", "Talon");
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");

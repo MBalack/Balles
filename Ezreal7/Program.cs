@@ -51,7 +51,7 @@ namespace Ezreal7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Ezreal")) return;
-            Chat.Print("Ezreal7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Ezreal Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
             W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
@@ -64,7 +64,7 @@ namespace Ezreal7
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Ezreal7", "Ezreal");
+            Menu = MainMenu.AddMenu("Ezreal", "Ezreal");
             Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
@@ -164,7 +164,7 @@ namespace Ezreal7
             KillStealMenu.AddSeparator();
             KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 900, 1, 5000));
+            KillStealMenu.Add("minKsR", new Slider("Use [R] KillSteal If Enemy Distance >", 900, 1, 5000));
             KillStealMenu.AddLabel("Recommended Distance 900");
             KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 

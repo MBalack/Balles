@@ -42,7 +42,7 @@ namespace Ziggs7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Ziggs")) return;
-            Chat.Print("Ziggs7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Ziggs Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 850, SkillShotType.Circular, 300, 1700, 130);
             Q2 = new Spell.Skillshot(SpellSlot.Q, 1125, SkillShotType.Linear, 250 + Q.CastDelay, 1700, 130);
@@ -51,9 +51,7 @@ namespace Ziggs7
             E = new Spell.Skillshot(SpellSlot.E, 900, SkillShotType.Circular, 500, 1600, 90);
             R = new Spell.Skillshot(SpellSlot.R, 5000, SkillShotType.Circular, 1000, 2800, 500);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Ziggs7", "Ziggs");
-            Menu.AddGroupLabel("Doctor7");
-            Menu.AddGroupLabel("Leave Feedback For Any Bugs");
+            Menu = MainMenu.AddMenu("Ziggs", "Ziggs");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));

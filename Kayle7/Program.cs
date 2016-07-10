@@ -43,7 +43,7 @@ namespace Kayle7
         private static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Kayle")) return;
-            Chat.Print("Kayle7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Kayle Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Targeted(SpellSlot.W, 900);
@@ -51,7 +51,7 @@ namespace Kayle7
             R = new Spell.Targeted(SpellSlot.R, 900);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-            Menu = MainMenu.AddMenu("Kayle7", "Kayle");
+            Menu = MainMenu.AddMenu("Kayle", "Kayle");
             Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");

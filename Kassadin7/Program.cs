@@ -40,7 +40,7 @@ namespace Kassadin7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Kassadin")) return;
-            Chat.Print("Kassadin7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Kassadin Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Active(SpellSlot.W);
@@ -51,8 +51,7 @@ namespace Kassadin7
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Seraph = new Item(3040);
-            Menu = MainMenu.AddMenu("Kassadin7", "Kassadin");
-            Menu.AddGroupLabel(" Kassadin ");
+            Menu = MainMenu.AddMenu("Kassadin", "Kassadin");
             Menu.AddGroupLabel(" Doctor7 ");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");

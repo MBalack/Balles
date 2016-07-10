@@ -43,7 +43,7 @@ namespace Olaf7
         static void OnLoadingComplete(EventArgs args)
         {
                 if (!_Player.ChampionName.Contains("Olaf")) return;
-                Chat.Print("Olaf7 Loaded!", Color.Orange);
+                Chat.Print("Doctor's Olaf Loaded!", Color.Orange);
                 Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1550, 75);
                 Q.AllowedCollisionCount = int.MaxValue;
@@ -56,9 +56,8 @@ namespace Olaf7
                 Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
                 Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
                 Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
-                Menu = MainMenu.AddMenu("Olaf7", "Olaf");
+                Menu = MainMenu.AddMenu("Olaf", "Olaf");
                 Menu.AddGroupLabel("Doctor7");
-
                 ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
                 ComboMenu.AddGroupLabel("Combo Settings");
                 ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));

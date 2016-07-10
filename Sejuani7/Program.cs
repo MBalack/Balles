@@ -41,7 +41,7 @@ namespace Sejuani7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Sejuani")) return;
-            Chat.Print("Sejuani7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Sejuani Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 650, SkillShotType.Linear, 0, 1600, 70);
             Q.AllowedCollisionCount = -1;
@@ -54,7 +54,7 @@ namespace Sejuani7
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Ignite = new Spell.Targeted(_Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Sejuani7", "Sejuani");
+            Menu = MainMenu.AddMenu("Sejuani", "Sejuani");
             Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");

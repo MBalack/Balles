@@ -39,7 +39,7 @@ namespace Hecarim7
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Hecarim")) return;
-            Chat.Print("Hecarim7 Loaded!", Color.Orange);
+            Chat.Print("Doctor's Hecarim Loaded!", Color.Orange);
             Bootstrap.Init(null);
 			Q = new Spell.Active(SpellSlot.Q, 350);
             W = new Spell.Active(SpellSlot.W, 525);
@@ -48,7 +48,7 @@ namespace Hecarim7
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-			Menu = MainMenu.AddMenu("Hecarim7", "Hecarim");
+			Menu = MainMenu.AddMenu("Hecarim", "Hecarim");
             Menu.AddSeparator();
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
