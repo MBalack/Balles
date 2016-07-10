@@ -11,6 +11,8 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
+using Font = SharpDX.Direct3D9.Font;
+using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace Hecarim7
@@ -22,6 +24,7 @@ namespace Hecarim7
         {
             get { return ObjectManager.Player; }
         }
+        public static Font Thm;
         public static Spell.Active Q;
         public static Spell.Active W;
         public static Spell.Active E;
@@ -44,6 +47,7 @@ namespace Hecarim7
             R= new Spell.Skillshot(SpellSlot.R, 1000, SkillShotType.Linear, 250, 800, 200);
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
 			Menu = MainMenu.AddMenu("Hecarim7", "Hecarim");
             Menu.AddSeparator();
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
@@ -107,6 +111,8 @@ namespace Hecarim7
             Drawings.AddGroupLabel("Drawing Settings");
             Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
             Drawings.Add("DrawW", new CheckBox("[W] Range", false));
+            Drawings.Add("DrawR", new CheckBox("[R] Range"));
+            Drawings.Add("DrawRhit", new CheckBox("[R] Draw Hit"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
@@ -123,6 +129,22 @@ namespace Hecarim7
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = W.Range }.Draw(_Player.Position);
             }
+            if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue)
+            {
+                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = R.Range }.Draw(_Player.Position);
+            }
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
+            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady())
+            {
+                var RPred = R.GetPrediction(target);
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                DrawFont(Thm, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(250), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
+            }
+        }
+
+        public static void DrawFont(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
+        {
+            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
         private static void Game_OnTick(EventArgs args)
@@ -170,7 +192,7 @@ namespace Hecarim7
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
-            var targetQ = TargetSelector.GetTarget(Q.Range, DamageType.Mixed);
+            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             var targetW = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
@@ -194,7 +216,7 @@ namespace Hecarim7
 	    	}
             if (targetQ != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady())
                 {
                     Q.Cast();
                 }
@@ -266,12 +288,16 @@ namespace Hecarim7
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
-            if (target != null)
+            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
+            if (targetQ != null)
             {
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > ManaQ && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > ManaQ)
                 {
                     Q.Cast();
                 }
+            }
+            if (target != null)
+            {
                 if (useW && W.IsReady() && Player.Instance.ManaPercent > ManaW && target.IsValidTarget(W.Range))
                 {
                     W.Cast();
@@ -296,7 +322,7 @@ namespace Hecarim7
         {
             var useQ = Auto["AutoQ"].Cast<CheckBox>().CurrentValue;
             var mana = Auto["ManaQ"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Mixed);
+            var target = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             if (target != null)
             {
                 if (useQ && Q.IsReady() && !Tru(_Player.Position) && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
