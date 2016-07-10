@@ -159,10 +159,10 @@ namespace Sejuani7
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
-            var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
-            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady())
+            var targetR = TargetSelector.GetTarget(R.Range, DamageType.Magical);
+            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && targetR != null && R.IsReady())
             {
-                var RPred = R.GetPrediction(target);
+                var RPred = R.GetPrediction(targetR);
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
                 DrawFont(Thn, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(400), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
             }
