@@ -21,6 +21,7 @@ namespace Sejuani7
     {
         public static Menu Menu, ComboMenu, HarassMenu, JungleClearMenu, LaneClearMenu, KillStealMenu, Skin, Drawings;
         public static Font Thm;
+        public static Font Thn;
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -51,6 +52,7 @@ namespace Sejuani7
             F = new Spell.Skillshot(_Player.GetSpellSlotFromName("summonerflash"), 425, SkillShotType.Linear, 0, int.MaxValue, 60);
             F.AllowedCollisionCount = int.MaxValue;
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
+            Thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Ignite = new Spell.Targeted(_Player.GetSpellSlotFromName("summonerdot"), 600);
             Menu = MainMenu.AddMenu("Sejuani7", "Sejuani");
             Menu.AddGroupLabel("Doctor7");
@@ -156,6 +158,13 @@ namespace Sejuani7
                 {
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
+            }
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
+            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady())
+            {
+                var RPred = R.GetPrediction(target);
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                DrawFont(Thn, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(400), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
             }
         }
 

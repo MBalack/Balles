@@ -175,6 +175,7 @@ namespace Renekton7
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             var targetE = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
@@ -183,13 +184,16 @@ namespace Renekton7
             var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
-                {
-                    Q.Cast();
-                }
                 if (useW && W.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
+                }
+            }
+            if (targetQ != null)
+            {
+                if (useQ && Q.IsReady())
+                {
+                    Q.Cast();
                 }
             }
             if (targetE != null)
@@ -307,10 +311,10 @@ namespace Renekton7
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (target != null)
+            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
+            if (targetQ != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady())
                 {
                     Q.Cast();
                 }
