@@ -45,7 +45,9 @@ namespace Kassadin7
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Skillshot(SpellSlot.E, 600, SkillShotType.Cone, 500, int.MaxValue, 10);
+            E.AllowedCollisionCount = int.MaxValue;
             R = new Spell.Skillshot(SpellSlot.R, 700, SkillShotType.Circular, 500, int.MaxValue, 150);
+            R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Seraph = new Item(3040);
