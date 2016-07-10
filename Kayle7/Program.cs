@@ -40,14 +40,14 @@ namespace Kayle7
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
 
-        static void OnLoadingComplete(EventArgs args)
+        private static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Kayle")) return;
             Chat.Print("Kayle7 Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Targeted(SpellSlot.W, 900);
-            E = new Spell.Active(SpellSlot.E, 550);
+            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
             R = new Spell.Targeted(SpellSlot.R, 900);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
@@ -117,6 +117,7 @@ namespace Kayle7
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -194,6 +195,11 @@ namespace Kayle7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
+        }
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
@@ -205,7 +211,7 @@ namespace Kayle7
                 {
                     Q.Cast(target);
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(550) && !target.IsDead && !target.IsZombie)
                 {
                     E.Cast();
                 }
@@ -262,7 +268,7 @@ namespace Kayle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3)
+                if (useE && E.IsReady() && minion.IsValidTarget(550) && minions.Count() >= 3)
                 {
                     E.Cast();
                 }
@@ -306,7 +312,7 @@ namespace Kayle7
                 {
                     Q.Cast(target);
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(550) && !target.IsDead && !target.IsZombie)
                 {
                     E.Cast();
                 }
@@ -318,7 +324,7 @@ namespace Kayle7
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, 550).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (Player.Instance.ManaPercent <= mana) return;
             if (monster != null)
             {
