@@ -28,7 +28,10 @@ namespace Bristana
         public static Font Thm;
         public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
         public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
-
+        public static AIHeroClient _Player
+        {
+            get { return ObjectManager.Player; }
+        }
         public static Menu Menu,
         SpellMenu,
         JungleMenu,
@@ -43,9 +46,105 @@ namespace Bristana
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
 
-        public static AIHeroClient _Player
+        private static void OnLoadingComplete(EventArgs args)
         {
-            get { return ObjectManager.Player; }
+            if (!_Player.ChampionName.Contains("Tristana")) return;
+            Chat.Print("Doctor's Tristana Loaded!", Color.Orange);
+            Bootstrap.Init(null);
+            uint level = (uint)Player.Instance.Level;
+            Q = new Spell.Active(SpellSlot.Q);
+            W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
+            E = new Spell.Targeted(SpellSlot.E, 550 + level * 7);
+            R = new Spell.Targeted(SpellSlot.R, 550 + level * 7);
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
+            Bil = new Item(3144, 475f);
+            Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
+            Menu = MainMenu.AddMenu("Tristana", "Tristana");
+            Menu.AddGroupLabel("Tristana");
+            SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            SpellMenu.AddGroupLabel("Combo Settings");
+            SpellMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            SpellMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
+            SpellMenu.AddSeparator();
+            SpellMenu.AddGroupLabel("Combo [E] On");
+            foreach (var target in EntityManager.Heroes.Enemies)
+            {
+                SpellMenu.Add("useECombo" + target.ChampionName, new CheckBox("" + target.ChampionName));
+            }
+            SpellMenu.AddSeparator();
+            SpellMenu.AddGroupLabel("KillSteal Settings");
+            SpellMenu.Add("ERKs", new CheckBox("KillSteal [ER]"));
+            SpellMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
+            SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
+
+            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass", false));
+            HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass"));
+            HarassMenu.AddSeparator();
+            HarassMenu.AddGroupLabel("Use [E] On");
+            foreach (var target in EntityManager.Heroes.Enemies)
+            {
+                HarassMenu.Add("HarassE" + target.ChampionName, new CheckBox("" + target.ChampionName));
+            }
+            HarassMenu.Add("manaHarass", new Slider("Min Mana For Harass", 50, 0, 100));
+
+            LaneMenu = Menu.AddSubMenu("Laneclear Settings", "Clear");
+            LaneMenu.AddGroupLabel("Laneclear Settings");
+            LaneMenu.Add("ClearQ", new CheckBox("Use [Q] Laneclear", false));
+            LaneMenu.Add("ClearE", new CheckBox("Use [E] Laneclear", false));
+            LaneMenu.Add("manaFarm", new Slider("Min Mana For LaneClear", 50, 0, 100));
+
+            JungleMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleMenu.AddGroupLabel("JungleClear Settings");
+            JungleMenu.Add("jungleQ", new CheckBox("Use [Q] JungleClear"));
+            JungleMenu.Add("jungleE", new CheckBox("Use [E] JungleClear"));
+            JungleMenu.Add("jungleW", new CheckBox("Use [W] JungleClear", false));
+            JungleMenu.Add("manaJung", new Slider("Min Mana For JungleClear", 50, 0, 100));
+
+            Items = Menu.AddSubMenu("Items Settings", "Items");
+            Items.AddGroupLabel("Items Settings");
+            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
+            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            Items.AddGroupLabel("Qss Settings");
+            Items.Add("Qss", new CheckBox("Use Qss"));
+            Items.AddGroupLabel("Qss On CC");
+            Items.Add("stun", new CheckBox("Stuns"));
+            Items.Add("rot", new CheckBox("Root"));
+            Items.Add("tunt", new CheckBox("Taunt"));
+            Items.Add("snare", new CheckBox("Snare"));
+            Items.Add("charm", new CheckBox("Charm", false));
+            Items.Add("slow", new CheckBox("Slows", false));
+            Items.Add("blind", new CheckBox("Blinds", false));
+            Items.Add("fear", new CheckBox("Fear", false));
+            Items.Add("silence", new CheckBox("Silence", false));
+            Items.Add("supperss", new CheckBox("Supperss", false));
+            Items.Add("poly", new CheckBox("Polymorph", false));
+            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
+
+            Misc = Menu.AddSubMenu("Misc Settings", "Draw");
+            Misc.AddGroupLabel("Anti Gapcloser");
+            Misc.Add("antiGap", new CheckBox("Anti Gapcloser"));
+            Misc.Add("antiRengar", new CheckBox("Anti Rengar"));
+            Misc.Add("antiKZ", new CheckBox("Anti Kha'Zix"));
+            Misc.Add("inter", new CheckBox("Use [R] Interupt"));
+            Misc.AddGroupLabel("Drawings Settings");
+            Misc.Add("DrawE", new CheckBox("Draw E"));
+            Misc.Add("DrawW", new CheckBox("Draw W", false));
+            Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
+
+            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
+            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
+            Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
+
+            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
+            Interrupter.OnInterruptableSpell += Interupt;
+            GameObject.OnCreate += GameObject_OnCreate;
+
         }
 
         private static void Game_OnTick(EventArgs args)
@@ -176,43 +275,19 @@ namespace Bristana
             }
         }
 
-        private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
-        {
-            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 300)
-            {
-                R.Cast(args.Sender);
-            }
-        }
-
-        public static void Item()
-        {
-            var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
-            var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
-            var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            if (target != null)
-            {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
-                {
-                    Bil.Cast(target);
-                }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
-                {
-                    Botrk.Cast(target);
-                }
-            }
-        }
-
         private static void Harass()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
+            var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
+            var mana = HarassMenu["manaHarass"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue && Q.IsReady() && target.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
                 {
                     Q.Cast();
                 }
-                if (E.IsReady() && target.IsValidTarget(E.Range) && _Player.ManaPercent > HarassMenu["manaHarass"].Cast<Slider>().CurrentValue)
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent > 10 && _Player.ManaPercent > mana)
                 {
                     if (HarassMenu["HarassE" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -225,13 +300,15 @@ namespace Bristana
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
+            var useQ = SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue && Q.IsReady() && target.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
                 {
                     Q.Cast();
                 }
-                if (E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent > 10)
                 {
                     if (SpellMenu["useECombo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -241,39 +318,19 @@ namespace Bristana
             }
         }
 
-        private static void KillSteal()
-        {
-            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
-            foreach (var target2 in target)
-            {
-                if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
-                {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
-                    {
-                        R.Cast(target2);
-                    }
-                }
-            }
-        }
-
         private static void LaneClear()
         {
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().OrderByDescending(m => m.Distance(_Player)).FirstOrDefault(m => m.IsValidTarget(E.Range));
-            var turret = EntityManager.Turrets.Enemies.FirstOrDefault(t => !t.IsDead && t.Distance(_Player) < _Player.AttackRange);
-            if (turret != null)
+            var useQ = LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
+            var useE = LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue;
+            var mana = LaneMenu["manaFarm"].Cast<Slider>().CurrentValue;
+            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            foreach (var minion in minions)
             {
-                if (LaneMenu["ClearTower"].Cast<CheckBox>().CurrentValue && E.IsReady() && turret.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
-                {
-                    E.Cast(turret);
-                }
-            }
-            if (minion != null)
-            {
-                if (LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue && E.IsReady() && !turret.IsValidTarget(E.Range) && minion.IsValidTarget(E.Range) && _Player.ManaPercent > LaneMenu["manaFarm"].Cast<Slider>().CurrentValue)
+                if (useE && E.IsReady() && minion.HealthPercent > 70 && minion.IsValidTarget(E.Range) && _Player.ManaPercent > mana)
                 {
                     E.Cast(minion);
                 }
-                if (LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue && Q.IsReady() && minion.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3)
                 {
                     Q.Cast();
                 }
@@ -282,18 +339,22 @@ namespace Bristana
 
         private static void JungleClear()
         {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(m => m.MaxHealth).FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(E.Range));
+            var useQ = JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue;
+            var useW = JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue;
+            var useE = JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue;
+            var mana = JungleMenu["manaJung"].Cast<Slider>().CurrentValue;
             if (monster != null)
             {
-                if (Q.IsReady() && JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range))
+                if (useQ && Q.IsReady() && monster.IsValidTarget(E.Range))
                 {
                     Q.Cast();
                 }
-                if (W.IsReady() && JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && monster.IsValidTarget(W.Range) && _Player.ManaPercent > mana)
                 {
-                    W.Cast(monster.ServerPosition);
+                    W.Cast(monster.Position);
                 }
-                if (E.IsReady() && JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue && monster.IsValidTarget(E.Range) && _Player.ManaPercent > JungleMenu["manaJung"].Cast<Slider>().CurrentValue)
+                if (useE && E.IsReady() && monster.IsValidTarget(E.Range) && _Player.ManaPercent > mana)
                 {
                     E.Cast(monster);
                 }
@@ -325,6 +386,43 @@ namespace Bristana
             }
         }
 
+        private static float EDamage(Obj_AI_Base target)
+        {
+            float Edamage = 0;
+            if (target.HasBuff("tristanaecharge"))
+            {
+                Edamage += (float)(Player.Instance.GetSpellDamage(target, SpellSlot.E) * (target.GetBuffCount("tristanaecharge") * 0.30)) + Player.Instance.GetSpellDamage(target, SpellSlot.E);
+            }
+
+            return Edamage;
+        }
+
+        private static void KillSteal()
+        {
+            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
+            var targetE = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && e.HasBuff("tristanaecharge") && !e.IsDead && !e.IsZombie);
+            foreach (var target2 in target)
+            {
+                if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                {
+                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
+                    {
+                        R.Cast(target2);
+                    }
+                }
+            }
+            foreach (var target3 in targetE)
+            {
+                if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady())
+                {
+                    if (target3.Health + target3.AttackShield < Player.Instance.GetSpellDamage(target3, SpellSlot.R) + EDamage(target3))
+                    {
+                        R.Cast(target3);
+                    }
+                }
+            }
+        }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
@@ -349,107 +447,35 @@ namespace Bristana
         private static void Game_OnUpdate(EventArgs args)
         {
             uint level = (uint)Player.Instance.Level;
-            E = new Spell.Targeted(SpellSlot.E, 600 + level * 7);
-            R = new Spell.Targeted(SpellSlot.R, 600 + level * 7);
+            E = new Spell.Targeted(SpellSlot.E, 550 + level * 7);
+            R = new Spell.Targeted(SpellSlot.R, 550 + level * 7);
         }
 
-        private static void OnLoadingComplete(EventArgs args)
+        private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
-            if (!_Player.ChampionName.Contains("Tristana")) return;
-            Chat.Print("Bristana Loaded!", Color.Orange);
-            Bootstrap.Init(null);
-            uint level = (uint)Player.Instance.Level;
-            Q = new Spell.Active(SpellSlot.Q);
-            W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
-            E = new Spell.Targeted(SpellSlot.E, 600 + level * 7);
-            R = new Spell.Targeted(SpellSlot.R, 600 + level * 7);
-            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
-            Bil = new Item(3144, 475f);
-            Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-            Menu = MainMenu.AddMenu("Bristana", "Bristana");
-            Menu.AddGroupLabel("Bristana");
-            Menu.AddLabel(" Good Luck! ");
-            SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-            SpellMenu.AddGroupLabel("Combo Settings");
-            SpellMenu.Add("ComboQ", new CheckBox("Combo [Q]"));
-            SpellMenu.Add("ComboER", new CheckBox("Combo [ER]"));
-            SpellMenu.AddSeparator();
-            SpellMenu.Add("RKs", new CheckBox("Combo [R]"));
-            SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
-            SpellMenu.AddSeparator();
-            SpellMenu.AddGroupLabel("Combo [E] On");
-            foreach (var target in EntityManager.Heroes.Enemies)
+            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 325)
             {
-                SpellMenu.Add("useECombo" + target.ChampionName, new CheckBox("" + target.ChampionName));
+                R.Cast(args.Sender);
             }
+        }
 
-            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-            HarassMenu.AddGroupLabel("Harass Settings");
-            HarassMenu.Add("HarassQ", new CheckBox("Harass [Q]", false));
-            HarassMenu.AddGroupLabel("Harass [E] on");
-            foreach (var target in EntityManager.Heroes.Enemies)
+        public static void Item()
+        {
+            var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
+            var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
+            var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            if (target != null)
             {
-                HarassMenu.Add("HarassE" + target.ChampionName, new CheckBox("" + target.ChampionName));
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                {
+                    Bil.Cast(target);
+                }
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                {
+                    Botrk.Cast(target);
+                }
             }
-            HarassMenu.Add("manaHarass", new Slider("Min Mana For Harass", 50, 0, 100));
-
-            LaneMenu = Menu.AddSubMenu("Laneclear Settings", "Clear");
-            LaneMenu.AddGroupLabel("Laneclear Settings");
-            LaneMenu.Add("ClearQ", new CheckBox("Laneclear [Q]", false));
-            LaneMenu.Add("ClearE", new CheckBox("Laneclear [E]", false));
-            LaneMenu.Add("ClearTower", new CheckBox("Laneclear [E] Turret", false));
-            LaneMenu.Add("manaFarm", new Slider("Min Mana For LaneClear", 50, 0, 100));
-
-            JungleMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-            JungleMenu.AddGroupLabel("JungleClear Settings");
-            JungleMenu.Add("jungleQ", new CheckBox("JungleClear [Q]"));
-            JungleMenu.Add("jungleE", new CheckBox("JungleClear [E]"));
-            JungleMenu.Add("jungleW", new CheckBox("JungleClear [W]", false));
-            JungleMenu.Add("manaJung", new Slider("Min Mana For JungleClear", 50, 0, 100));
-
-            Items = Menu.AddSubMenu("Items Settings", "Items");
-            Items.AddGroupLabel("Items Settings");
-            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
-            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
-            Items.AddGroupLabel("Qss Settings");
-            Items.Add("Qss", new CheckBox("Use Qss"));
-            Items.AddGroupLabel("Qss On CC");
-            Items.Add("stun", new CheckBox("Stuns"));
-            Items.Add("rot", new CheckBox("Root"));
-            Items.Add("tunt", new CheckBox("Taunt"));
-            Items.Add("snare", new CheckBox("Snare"));
-            Items.Add("charm", new CheckBox("Charm", false));
-            Items.Add("slow", new CheckBox("Slows", false));
-            Items.Add("blind", new CheckBox("Blinds", false));
-            Items.Add("fear", new CheckBox("Fear", false));
-            Items.Add("silence", new CheckBox("Silence", false));
-            Items.Add("supperss", new CheckBox("Supperss", false));
-            Items.Add("poly", new CheckBox("Polymorph", false));
-            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
-
-            Misc = Menu.AddSubMenu("Misc Settings", "Draw");
-            Misc.AddGroupLabel("Anti Gapcloser");
-            Misc.Add("antiGap", new CheckBox("Anti Gapcloser"));
-            Misc.Add("antiRengar", new CheckBox("Anti Rengar"));
-            Misc.Add("antiKZ", new CheckBox("Anti Kha'Zix"));
-            Misc.Add("inter", new CheckBox("Use [R] Interupt"));
-            Misc.AddGroupLabel("Drawings Settings");
-            Misc.Add("DrawE", new CheckBox("Draw E"));
-            Misc.Add("DrawW", new CheckBox("Draw W", false));
-            Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
-
-            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
-
-            Game.OnTick += Game_OnTick;
-            Game.OnUpdate += Game_OnUpdate;
-            Drawing.OnDraw += Drawing_OnDraw;
-            Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
-            Interrupter.OnInterruptableSpell += Interupt;
-            GameObject.OnCreate += GameObject_OnCreate;
-
         }
     }
 }
