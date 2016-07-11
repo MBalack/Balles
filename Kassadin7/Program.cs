@@ -150,11 +150,11 @@ namespace Kassadin7
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
                 if (ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue)
                 {
-                    DrawFont(thm, "Use R Under Turret : Disable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.White);
+                    DrawFont(thm, "Use R Under Turret : Disable", (float)(ft[0] - 70), (float)(ft[1] + 50), SharpDX.Color.White);
                 }
                 else
                 {
-                    DrawFont(thm, "Use R Under Turret : Enable", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.Red);
+                    DrawFont(thm, "Use R Under Turret : Enable", (float)(ft[0] - 70), (float)(ft[1] + 50), SharpDX.Color.Red);
                 }
             }
         }
@@ -226,7 +226,14 @@ namespace Kassadin7
                 }
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(target);
+                    if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !W.IsReady())
+                    {
+                        Q.Cast(target);
+                    }
+                    else if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                    {
+                        Q.Cast(target);
+                    }
                 }
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.Position.CountEnemiesInRange(R.Range) <= minR && _Player.HealthPercent >= Minhp)
                 {
@@ -315,7 +322,7 @@ namespace Kassadin7
                 {
                     Q.Cast(minion);
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) > minion.TotalShieldHealth())
+                if (useW && W.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) > minion.TotalShieldHealth() && !Q.IsReady())
                 {
                     W.Cast();
                 }
@@ -348,7 +355,14 @@ namespace Kassadin7
                 }
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
-                    Q.Cast(target);
+                    if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !W.IsReady())
+                    {
+                        Q.Cast(target);
+                    }
+                    else if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                    {
+                        Q.Cast(target);
+                    }
                 }
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.Position.CountEnemiesInRange(R.Range) <= minR && _Player.HealthPercent >= Minhp && Player.Instance.GetBuffCount("RiftWalk") < minRs)
                 {

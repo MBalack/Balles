@@ -209,7 +209,14 @@ namespace Talon7
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    W.Cast(target);
+                    if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
+                    {
+                        W.Cast(target);
+                    }
+                    else if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                    {
+                        W.Cast(target);
+                    }
                 }
                 if (useE && E.IsReady() && E.IsInRange(target) && disE <= target.Distance(Player.Instance) && Player.Instance.HealthPercent >= hp)
                 {
@@ -311,7 +318,14 @@ namespace Talon7
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    W.Cast(target);
+                    if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
+                    {
+                        W.Cast(target);
+                    }
+                    else if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                    {
+                        W.Cast(target);
+                    }
                 }
             }
         }
