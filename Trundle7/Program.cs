@@ -246,14 +246,14 @@ namespace Trundle7
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(550, DamageType.Physical);
+            var target = TargetSelector.GetTarget(450, DamageType.Physical);
             if (target != null)
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }

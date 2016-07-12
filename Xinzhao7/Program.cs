@@ -27,6 +27,7 @@ namespace XinZhao7
         public static Spell.Targeted E;
         public static Spell.Active R;
         public static Spell.Targeted Ignite;
+        public static Font thm;
         public static Item Hydra;
         public static Item Tiamat;
         public static Item Titanic;
@@ -52,6 +53,7 @@ namespace XinZhao7
             E = new Spell.Targeted(SpellSlot.E, 600);
             R = new Spell.Active(SpellSlot.R, 500);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
             Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
             Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
@@ -65,6 +67,7 @@ namespace XinZhao7
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("DisE", new Slider("Use [E] If Enemy Distance >", 250, 0, 600));
+            ComboMenu.Add("CTurret", new KeyBind("Dont Use [E] UnderTurret", false, KeyBind.BindTypes.PressToggle, 'T'));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
             ComboMenu.Add("BOTRK", new CheckBox("Use [Botrk]"));
@@ -131,6 +134,18 @@ namespace XinZhao7
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Black, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+            if (Misc["DrawTR"].Cast<CheckBox>().CurrentValue)
+            {
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue)
+                {
+                    DrawFont(thm, "Use E Under Turret : Disable", (float)(ft[0] - 70), (float)(ft[1] + 50), SharpDX.Color.White);
+                }
+                else
+                {
+                    DrawFont(thm, "Use E Under Turret : Enable", (float)(ft[0] - 70), (float)(ft[1] + 50), SharpDX.Color.Red);
+                }
             }
         }
 
@@ -217,11 +232,22 @@ namespace XinZhao7
             var item = ComboMenu["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = ComboMenu["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = ComboMenu["ihpp"].Cast<Slider>().CurrentValue;
+            var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             if (target != null)
             {
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
                 {
-                    E.Cast(target);
+                    if (turret)
+                    {
+                        if (!UnderTuret(target))
+                        {
+                           E.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                       E.Cast(target);
+                    }
                 }
                 if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
@@ -231,11 +257,11 @@ namespace XinZhao7
                 {
                     W.Cast();
                 }
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
@@ -379,6 +405,17 @@ namespace XinZhao7
                     }
                 }
             }
+        }
+
+        public static void DrawFont(Font vFont, string vText, float jx, float jy, ColorBGRA jc)
+        {
+            vFont.DrawText(null, vText, (int)jx, (int)jy, jc);
+        }
+
+        private static bool UnderTuret(Obj_AI_Base target)
+        {
+            var tower = ObjectManager.Get<Obj_AI_Turret>().FirstOrDefault(turret => turret != null && turret.Distance(target) <= 775 && turret.IsValid && turret.Health > 0 && !turret.IsAlly);
+            return tower != null;
         }
 
         private static void KillSteal()

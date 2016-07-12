@@ -293,15 +293,15 @@ namespace Talon7
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (target != null)
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
-                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(600) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(550) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Youmuu.Cast();
                 }
