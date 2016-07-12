@@ -421,12 +421,6 @@ namespace Graves7
             }
 		}
 
-        public static float RDamage(Obj_AI_Base target)
-        {
-            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 200, 350, 480 }[Program.R.Level] + 1.2f * _Player.FlatPhysicalDamageMod));
-        }
-
         private static void KillSteal()
 		{
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;

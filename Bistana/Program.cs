@@ -17,7 +17,7 @@ using Color = System.Drawing.Color;
 
 namespace Bristana
 {
-    class Program
+    static class Program
     {
         public static Spell.Active Q;
         public static Spell.Skillshot W;
@@ -32,19 +32,14 @@ namespace Bristana
         {
             get { return ObjectManager.Player; }
         }
-        public static Menu Menu,
-        SpellMenu,
-        JungleMenu,
-        HarassMenu,
-        LaneMenu,
-        Misc,
-        Items,
-        Skin;
+        public static Menu Menu, SpellMenu, JungleMenu, HarassMenu, LaneMenu, Misc, Items, Skin;
 
         static void Main(string[] args)
         {
             Loading.OnLoadingComplete += OnLoadingComplete;
         }
+
+// Menu
 
         private static void OnLoadingComplete(EventArgs args)
         {
@@ -65,17 +60,20 @@ namespace Bristana
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             SpellMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            SpellMenu.AddSeparator();
             SpellMenu.AddGroupLabel("Combo [E] On");
             foreach (var target in EntityManager.Heroes.Enemies)
             {
                 SpellMenu.Add("useECombo" + target.ChampionName, new CheckBox("" + target.ChampionName));
             }
-            SpellMenu.AddSeparator();
             SpellMenu.AddGroupLabel("KillSteal Settings");
             SpellMenu.Add("ERKs", new CheckBox("KillSteal [ER]"));
             SpellMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
             SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
+            SpellMenu.Add("WKs", new CheckBox("Use [W] KillSteal", false));
+            SpellMenu.Add("CTurret", new CheckBox("Dont Use [W] KillSteal Under Turet"));
+            SpellMenu.Add("Attack", new Slider("Use [W] KillSteal If Can Kill Enemy With x Attack", 2, 1, 6));
+            SpellMenu.Add("MinW", new Slider("Use [W] KillSteal If Enemies Around Target <", 2, 1, 5));
+            SpellMenu.AddLabel("Always [W] KillSteal If Slider Enemies Around = 5");
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -125,14 +123,15 @@ namespace Bristana
 
             Misc = Menu.AddSubMenu("Misc Settings", "Draw");
             Misc.AddGroupLabel("Anti Gapcloser");
-            Misc.Add("antiGap", new CheckBox("Anti Gapcloser"));
+            Misc.Add("antiGap", new CheckBox("Anti Gapcloser", false));
             Misc.Add("antiRengar", new CheckBox("Anti Rengar"));
             Misc.Add("antiKZ", new CheckBox("Anti Kha'Zix"));
-            Misc.Add("inter", new CheckBox("Use [R] Interupt"));
+            Misc.Add("inter", new CheckBox("Use [R] Interupt", false));
             Misc.AddGroupLabel("Drawings Settings");
-            Misc.Add("DrawE", new CheckBox("Draw E"));
-            Misc.Add("DrawW", new CheckBox("Draw W", false));
-            Misc.Add("Notifications", new CheckBox("Notifications Can Kill R"));
+            Misc.Add("Draw_Disabled", new CheckBox("Disabled Drawings", false));
+            Misc.Add("DrawE", new CheckBox("Draw Attack Range"));
+            Misc.Add("DrawW", new CheckBox("Draw [W]", false));
+            Misc.Add("Notifications", new CheckBox("Notifications Can Kill With [R]"));
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
@@ -146,6 +145,8 @@ namespace Bristana
             GameObject.OnCreate += GameObject_OnCreate;
 
         }
+
+// Game OnTick
 
         private static void Game_OnTick(EventArgs args)
         {
@@ -182,6 +183,8 @@ namespace Bristana
 
         }
 
+// Qss
+
         public static void CastQss()
         {
             if (Qss.IsOwned() && Qss.IsReady())
@@ -193,6 +196,8 @@ namespace Bristana
                 Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
             }
         }
+
+// Buff
 
         private static void Qsss()
         {
@@ -243,6 +248,8 @@ namespace Bristana
             }
         }
 
+// Flee Mode
+
         private static void Flee()
         {
             if (W.IsReady())
@@ -253,14 +260,19 @@ namespace Bristana
             }
         }
 
+// Skin Changer
+
         public static int SkinId()
         {
             return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+
         public static bool checkSkin()
         {
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
+
+// Interrupt
 
         public static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
         {
@@ -274,6 +286,8 @@ namespace Bristana
                 R.Cast(sender);
             }
         }
+
+//Harass Mode
 
         private static void Harass()
         {
@@ -297,6 +311,8 @@ namespace Bristana
             }
         }
 
+//Combo Mode
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
@@ -318,6 +334,8 @@ namespace Bristana
             }
         }
 
+//LaneClear Mode
+
         private static void LaneClear()
         {
             var useQ = LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
@@ -336,6 +354,8 @@ namespace Bristana
                 }
             }
         }
+
+// JungleClear Mode
 
         private static void JungleClear()
         {
@@ -366,6 +386,8 @@ namespace Bristana
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
+// Anti Rengar
+
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
             var renga = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Rengar"));
@@ -386,6 +408,8 @@ namespace Bristana
             }
         }
 
+// EDamage
+
         private static float EDamage(Obj_AI_Base target)
         {
             float Edamage = 0;
@@ -397,17 +421,61 @@ namespace Bristana
             return Edamage;
         }
 
+// KillSteal
+
         private static void KillSteal()
         {
-            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
+            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
             var targetE = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && e.HasBuff("tristanaecharge") && !e.IsDead && !e.IsZombie);
+            var RKill = SpellMenu["RKs"].Cast<CheckBox>().CurrentValue;
+            var WKill = SpellMenu["WKs"].Cast<CheckBox>().CurrentValue;
+            var WAttack = SpellMenu["Attack"].Cast<Slider>().CurrentValue;
+            var minW = SpellMenu["MinW"].Cast<Slider>().CurrentValue;
             foreach (var target2 in target)
             {
-                if (SpellMenu["RKs"].Cast<CheckBox>().CurrentValue && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                if (RKill && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R))
+                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(R.Range))
                     {
                         R.Cast(target2);
+                    }
+                }
+                if (WKill && W.IsReady())
+                {
+                    if (target2.Health + target2.AttackShield < Player.Instance.GetAutoAttackDamage(target2) * WAttack && Player.Instance.Mana > W.Handle.SData.Mana * 2 && Player.Instance.HealthPercent > 25 && target2.Position.CountEnemiesInRange(400) <= minW)
+                    {
+                        var turret = SpellMenu["CTurret"].Cast<CheckBox>().CurrentValue;
+                        if (target2.HasBuff("tristanaecharge"))
+                        {
+                            if (target2.Health + target2.AttackShield > EDamage(target2))
+                            {
+                                if (turret)
+                                {
+                                    if (!target2.Position.UnderTuret())
+                                    {
+                                       W.Cast(target2.ServerPosition);
+                                    }
+                                }
+                                else
+                                {
+                                   W.Cast(target2.ServerPosition);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (turret)
+                            {
+                                if (!target2.Position.UnderTuret())
+                                {
+                                   W.Cast(target2.ServerPosition);
+                                }
+                            }
+                            else
+                            {
+                               W.Cast(target2.ServerPosition);
+                            }
+                        }
                     }
                 }
             }
@@ -423,13 +491,18 @@ namespace Bristana
             }
         }
 
+// Drawings
+
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (_Player.IsDead) return;
+            if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
+                return;
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
             }
-            if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
+            if (Misc["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = W.Range }.Draw(_Player.Position);
             }
@@ -439,10 +512,19 @@ namespace Bristana
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
                 if (target.IsValidTarget(1000) && Player.Instance.GetSpellDamage(target, SpellSlot.R) > target.Health + target.AttackShield)
                 {
-                    DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
+                    DrawFont(Thm, "[R] Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
         }
+
+// Under Turet
+
+        public static bool UnderTuret(this Vector3 position)
+        {
+            return EntityManager.Turrets.Enemies.Where(a => a.Health > 0 && !a.IsDead).Any(a => a.Distance(position) < 950);
+        }
+
+// Game Update
 
         private static void Game_OnUpdate(EventArgs args)
         {
@@ -459,6 +541,8 @@ namespace Bristana
             }
         }
 
+// Use Items
+
         public static void Item()
         {
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
@@ -467,11 +551,11 @@ namespace Bristana
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (target != null)
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
