@@ -496,8 +496,7 @@ namespace Bristana
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (_Player.IsDead) return;
-            if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
-                return;
+            if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
@@ -548,7 +547,7 @@ namespace Bristana
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            var target = TargetSelector.GetTarget(450, DamageType.Physical);
             if (target != null)
             {
                 if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
