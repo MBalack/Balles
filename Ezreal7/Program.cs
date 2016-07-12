@@ -423,12 +423,12 @@ namespace Ezreal7
         {
             var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (minions != null)
             {
                 if (Player.Instance.ManaPercent >= laneQMN)
                 {
-                    if (useQLH && Q.IsReady() && _Player.GetAutoAttackDamage(minions) < minions.TotalShieldHealth())
+                    if (useQLH && Q.IsReady() && minions.Health < Player.Instance.GetSpellDamage(minions, SpellSlot.Q))
                     {
                         Q.Cast(minions);
                     }
@@ -486,15 +486,13 @@ namespace Ezreal7
         {
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth() && m.IsEnemy && !m.IsDead && m.IsValid));
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
+            if (Player.Instance.ManaPercent < LhM) return;
             if (minion != null)
             {
-                if (Player.Instance.ManaPercent >= LhM && _Player.GetAutoAttackDamage(minion) < minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.Q))
                 {
-                    if (useQ && Q.IsReady())
-                    {
-                        Q.Cast(minion);
-                    }
+                    Q.Cast(minion);
                 }
             }
         }
@@ -513,7 +511,7 @@ namespace Ezreal7
                 if (useQ && Q.IsReady() && automana <= Player.Instance.ManaPercent)
                 {
                     var predQ = Q.GetPrediction(Selector);
-                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predQ.HitChancePercent >= 80)
+                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predQ.HitChancePercent >= 70)
                     {
                         Q.Cast(predQ.CastPosition);
                     }
@@ -521,7 +519,7 @@ namespace Ezreal7
                 if (useW && W.IsReady() && automanaw <= Player.Instance.ManaPercent)
                 {
                     var predW = W.GetPrediction(Selector);
-                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predW.HitChancePercent >= 80)
+                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predW.HitChancePercent >= 70)
                     {
                         W.Cast(predW.CastPosition);
                     }
