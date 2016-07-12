@@ -392,16 +392,15 @@ namespace Talon7
             var useW = LaneClearMenu["LastW"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.Q) >= m.TotalShieldHealth()));
-            var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(W.Range) && (Player.Instance.GetSpellDamage(m, SpellSlot.W) >= m.TotalShieldHealth()));
+            var minionQ = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             if (Player.Instance.ManaPercent > mana)
+            foreach (var minions in minionQ)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(200))
+                if (useQ && Q.IsReady() && minions.IsValidTarget(250) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
-
-                if (useW && W.IsReady() && minions.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && minions.IsValidTarget(W.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.W) > minions.TotalShieldHealth())
                 {
                     W.Cast(minions);
                 }

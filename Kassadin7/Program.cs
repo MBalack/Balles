@@ -318,11 +318,11 @@ namespace Kassadin7
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + _Player.GetAutoAttackDamage(minion) > minion.TotalShieldHealth() && Player.Instance.ManaPercent >= mana)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth() && Player.Instance.ManaPercent >= mana)
                 {
                     Q.Cast(minion);
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) > minion.TotalShieldHealth() && !Q.IsReady())
+                if (useW && W.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + _Player.GetAutoAttackDamage(minion) > minion.TotalShieldHealth() && !Q.IsReady())
                 {
                     W.Cast();
                 }
