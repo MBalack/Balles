@@ -244,11 +244,11 @@ namespace Olaf7
                 {
                     E.Cast(target);
                 }
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
