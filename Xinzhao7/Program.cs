@@ -10,7 +10,9 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
+using Font = SharpDX.Direct3D9.Font;
 using SharpDX;
+using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
 namespace XinZhao7
