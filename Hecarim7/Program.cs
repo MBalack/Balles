@@ -134,11 +134,15 @@ namespace Hecarim7
                 new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = R.Range }.Draw(_Player.Position);
             }
             var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
-            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady())
+            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady() && target.IsValidTarget(R.Range))
             {
                 var RPred = R.GetPrediction(target);
-                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                DrawFont(Thm, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(250), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
+                var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
+                if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR)
+                {
+                    Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                    DrawFont(Thm, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(250), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
+                }
             }
         }
 

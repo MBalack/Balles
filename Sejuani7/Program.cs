@@ -121,8 +121,9 @@ namespace Sejuani7
             Drawings.Add("DrawW", new CheckBox("[W] Range"));
             Drawings.Add("DrawE", new CheckBox("[E] Range"));
             Drawings.Add("DrawR", new CheckBox("[R] Range"));
-            Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
+            Drawings.Add("DrawRhit", new CheckBox("[R] Draw Hit"));
             Drawings.Add("Notifications", new CheckBox("Notifications Killable [R]"));
+            Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
@@ -136,35 +137,38 @@ namespace Sejuani7
                 return;
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = R.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
             }
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
-                var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                if (target.IsValidTarget(R.Range) && RDamage(target) > target.Health + target.AttackShield)
+                if (target != null && target.IsValidTarget(R.Range) && RDamage(target) > target.Health + target.AttackShield)
                 {
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
-            var targetR = TargetSelector.GetTarget(R.Range, DamageType.Magical);
-            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && targetR != null && R.IsReady())
+            if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady() && target.IsValidTarget(R.Range))
             {
-                var RPred = R.GetPrediction(targetR);
-                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                DrawFont(Thn, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(400), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
+                var RPred = R.GetPrediction(target);
+                var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
+                if (RPred.CastPosition.CountEnemiesInRange(400) >= MinR)
+                {
+                    Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                    DrawFont(Thm, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(400), (float)(ft[0] - 90), (float)(ft[1] + 20), SharpDX.Color.Orange);
+                }
             }
         }
 
