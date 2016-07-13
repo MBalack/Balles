@@ -258,7 +258,7 @@ namespace Borki7
                 {
                     Q.Cast(minion);
                 }
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minion.Count() >= 2)
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range))
                 {
                     E.Cast();
                 }
