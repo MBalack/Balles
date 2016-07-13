@@ -242,11 +242,11 @@ namespace Borki7
         private static void LaneClear()
         {
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(R.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < Q.Radius) > 2);
-            var mana = ClearMenu["manaClear"].Cast<Slider>().CurrentValue
+            var mana = ClearMenu["manaClear"].Cast<Slider>().CurrentValue;
             var useQ = ClearMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
             var useR = ClearMenu["ClearR"].Cast<CheckBox>().CurrentValue;
             var useE = ClearMenu["ClearE"].Cast<CheckBox>().CurrentValue;
-            var Rocket = ClearMenu["RocketClear"].Cast<Slider>().CurrentValue
+            var Rocket = ClearMenu["RocketClear"].Cast<Slider>().CurrentValue;
             if (_Player.ManaPercent < mana) return;
             if (minion != null)
             {
