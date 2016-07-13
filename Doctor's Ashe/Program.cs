@@ -47,7 +47,7 @@ namespace Ashe
             Chat.Print("Doctor's Ashe Loaded!", Color.Orange);
             Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q, 600);
-            W = new Spell.Skillshot(SpellSlot.W, 1200, SkillShotType.Cone);
+            W = new Spell.Skillshot(SpellSlot.W, 1200, SkillShotType.Linear, 0, int.MaxValue, 60);
             W.AllowedCollisionCount = 0;
             E = new Spell.Skillshot(SpellSlot.E, 10000, SkillShotType.Linear);
             E.AllowedCollisionCount = int.MaxValue;
@@ -312,13 +312,33 @@ namespace Ashe
             if (_Player.ManaPercent < mana) return;
             if (target != null)
             {
-                if (useQ && target.IsValidTarget(Q.Range) && QReady && Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                if (useQ && target.IsValidTarget(Q.Range) && QReady)
                 {
-                    Q.Cast();
+                    if (R.IsReady())
+                    {
+                        if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                        {
+                            Q.Cast();
+                        }
+                    }
+                    else
+                    {
+                        Q.Cast();
+                    }
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    W.Cast(target);
+                    if (R.IsReady())
+                    {
+                        if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
+                        {
+                            W.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                        W.Cast(target);
+                    }
                 }
             }
         }
@@ -334,7 +354,17 @@ namespace Ashe
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
                 {
-                    W.Cast(target);
+                    if (R.IsReady())
+                    {
+                        if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
+                        {
+                            W.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                        W.Cast(target);
+                    }
                 }
                 if (useR && R.IsReady() && target.IsValidTarget(W.Range) && _Player.HealthPercent <= 70)
                 {
@@ -473,9 +503,19 @@ namespace Ashe
                         R.Cast(RPred.CastPosition);
                     }
 		    	}
-                if (useQ && target.IsValidTarget(Q.Range) && QReady && Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                if (useQ && target.IsValidTarget(Q.Range) && QReady)
                 {
-                    Q.Cast();
+                    if (R.IsReady())
+                    {
+                        if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                        {
+                            Q.Cast();
+                        }
+                    }
+                    else
+                    {
+                        Q.Cast();
+                    }
                 }
             }
         }
