@@ -227,7 +227,7 @@ namespace Irelia
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()))
             {
-                var targetQ = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+                var targetQ = TargetSelector.GetTarget(1200, DamageType.Physical);
                 if (useQ2 && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(targetQ) > Q.Range && minion.Distance(targetQ) < _Player.Distance(targetQ))
                 {
                     if (turret)
@@ -429,7 +429,7 @@ namespace Irelia
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
-            var target = TargetSelector.GetTarget(1200, DamageType.Magical);
+            var target = TargetSelector.GetTarget(1200, DamageType.Physical);
             if (Player.Instance.ManaPercent < ManaQ) return;
             foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()))
             {
