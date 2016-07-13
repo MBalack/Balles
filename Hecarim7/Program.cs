@@ -168,6 +168,7 @@ namespace Hecarim7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
 			{
 				Combo();
+                RLogic();
 			}
                 KillSteal();
                 AutoQ();
@@ -191,41 +192,41 @@ namespace Hecarim7
 		
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
-            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
-            var targetW = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Mixed);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
-            var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useE && E.IsReady() && target.IsValidTarget(R.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast();
                 }
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    var RPred = R.GetPrediction(target);
+                    W.Cast();
+                }
+            }
+        }
+
+        private static void RLogic()
+        {
+            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead);
+            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
+            var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            foreach (var targetR in target2)
+            {
+                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
+                {
+                    var RPred = R.GetPrediction(targetR);
                     if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR && RPred.HitChance >= HitChance.High)
                     {
                         R.Cast(RPred.CastPosition);
                     }
 		    	}
-	    	}
-            if (targetQ != null)
-            {
-                if (useQ && Q.IsReady())
+                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
-                }
-            }
-            if (targetW != null)
-            {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
-                {
-                    W.Cast();
                 }
             }
         }

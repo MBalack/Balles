@@ -151,6 +151,7 @@ namespace Renekton7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
+                QLogic();
             }
             KillSteal();
             Ultimate();
@@ -174,10 +175,7 @@ namespace Renekton7
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
-            var targetE = TargetSelector.GetTarget(E.Range, DamageType.Physical);
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useE2 = ComboMenu["ComboE2"].Cast<CheckBox>().CurrentValue;
@@ -188,23 +186,26 @@ namespace Renekton7
                 {
                     W.Cast();
                 }
+                if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
+                {
+                    E.Cast(target.Position);
+                }
+                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= target.Distance(Player.Instance))
+                {
+                    E.Cast(target.Position);
+                }
             }
-            if (targetQ != null)
+        }
+
+        private static void QLogic()
+        {
+            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead);
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            foreach (var targetR in target2)
             {
-                if (useQ && Q.IsReady())
+                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
-                }
-            }
-            if (targetE != null)
-            {
-                if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && targetE.IsValidTarget(E.Range) && 200 <= targetE.Distance(Player.Instance))
-                {
-                    E.Cast(targetE.Position);
-                }
-                if (useE2 && E.IsReady() && targetE.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= targetE.Distance(Player.Instance))
-                {
-                    E.Cast(targetE.Position);
                 }
             }
         }
@@ -311,10 +312,10 @@ namespace Renekton7
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
-            if (targetQ != null)
+            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead);
+            foreach (var targetR in target2)
             {
-                if (useQ && Q.IsReady())
+                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
