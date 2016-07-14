@@ -63,6 +63,7 @@ namespace Ashe
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
+            ComboMenu.Add("KeepCombo", new CheckBox("Kepp Mana For [R]"));
             ComboMenu.AddGroupLabel("KillSteal Settings");
             ComboMenu.Add("RAoe", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("minRAoe", new Slider("Use [R] Aoe If Hit x Enemies", 2, 1, 5));
@@ -74,6 +75,7 @@ namespace Ashe
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
+            HarassMenu.Add("KeepHarass", new CheckBox("Keep Mana For [R]", false));
             HarassMenu.Add("manaHarass", new Slider("Mana Harass", 50, 0, 100));
 
             LaneClearMenu = Menu.AddSubMenu("Laneclear Settings", "Clear");
@@ -212,7 +214,7 @@ namespace Ashe
             }
         }
 
-        // Buff
+// Buff
 
         private static void Qsss()
         {
@@ -263,7 +265,7 @@ namespace Ashe
             }
         }
 
-        // Flee Mode
+// Flee Mode
 
         private static void Flee()
         {
@@ -274,7 +276,7 @@ namespace Ashe
             }
         }
 
-        // Skin Changer
+// Skin Changer
 
         public static int SkinId()
         {
@@ -308,13 +310,14 @@ namespace Ashe
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
+            var Keep = HarassMenu["KeepHarass"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["manaHarass"].Cast<Slider>().CurrentValue;
             if (_Player.ManaPercent < mana) return;
             if (target != null)
             {
                 if (useQ && target.IsValidTarget(Q.Range) && QReady)
                 {
-                    if (R.IsReady())
+                    if (Keep && R.IsReady())
                     {
                         if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
                         {
@@ -348,13 +351,15 @@ namespace Ashe
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            var targetS = TargetSelector.SelectedTarget;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
+            var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
                 {
-                    if (R.IsReady())
+                    if (Keep && R.IsReady())
                     {
                         if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
                         {
@@ -369,6 +374,13 @@ namespace Ashe
                 if (useR && R.IsReady() && target.IsValidTarget(W.Range) && _Player.HealthPercent <= 70)
                 {
                     R.Cast(target);
+                }
+            }
+            if (targetS != null)
+            {
+                if (R.IsReady() && targetS.IsValidTarget(1500))
+                {
+                    R.Cast(targetS);
                 }
             }
         }
@@ -456,6 +468,8 @@ namespace Ashe
             }
         }
 
+// AntiGap
+
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
             if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 325)
@@ -493,6 +507,7 @@ namespace Ashe
             var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             foreach (var target in target2)
             {
                 if (RAoe && R.IsReady() && target.IsValidTarget(2000))
@@ -505,7 +520,7 @@ namespace Ashe
 		    	}
                 if (useQ && target.IsValidTarget(Q.Range) && QReady)
                 {
-                    if (R.IsReady())
+                    if (Keep && R.IsReady())
                     {
                         if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
                         {

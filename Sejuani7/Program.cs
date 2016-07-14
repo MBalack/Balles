@@ -204,6 +204,10 @@ namespace Sejuani7
                     Player.SetSkinId(SkinId());
                 }
             }
+            if (ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue)
+            {
+                Orbwalker.OrbwalkTo(Game.CursorPos);
+            }
         }
 
         public static int SkinId()
