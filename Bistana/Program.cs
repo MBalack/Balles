@@ -291,11 +291,10 @@ namespace Bristana
 
         private static void Harass()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["manaHarass"].Cast<Slider>().CurrentValue;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
                 {
@@ -315,10 +314,9 @@ namespace Bristana
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             var useQ = SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(E.Range))
                 {

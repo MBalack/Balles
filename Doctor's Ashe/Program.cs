@@ -350,12 +350,12 @@ namespace Ashe
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead);
             var targetS = TargetSelector.SelectedTarget;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
                 {
