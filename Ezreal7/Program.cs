@@ -355,14 +355,13 @@ namespace Ezreal7
 		
         public static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var targetR = TargetSelector.GetTarget(2500, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinRangeR = ComboMenu["MinRangeR"].Cast<Slider>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead))
      	    {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {

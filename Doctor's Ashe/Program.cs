@@ -350,7 +350,6 @@ namespace Ashe
 
         private static void Combo()
         {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead);
             var targetS = TargetSelector.SelectedTarget;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
