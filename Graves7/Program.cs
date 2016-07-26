@@ -62,20 +62,22 @@ namespace Graves7
             Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.AddLabel("Use [Q] On");
             foreach (var Selector in EntityManager.Heroes.Enemies)
             {
                 ComboMenu.Add("combo" + Selector.ChampionName, new CheckBox("" + Selector.ChampionName));
             }
             ComboMenu.AddSeparator();
-            ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
+            ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
 			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E] Reload", 1, 0, 1));
-            ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
-            ComboMenu.Add("ComboR", new CheckBox("Use [R]", false));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe In Combo", false));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "HarassMenu");
             HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
             HarassMenu.AddLabel("Harass [Q] On");
             foreach (var Selector in EntityManager.Heroes.Enemies)
             {
@@ -85,9 +87,9 @@ namespace Graves7
             HarassMenu.AddSeparator();
             HarassMenu.AddGroupLabel("Spells Settings");
             HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
-            HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]", 40));
+            HarassMenu.Add("ManaW", new Slider("Mana Harass [W]", 40));
             HarassMenu.Add("HarassAA", new CheckBox("Use [E] Reset AA", false));
-            HarassMenu.Add("ManaHarass", new Slider("Min Mana For [E] Harass", 50));	
+            HarassMenu.Add("ManaHarass", new Slider("Mana [E] Harass", 50));	
 
             ClearMenu = Menu.AddSubMenu("Laneclear Settings", "LaneClearMenu");
             ClearMenu.AddGroupLabel("Laneclear Settings");
@@ -275,16 +277,13 @@ namespace Graves7
 
         public static void Combo()
         {
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (Selector == null)
-            {
-                return;
-            }
-            if (Q.IsReady() && Selector.IsValidTarget(Q.Range))
+            if (useQ && Q.IsReady())
+            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (ComboMenu["combo" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
                 {
@@ -295,9 +294,14 @@ namespace Graves7
                     }
                 }
 			}
-            if (useW && W.IsReady() && Selector.IsValidTarget(W.Range))
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            if (target == null)
+            {
+                return;
+            }
+            if (useW && W.IsReady() && target.IsValidTarget(W.Range))
      	    {
-                W.Cast(Selector);
+                W.Cast(target);
 			}
             if (useE && E.IsReady())
             {
@@ -310,9 +314,9 @@ namespace Graves7
       	    	    Player.CastSpell(SpellSlot.E, Game.CursorPos);
                 }
             }
-            if (useR && R.IsReady() && Selector.IsValidTarget(R.Range))
+            if (useR && R.IsReady() && target.IsValidTarget(R.Range))
             {
-                var pred = R.GetPrediction(Selector);
+                var pred = R.GetPrediction(target);
                 if (pred.CastPosition.CountEnemiesInRange(R.Range) >= MinR && pred.HitChance >= HitChance.High)
                 {
                     R.Cast(pred.CastPosition);
@@ -322,15 +326,11 @@ namespace Graves7
 
         private static void Harass()
         {
+            var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var mana = HarassMenu["HarassMana"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-            var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (Selector == null)
-            {
-                return;
-            }
-            if (Q.IsReady() && Player.Instance.ManaPercent >= ManaW && Selector.IsValidTarget(Q.Range))
+            if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaW)
+            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (HarassMenu["haras" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
                 {
@@ -341,9 +341,14 @@ namespace Graves7
                     }
                 }
 			}
-            if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && Selector.IsValidTarget(W.Range))
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            if (target == null)
             {
-               W.Cast(Selector);
+                return;
+            }
+            if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && target.IsValidTarget(W.Range))
+            {
+               W.Cast(target);
             }
 		}
 

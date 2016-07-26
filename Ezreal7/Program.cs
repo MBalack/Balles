@@ -355,7 +355,7 @@ namespace Ezreal7
 		
         public static void Combo()
         {
-            var targetR = TargetSelector.GetTarget(2500, DamageType.Physical);
+            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2500) && !e.IsDead);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
@@ -380,7 +380,7 @@ namespace Ezreal7
                     }
 	    		}
             }
-            if (targetR != null)
+            foreach (var targetR in target2)
      	    {
                 if (useR && R.IsReady() && targetR.IsValidTarget(R.Range) && targetR.IsInRange(Player.Instance, 2500) && !targetR.IsInRange(Player.Instance, MinRangeR))
                 {
