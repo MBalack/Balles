@@ -71,7 +71,7 @@ namespace Ezreal7
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
-            ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
             ComboMenu.AddSeparator();
             ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
@@ -395,7 +395,6 @@ namespace Ezreal7
 
         public static void JungleClear()
         {
-
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.ServerPosition, 700).FirstOrDefault(x => x.IsValidTarget(Q.Range));
@@ -427,7 +426,7 @@ namespace Ezreal7
             {
                 if (Player.Instance.ManaPercent >= laneQMN)
                 {
-                    if (useQLH && Q.IsReady() && minions.Health < Player.Instance.GetSpellDamage(minions, SpellSlot.Q))
+                    if (useQLH && Q.IsReady() && Prediction.Health.GetPrediction(minions, Q.CastDelay) <= Player.Instance.GetSpellDamage(minions, SpellSlot.Q))
                     {
                         Q.Cast(minions);
                     }
@@ -459,8 +458,7 @@ namespace Ezreal7
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-            var Selector = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (Selector != null)
+            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead))
             {
                 if (useQ && Player.Instance.ManaPercent >= ManaQ && Q.IsReady() && Selector.IsValidTarget(Q.Range))
                 {
@@ -489,7 +487,7 @@ namespace Ezreal7
             if (Player.Instance.ManaPercent < LhM) return;
             if (minion != null)
             {
-                if (useQ && Q.IsReady() && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.Q))
+                if (useQ && Q.IsReady() && Prediction.Health.GetPrediction(minion, Q.CastDelay) <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q))
                 {
                     Q.Cast(minion);
                 }
@@ -503,24 +501,25 @@ namespace Ezreal7
             var key = Auto["Key"].Cast<KeyBind>().CurrentValue;
             var automana = Auto["AutomanaQ"].Cast<Slider>().CurrentValue;
             var automanaw = Auto["AutomanaW"].Cast<Slider>().CurrentValue;
-            var Selector = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            if (Selector == null) return;
-            if (key && Selector.IsValidTarget(W.Range) && !Tru(_Player.Position) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && automana <= Player.Instance.ManaPercent)
+                if (key && Selector.IsValidTarget(W.Range) && !Tru(_Player.Position) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
-                    var predQ = Q.GetPrediction(Selector);
-                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predQ.HitChancePercent >= 70)
+                    if (useQ && Q.IsReady() && automana <= Player.Instance.ManaPercent)
                     {
-                        Q.Cast(predQ.CastPosition);
+                        var predQ = Q.GetPrediction(Selector);
+                        if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predQ.HitChancePercent >= 70)
+                        {
+                            Q.Cast(predQ.CastPosition);
+                        }
                     }
-                }
-                if (useW && W.IsReady() && automanaw <= Player.Instance.ManaPercent)
-                {
-                    var predW = W.GetPrediction(Selector);
-                    if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predW.HitChancePercent >= 70)
+                    if (useW && W.IsReady() && automanaw <= Player.Instance.ManaPercent)
                     {
-                        W.Cast(predW.CastPosition);
+                        var predW = W.GetPrediction(Selector);
+                        if (Auto["harass" + Selector.ChampionName].Cast<CheckBox>().CurrentValue && predW.HitChancePercent >= 70)
+                        {
+                            W.Cast(predW.CastPosition);
+                        }
                     }
                 }
             }
