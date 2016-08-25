@@ -67,6 +67,7 @@ namespace Ashe
             ComboMenu.AddGroupLabel("KillSteal Settings");
             ComboMenu.Add("RAoe", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("minRAoe", new Slider("Use [R] Aoe If Hit x Enemies", 2, 1, 5));
+            ComboMenu.Add("ComboSL", new CheckBox("Use [R] On Selected Target", false));
             ComboMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
             ComboMenu.Add("WKs", new CheckBox("Automatic [W] KillSteal"));
             ComboMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'T'));
@@ -351,6 +352,7 @@ namespace Ashe
         private static void Combo()
         {
             var targetS = TargetSelector.SelectedTarget;
+            var useSL = ComboMenu["ComboSL"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
@@ -375,7 +377,7 @@ namespace Ashe
                     R.Cast(target);
                 }
             }
-            if (targetS != null)
+            if (useSL && targetS != null)
             {
                 if (R.IsReady() && targetS.IsValidTarget(1500))
                 {
