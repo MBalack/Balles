@@ -26,8 +26,6 @@ namespace Bristana
         public static Item Botrk;
         public static Item Bil;
         public static Font Thm;
-        public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
-        public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -45,7 +43,6 @@ namespace Bristana
         {
             if (!_Player.ChampionName.Contains("Tristana")) return;
             Chat.Print("Doctor's Tristana Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             uint level = (uint)Player.Instance.Level;
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
@@ -73,7 +70,7 @@ namespace Bristana
             SpellMenu.Add("CTurret", new CheckBox("Dont Use [W] KillSteal Under Turet"));
             SpellMenu.Add("Attack", new Slider("Use [W] KillSteal If Can Kill Enemy With x Attack", 2, 1, 6));
             SpellMenu.Add("MinW", new Slider("Use [W] KillSteal If Enemies Around Target <", 2, 1, 5));
-            SpellMenu.AddLabel("Always [W] KillSteal If Slider Enemies Around = 5");
+            SpellMenu.AddLabel("Always Use [W] KillSteal If Slider Enemies Around = 5");
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -105,21 +102,6 @@ namespace Bristana
             Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
             Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
             Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
-            Items.AddGroupLabel("Qss Settings");
-            Items.Add("Qss", new CheckBox("Use Qss"));
-            Items.AddGroupLabel("Qss On CC");
-            Items.Add("stun", new CheckBox("Stuns"));
-            Items.Add("rot", new CheckBox("Root"));
-            Items.Add("tunt", new CheckBox("Taunt"));
-            Items.Add("snare", new CheckBox("Snare"));
-            Items.Add("charm", new CheckBox("Charm", false));
-            Items.Add("slow", new CheckBox("Slows", false));
-            Items.Add("blind", new CheckBox("Blinds", false));
-            Items.Add("fear", new CheckBox("Fear", false));
-            Items.Add("silence", new CheckBox("Silence", false));
-            Items.Add("supperss", new CheckBox("Supperss", false));
-            Items.Add("poly", new CheckBox("Polymorph", false));
-            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Draw");
             Misc.AddGroupLabel("Anti Gapcloser");
@@ -135,117 +117,14 @@ namespace Bristana
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "Classic", "Riot Tristana", "Earnest Elf Tristana", "Firefighter Tristana", "Guerilla Tristana", "Rocket Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Color Tristana", "Dragon Trainer Tristana"));
+            Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"));
 
-            Game.OnTick += Game_OnTick;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
             Interrupter.OnInterruptableSpell += Interupt;
             GameObject.OnCreate += GameObject_OnCreate;
 
-        }
-
-// Game OnTick
-
-        private static void Game_OnTick(EventArgs args)
-        {
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-            {
-                JungleClear();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
-            {
-                Flee();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-            {
-                Combo();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-            {
-                Harass();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
-            {
-                LaneClear();
-            }
-            KillSteal();
-            Item();
-            Qsss();
-            if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-
-        }
-
-// Qss
-
-        public static void CastQss()
-        {
-            if (Qss.IsOwned() && Qss.IsReady())
-            {
-                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
-            }
-            if (Simitar.IsOwned() && Simitar.IsReady())
-            {
-                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
-            }
-        }
-
-// Buff
-
-        private static void Qsss()
-        {
-            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
-            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
-            {
-                CastQss();
-            }
-            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
-            {
-                CastQss();
-            }
-            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
-            {
-                CastQss();
-            }
-            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
-            {
-                CastQss();
-            }
-            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
-            {
-                CastQss();
-            }
-            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
-            {
-                CastQss();
-            }
-            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
-            {
-                CastQss();
-            }
-            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
-            {
-                CastQss();
-            }
-            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
-            {
-                CastQss();
-            }
-            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
-            {
-                CastQss();
-            }
-            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
-            {
-                CastQss();
-            }
         }
 
 // Flee Mode
@@ -528,6 +407,36 @@ namespace Bristana
             uint level = (uint)Player.Instance.Level;
             E = new Spell.Targeted(SpellSlot.E, 550 + level * 7);
             R = new Spell.Targeted(SpellSlot.R, 550 + level * 7);
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+            {
+                JungleClear();
+            }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+            {
+                Flee();
+            }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            {
+                Combo();
+            }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            {
+                Harass();
+            }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
+            {
+                LaneClear();
+            }
+            KillSteal();
+            Item();
+            if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
+            {
+                if (checkSkin())
+                {
+                    Player.SetSkinId(SkinId());
+                }
+            }
         }
 
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
