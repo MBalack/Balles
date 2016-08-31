@@ -18,8 +18,6 @@ namespace Twitch7
         public static Item Botrk;
         public static Item Bil;
         public static Item Youmuu;
-        public static readonly Item Qss = new Item(ItemId.Quicksilver_Sash);
-        public static readonly Item Simitar = new Item(ItemId.Mercurial_Scimitar);
         public static readonly int[] SDamage = {0, 15, 20, 25, 30, 35};
         public static readonly int[] BDamage = {0, 20, 35, 50, 65, 80};
         public const float YOff = 10;
@@ -149,21 +147,6 @@ namespace Twitch7
             Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
             Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
             Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
-            Items.AddGroupLabel("Qss Settings");
-            Items.Add("Qss", new CheckBox("Use Qss"));
-            Items.AddGroupLabel("Qss On CC");
-            Items.Add("stun", new CheckBox("Stuns"));
-            Items.Add("rot", new CheckBox("Root"));
-            Items.Add("tunt", new CheckBox("Taunt"));
-            Items.Add("snare", new CheckBox("Snare"));
-            Items.Add("charm", new CheckBox("Charm", false));
-            Items.Add("slow", new CheckBox("Slows", false));
-            Items.Add("blind", new CheckBox("Blinds", false));
-            Items.Add("fear", new CheckBox("Fear", false));
-            Items.Add("silence", new CheckBox("Silence", false));
-            Items.Add("supperss", new CheckBox("Supperss", false));
-            Items.Add("poly", new CheckBox("Polymorph", false));
-            Items.Add("delay", new Slider("Humanizer Qss Delay", 0, 0, 1500));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Damage;
@@ -209,7 +192,6 @@ namespace Twitch7
             }
             KillSteal();
             Item();
-            Qsss();
             Escape();
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -227,68 +209,6 @@ namespace Twitch7
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
-        }
-
-        public static void CastQss()
-        {
-            if (Qss.IsOwned() && Qss.IsReady())
-            {
-                Core.DelayAction(() => Qss.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
-            }
-
-            if (Simitar.IsOwned() && Simitar.IsReady())
-            {
-                Core.DelayAction(() => Simitar.Cast(), Items["delay"].Cast<Slider>().CurrentValue);
-            }
-        }
-
-        private static void Qsss()
-        {
-            if (!Items["Qss"].Cast<CheckBox>().CurrentValue) return;
-            if (Items["snare"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Snare))
-            {
-                CastQss();
-            }
-            if (Items["tunt"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Taunt))
-            {
-                CastQss();
-            }
-            if (Items["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
-            {
-                CastQss();
-            }
-            if (Items["poly"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Polymorph))
-            {
-                CastQss();
-            }
-            if (Items["blind"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Blind))
-            {
-                CastQss();
-            }
-            if (Items["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear))
-            {
-                CastQss();
-            }
-            if (Items["charm"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Charm))
-            {
-                CastQss();
-            }
-            if (Items["supperss"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Suppression))
-            {
-                CastQss();
-            }
-            if (Items["silence"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Silence))
-            {
-                CastQss();
-            }
-            if (Items["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
-            {
-                CastQss();
-            }
-            if (Items["slow"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Slow))
-            {
-                CastQss();
-            }
         }
 
         public static void Combo()
@@ -358,7 +278,6 @@ namespace Twitch7
 
         public static void Item()
         {
-
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var yous = Items["you"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
