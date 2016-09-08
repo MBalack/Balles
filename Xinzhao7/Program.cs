@@ -17,7 +17,7 @@ using Color = System.Drawing.Color;
 
 namespace XinZhao7
 {
-    internal class Program
+    static class Program
     {
         public static Menu Menu, ComboMenu, HarassMenu, Ulti, LaneClearMenu, JungleClearMenu, KillStealMenu, Misc;
         public static AIHeroClient _Player
