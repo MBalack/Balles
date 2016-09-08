@@ -355,9 +355,8 @@ namespace XinZhao7
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
-            var useriu = JungleClearMenu["itemJC"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
+            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(250));
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
                 if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(325))
