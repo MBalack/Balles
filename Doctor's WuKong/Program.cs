@@ -15,9 +15,9 @@ using SharpDX;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
-namespace XinZhao7
+namespace Doctor_s_WuKong
 {
-    internal class Program
+    static class Program
     {
         public static Menu Menu, ComboMenu, HarassMenu, Ulti, LaneClearMenu, JungleClearMenu, KillStealMenu, Misc;
         public static AIHeroClient _Player
@@ -28,17 +28,10 @@ namespace XinZhao7
         public static Spell.Active W;
         public static Spell.Targeted E;
         public static Spell.Active R;
-        public static Spell.Targeted Ignite;
         public static Font thm;
         public static Item Hydra;
         public static Item Tiamat;
-        public static Item Titanic;
-        public static Item Botrk;
-        public static Item Bil;
-        public const float YOff = 10;
-        public const float XOff = 0;
-        public const float Width = 107;
-        public const float Thick = 9;
+        public static Spell.Targeted Ignite;
 
         static void Main(string[] args)
         {
@@ -47,59 +40,55 @@ namespace XinZhao7
 
         static void OnLoadingComplete(EventArgs args)
         {
-            if (!_Player.ChampionName.Contains("XinZhao")) return;
-            Chat.Print("Doctor's Xinzhao Loaded!", Color.Orange);
+            if (!_Player.ChampionName.Contains("MonkeyKing")) return;
+            Chat.Print("Doctor's Wukong Loaded!", Color.Orange);
             Bootstrap.Init(null);
-            Q = new Spell.Active(SpellSlot.Q);
+            Q = new Spell.Active(SpellSlot.Q, 375);
             W = new Spell.Active(SpellSlot.W);
-            E = new Spell.Targeted(SpellSlot.E, 600);
-            R = new Spell.Active(SpellSlot.R, 500);
+            E = new Spell.Targeted(SpellSlot.E, 650);
+            R = new Spell.Active(SpellSlot.R, 375);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
             Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
-            Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
-            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
-            Bil = new Item(3144, 475f);
-            Menu = MainMenu.AddMenu("Xinzhao", "Xinzhao");
+            Menu = MainMenu.AddMenu("Doctor's Wukong", "Doctor's Wukong");
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("DisE", new Slider("Use [E] If Enemy Distance >", 250, 0, 600));
+            ComboMenu.Add("DisE", new Slider("Use [E] If Enemy Distance >", 250, 0, 650));
             ComboMenu.Add("CTurret", new KeyBind("Dont Use [E] UnderTurret", false, KeyBind.BindTypes.PressToggle, 'T'));
             ComboMenu.AddGroupLabel("Items Settings");
             ComboMenu.Add("hydra", new CheckBox("Use [Hydra] Reset AA"));
-            ComboMenu.Add("BOTRK", new CheckBox("Use [Botrk]"));
-            ComboMenu.Add("ihp", new Slider("My HP Use BOTRK", 50));
-            ComboMenu.Add("ihpp", new Slider("Enemy HP Use BOTRK", 50));
 
             Ulti = Menu.AddSubMenu("Ultimate Settings", "Ulti");
             Ulti.AddGroupLabel("Ultimate Enemies In Count");
             Ulti.Add("ultiR", new CheckBox("Use [R] Enemies In Range"));
             Ulti.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
+            Ulti.Add("follow", new CheckBox("Auto Move To Target While [R]", false));
             Ulti.AddGroupLabel("Ultimate My HP");
-            Ulti.Add("ultiR2", new CheckBox("Use [R] If My HP"));
+            Ulti.Add("ultiR2", new CheckBox("Use [R] If My HP <"));
             Ulti.Add("MauR", new Slider("My HP Use [R]", 40));
+            Ulti.Add("wulti", new CheckBox("Use [W] If My HP <"));
+            Ulti.Add("MauW", new Slider("My HP Use [W]", 40));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
-            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
+            HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass", false) );
             HarassMenu.Add("ManaHR", new Slider("Mana For Harass", 40));
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
             LaneClearMenu.Add("QLC", new CheckBox("Use [Q] LaneClear", false));
-            LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
+            LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
             LaneClearMenu.Add("ManaLC", new Slider("Mana For LaneClear", 50));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
-            JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
             JungleClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
             JungleClearMenu.Add("ManaJC", new Slider("Mana For JungleClear", 30));
 
@@ -112,19 +101,20 @@ namespace XinZhao7
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("Skin Settings");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5", "6"));
+            Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5"));
             Misc.AddGroupLabel("Drawing Settings");
-            Misc.Add("DrawR", new CheckBox("R Range"));
-            Misc.Add("DrawE", new CheckBox("E Range"));
-            Misc.Add("Damage", new CheckBox("Damage Indicator [R]"));
-            Misc.AddGroupLabel("Interrupt Settings");
+            Misc.Add("DrawR", new CheckBox("[R] Range"));
+            Misc.Add("DrawE", new CheckBox("[E] Range"));
+            Misc.Add("DrawTR", new CheckBox("Draw Text Tower"));
+            Misc.AddGroupLabel("Interrupt/Anti Gap Settings");
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
+            Misc.Add("AntiGap", new CheckBox("Use [W] Anti Gapcloser"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
             Orbwalker.OnPostAttack += ResetAttack;
             Interrupter.OnInterruptableSpell += Interupt;
-            Drawing.OnEndScene += Damage;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -153,7 +143,7 @@ namespace XinZhao7
 
         private static void Game_OnTick(EventArgs args)
         {
-
+            Orbwalker.DisableAttacking = false;
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -194,36 +184,6 @@ namespace XinZhao7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        private static void Damage(EventArgs args)
-        {
-            foreach (
-                var enemy in
-                    EntityManager.Heroes.Enemies.Where(e => e.IsValid && e.IsHPBarRendered && e.TotalShieldHealth() > 10)
-                )
-            {
-                var damage = RDamage(enemy);
-
-                if (Misc["Damage"].Cast<CheckBox>().CurrentValue && R.IsReady())
-                {
-                    var dmgPer = (enemy.TotalShieldHealth() - damage > 0 ? enemy.TotalShieldHealth() - damage : 0) /
-                                 enemy.TotalShieldMaxHealth();
-                    var currentHPPer = enemy.TotalShieldHealth() / enemy.TotalShieldMaxHealth();
-                    var initPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + dmgPer * Width),
-                        (int)enemy.HPBarPosition.Y + YOff);
-                    var endPoint = new Vector2((int)(enemy.HPBarPosition.X + XOff + currentHPPer * Width) + 1,
-                        (int)enemy.HPBarPosition.Y + YOff);
-
-                    EloBuddy.SDK.Rendering.Line.DrawLine(System.Drawing.Color.Orange, Thick, initPoint, endPoint);
-                }
-            }
-        }
-
-        public static float RDamage(Obj_AI_Base target)
-        {
-            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 0, 75, 175, 275 }[Program.R.Level] + 1.0f * _Player.FlatPhysicalDamageMod));
-        }
-
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
@@ -231,9 +191,6 @@ namespace XinZhao7
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
-            var item = ComboMenu["BOTRK"].Cast<CheckBox>().CurrentValue;
-            var Minhp = ComboMenu["ihp"].Cast<Slider>().CurrentValue;
-            var Minhpp = ComboMenu["ihpp"].Cast<Slider>().CurrentValue;
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             if (target != null)
             {
@@ -251,32 +208,40 @@ namespace XinZhao7
                        E.Cast(target);
                     }
                 }
-                if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
-                {
-                    Q.Cast();
-                }
-                if (useW && W.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(375) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (useQ && Q.IsReady() && target.IsValidTarget(300) && _Player.Distance(target) > 175 && !target.IsDead && !target.IsZombie)
                 {
-                    Bil.Cast(target);
+                    Q.Cast();
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
-                {
-                    Botrk.Cast(target);
-                }
+            }
+        }
+
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
+        {	
+            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) < 300)
+            {
+                W.Cast();
             }
         }
 
         private static void Ultimate()
         {
+            var target = TargetSelector.GetTarget(R.Range + 175, DamageType.Physical);
             var useR = Ulti["ultiR"].Cast<CheckBox>().CurrentValue;
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var mauR = Ulti["MauR"].Cast<Slider>().CurrentValue;
-            if (useR && !Player.Instance.IsInShopRange() && _Player.Position.CountEnemiesInRange(R.Range) >= minR)
+            var auto = Ulti["follow"].Cast<CheckBox>().CurrentValue;
+            var autow = Ulti["wulti"].Cast<CheckBox>().CurrentValue;
+            var mauW = Ulti["MauW"].Cast<Slider>().CurrentValue;
+            if (_Player.HasBuff("MonkeyKingSpinToWin"))
+            {
+                Orbwalker.DisableAttacking = true;
+            }
+            if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR)
             {
                 R.Cast();
             }
@@ -284,28 +249,43 @@ namespace XinZhao7
             {
                 R.Cast();
             }
+            if (autow && _Player.HealthPercent <= mauW && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+            {
+                W.Cast();
+            }
+            if (target == null) return;
+            if (auto && target.IsValidTarget() && !target.IsDead && !target.IsZombie && _Player.HasBuff("MonkeyKingSpinToWin"))
+            {
+                Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
+            }
         }
 
         private static void ResetAttack(AttackableUnit target, EventArgs args)
         {
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var useQJ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
                 if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                    if (Hydra.IsOwned() && Hydra.IsReady() && !Q.IsReady() && target.IsValidTarget(325))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
+                    if (Tiamat.IsOwned() && Tiamat.IsReady() && !Q.IsReady() && target.IsValidTarget(325))
                     {
                         Tiamat.Cast();
                     }
-                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
-                    {
-                        Titanic.Cast();
-                    }
+                }
+                if (useQ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    Q.Cast();
+                }
+                if (useQJ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                {
+                    Q.Cast();
                 }
             }
         }
@@ -313,60 +293,49 @@ namespace XinZhao7
         private static void LaneClear()
         {
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
-            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
+            var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(250) && minions.Count() >= 3)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(350) && minions.Count() >= 3)
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(250))
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range))
                 {
-                    W.Cast();
+                    E.Cast(minion);
                 }
             }
         }
 
         private static void Harass()
         {
-            var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
+     	    var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaHR"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(_Player.AttackRange, DamageType.Physical);
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(325) && !target.IsDead && !target.IsZombie)
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
                 {
-                    W.Cast();
+                    E.Cast(target);
                 }
             }
         }
 
         public static void JungleClear()
         {
-
-            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
-            var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(250));
+            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(375));
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(325))
-                {
-                    Q.Cast();
-                }
-                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(W.Range))
-                {
-                    W.Cast();
-                }
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range))
                 {
                     E.Cast(jungleMonsters);
@@ -422,7 +391,7 @@ namespace XinZhao7
         {
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(R.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
@@ -433,7 +402,7 @@ namespace XinZhao7
                 }
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    if (target.Health + target.AttackShield < RDamage(target))
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
                         R.Cast();
                     }
