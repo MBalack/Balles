@@ -23,8 +23,6 @@ namespace Bristana
         public static Spell.Skillshot W;
         public static Spell.Targeted E;
         public static Spell.Targeted R;
-        public static Item Botrk;
-        public static Item Bil;
         public static Font Thm;
         public static AIHeroClient _Player
         {
@@ -48,8 +46,6 @@ namespace Bristana
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 450, int.MaxValue, 180);
             E = new Spell.Targeted(SpellSlot.E, 550 + level * 7);
             R = new Spell.Targeted(SpellSlot.R, 550 + level * 7);
-            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
-            Bil = new Item(3144, 475f);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Menu = MainMenu.AddMenu("Tristana", "Tristana");
             Menu.AddGroupLabel("Tristana");
@@ -444,27 +440,6 @@ namespace Bristana
             if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 325)
             {
                 R.Cast(args.Sender);
-            }
-        }
-
-// Use Items
-
-        public static void Item()
-        {
-            var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
-            var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
-            var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(450, DamageType.Physical);
-            if (target != null)
-            {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
-                {
-                    Bil.Cast(target);
-                }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
-                {
-                    Botrk.Cast(target);
-                }
             }
         }
     }
