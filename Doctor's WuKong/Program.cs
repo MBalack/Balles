@@ -65,8 +65,8 @@ namespace Doctor_s_WuKong
 
             Ulti = Menu.AddSubMenu("Ultimate Settings", "Ulti");
             Ulti.AddGroupLabel("Ultimate Enemies In Count");
-            Ulti.Add("ultiR", new CheckBox("Use [R] Enemies In Range"));
-            Ulti.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
+            Ulti.Add("ultiR", new CheckBox("Use [R] Aoe"));
+            Ulti.Add("MinR", new Slider("Min Enemies Use [R] Aoe", 2, 1, 5));
             Ulti.Add("follow", new CheckBox("Auto Move To Target While [R]", false));
             Ulti.AddGroupLabel("Ultimate My HP");
             Ulti.Add("ultiR2", new CheckBox("Use [R] If My HP <"));
@@ -282,10 +282,14 @@ namespace Doctor_s_WuKong
                 if (useQ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
                 if (useQJ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
                     Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
             }
         }
