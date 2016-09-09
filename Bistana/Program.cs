@@ -28,7 +28,7 @@ namespace Bristana
         {
             get { return ObjectManager.Player; }
         }
-        public static Menu Menu, SpellMenu, JungleMenu, HarassMenu, LaneMenu, Misc, Items, Skin;
+        public static Menu Menu, SpellMenu, JungleMenu, HarassMenu, LaneMenu, Misc, Skin;
 
         static void Main(string[] args)
         {
@@ -92,12 +92,6 @@ namespace Bristana
             JungleMenu.Add("jungleE", new CheckBox("Use [E] JungleClear"));
             JungleMenu.Add("jungleW", new CheckBox("Use [W] JungleClear", false));
             JungleMenu.Add("manaJung", new Slider("Min Mana For JungleClear", 50, 0, 100));
-
-            Items = Menu.AddSubMenu("Items Settings", "Items");
-            Items.AddGroupLabel("Items Settings");
-            Items.Add("BOTRK", new CheckBox("Use [Botrk]"));
-            Items.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-            Items.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Draw");
             Misc.AddGroupLabel("Anti Gapcloser");
@@ -425,7 +419,6 @@ namespace Bristana
                 LaneClear();
             }
             KillSteal();
-            Item();
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
