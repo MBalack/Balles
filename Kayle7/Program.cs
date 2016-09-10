@@ -229,9 +229,9 @@ namespace Kayle7
                 (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("Recall"));
             foreach (var target2 in target)
             {
-                if (useR2 && !Player.Instance.IsInShopRange() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
+                if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
                 {
-                    if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && target2.HealthPercent <= almin)
+                    if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("Zed_Base_R_buf_tell.troy")))
                     {
                         R.Cast(target2);
                     }
@@ -249,12 +249,16 @@ namespace Kayle7
             if (Player.Instance.ManaPercent <= mana) return;
             foreach (var target2 in target)
             {
-                if (useW2 && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
+                if (useW2 && W.IsReady() && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
                 {
                     if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && target2.HealthPercent <= almin)
                     {
                         W.Cast(target2);
                     }
+                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && !R.IsReady() && target2.HasBuff("Zed_Base_R_buf_tell.troy"))
+                    {
+                        W.Cast(target2);
+					}
                 }
             }
         }
