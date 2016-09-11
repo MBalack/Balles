@@ -267,7 +267,7 @@ namespace KogMaw
                 {
                     W.Cast();
                 }
-                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") W.IsInRange(minions))
+                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") && W.IsInRange(minions))
                 {
                     Orbwalker.DisableMovement = true;
                 }
