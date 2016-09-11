@@ -312,7 +312,7 @@ namespace KogMaw
                 {
                     Q.Cast(minions);
                 }
-                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(W.Range + 150) >= MinW)
+                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(750) >= MinW)
                 {
                     W.Cast();
                 }
