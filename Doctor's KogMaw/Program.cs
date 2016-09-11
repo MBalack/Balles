@@ -33,9 +33,6 @@ namespace KogMaw
         public static Spell.Skillshot E;
         public static Spell.Skillshot R;
         public static Font thm;
-        public static Item Botrk;
-        public static Item Bil;
-        public static Item Youmuu;
         public static Spell.Targeted Ignite;
 
         static void Main(string[] args)
@@ -53,9 +50,6 @@ namespace KogMaw
             E = new Spell.Skillshot(SpellSlot.E, 1200, SkillShotType.Linear, 500, 1400, 120);
             E.AllowedCollisionCount = int.MaxValue;
             R = new Spell.Skillshot(SpellSlot.R, 900 + 300 * (uint)Player.Instance.Spellbook.GetSpell(SpellSlot.R).Level, SkillShotType.Circular, 1200, int.MaxValue, 120);
-            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
-            Bil = new Item(3144, 475f);
-            Youmuu = new Item(3142, 10);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Menu = MainMenu.AddMenu("Doctor's KogMaw", "KogMaw");
@@ -79,6 +73,7 @@ namespace KogMaw
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
             HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass"));
             HarassMenu.Add("DisableH", new CheckBox("Dont Move While [W]", false));
+            HarassMenu.AddGroupLabel("Ultimate Settings");
             HarassMenu.Add("HRR", new CheckBox("Use [R] Harass"));
             HarassMenu.Add("MinRHR", new Slider("Max Stacks [R] Harass", 2, 1, 10));
             HarassMenu.Add("ManaHR", new Slider("Mana Harass", 50));
@@ -216,7 +211,7 @@ namespace KogMaw
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
@@ -230,7 +225,7 @@ namespace KogMaw
                 {
                     E.Cast(target);
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 200) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 150) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
@@ -377,7 +372,7 @@ namespace KogMaw
                 {
                     R.Cast(target);
 				}
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 200) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 150) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
