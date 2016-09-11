@@ -257,18 +257,17 @@ namespace KogMaw
         private static void WLaneClear()
         {
             var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
-            var MinW = LaneClearMenu["minW"].Cast<Slider>().CurrentValue;
             var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             if (Player.Instance.ManaPercent < mana) return;
             if (minions != null)
             {
-                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(650) >= MinW)
+                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150))
                 {
                     W.Cast();
                 }
-                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") && minions.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
+                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") W.IsInRange(minions))
                 {
                     Orbwalker.DisableMovement = true;
                 }
