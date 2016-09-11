@@ -81,7 +81,6 @@ namespace Ashe
             LaneClearMenu.AddGroupLabel("Laneclear Settings");
             LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q] Laneclear", false));
             LaneClearMenu.Add("ClearW", new CheckBox("Use [W] Laneclear", false));
-            LaneClearMenu.Add("minW", new Slider("Min Hit Minions Use [W]", 3, 1, 6));
             LaneClearMenu.Add("manaFarm", new Slider("Mana LaneClear", 60, 0, 100));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
@@ -114,6 +113,7 @@ namespace Ashe
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
             Interrupter.OnInterruptableSpell += Interupt;
+            Orbwalker.OnPostAttack += ResetAttack;
 
         }
 
@@ -303,6 +303,28 @@ namespace Ashe
             }
         }
 
+//Use Q ResetAttack
+
+        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        {
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
+            if (useQ && QReady && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(650))
+            {
+                if (Keep && R.IsReady())
+                {
+                    if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                    {
+                        Q.Cast();
+                    }
+                }
+                else
+                {
+                    Q.Cast();
+                }
+            }
+        }
+
 //LaneClear Mode
 
         private static void LaneClear()
@@ -424,8 +446,6 @@ namespace Ashe
             var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead);
             var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             foreach (var target in target2)
             {
                 if (RAoe && R.IsReady() && target.IsValidTarget(2000))
@@ -436,20 +456,6 @@ namespace Ashe
                         R.Cast(RPred.CastPosition);
                     }
 		    	}
-                if (useQ && target.IsValidTarget(Q.Range) && QReady)
-                {
-                    if (Keep && R.IsReady())
-                    {
-                        if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
-                        {
-                            Q.Cast();
-                        }
-                    }
-                    else
-                    {
-                        Q.Cast();
-                    }
-                }
             }
         }
     }
