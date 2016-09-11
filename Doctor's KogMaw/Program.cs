@@ -83,6 +83,9 @@ namespace KogMaw
             LaneClearMenu.Add("QLC", new CheckBox("Use [Q] LaneClear", false));
             LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
             LaneClearMenu.Add("minE", new Slider("Min Hit Minion Use [E]", 3, 1, 6));
+            LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
+            LaneClearMenu.Add("DisLane", new CheckBox("Dont Move While [W]", false));
+            LaneClearMenu.Add("minW", new Slider("Min Minion Around Use [W]", 3, 1, 6));
             LaneClearMenu.AddGroupLabel("Ultimate Settings");
             LaneClearMenu.Add("RLC", new CheckBox("Use [R] LaneClear"));
             LaneClearMenu.Add("MinRLC", new Slider("Max Stacks [R] LaneClear", 1, 1, 10));
@@ -96,6 +99,7 @@ namespace KogMaw
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear", false));
             JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
             JungleClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
+            JungleClearMenu.Add("DisJungle", new CheckBox("Dont Move While [W]", false));
             JungleClearMenu.AddGroupLabel("Ultimate Settings");
             JungleClearMenu.Add("RJungle", new CheckBox("Use [R] JungleClear"));
             JungleClearMenu.Add("MinRJC", new Slider("Max Stacks [R] JungleClear", 1, 1, 10));
@@ -290,11 +294,14 @@ namespace KogMaw
         private static void LaneClear()
         {
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
+            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var useR = LaneClearMenu["RLC"].Cast<CheckBox>().CurrentValue;
+            var DisW = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var Rlimit = LaneClearMenu["MinRLC"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var MinE = LaneClearMenu["minE"].Cast<Slider>().CurrentValue;
+            var MinW = LaneClearMenu["minW"].Cast<Slider>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, E.Width, (int) E.Range);
@@ -305,9 +312,17 @@ namespace KogMaw
                 {
                     Q.Cast(minions);
                 }
+                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(W.Range + 150) >= MinW)
+                {
+                    W.Cast();
+                }
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(minions);
+                }
+                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && minions.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
+                {
+                    Orbwalker.DisableMovement = true;
                 }
             }
             foreach (var minionEE in minionE)
@@ -383,10 +398,11 @@ namespace KogMaw
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
+            var DisW = JungleClearMenu["DisJungle"].Cast<CheckBox>().CurrentValue;
             var Rlimit = JungleClearMenu["MinRJC"].Cast<Slider>().CurrentValue;
             var useR = JungleClearMenu["RJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, E.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, W.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (Player.Instance.ManaPercent <= mana) return;
             if (monster != null)
             {
@@ -405,6 +421,10 @@ namespace KogMaw
                 if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(monster);
+                }
+                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && monster.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                {
+                    Orbwalker.DisableMovement = true;
                 }
             }
         }
