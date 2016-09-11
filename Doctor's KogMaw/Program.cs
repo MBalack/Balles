@@ -260,7 +260,7 @@ namespace KogMaw
             var MinW = LaneClearMenu["minW"].Cast<Slider>().CurrentValue;
             var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range));
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             if (Player.Instance.ManaPercent < mana) return;
             if (minions != null)
             {
@@ -320,7 +320,7 @@ namespace KogMaw
             var Rlimit = LaneClearMenu["MinRLC"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var MinE = LaneClearMenu["minE"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range));
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, E.Width, (int) E.Range);
             if (Player.Instance.ManaPercent < mana) return;
