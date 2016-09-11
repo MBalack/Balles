@@ -238,11 +238,11 @@ namespace KogMaw
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (target != null)
             {
-                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)
+                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Orbwalker.DisableMovement = true;
                 }
-                if (DisWH && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)
+                if (DisWH && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
                     Orbwalker.DisableMovement = true;
                 }
