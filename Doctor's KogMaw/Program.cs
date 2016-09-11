@@ -164,6 +164,7 @@ namespace KogMaw
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
+                WLaneClear();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
@@ -239,9 +240,7 @@ namespace KogMaw
         {
             var DisW = ComboMenu["Disable"].Cast<CheckBox>().CurrentValue;
             var DisWH = HarassMenu["DisableH"].Cast<CheckBox>().CurrentValue;
-            var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             if (target != null)
             {
                 if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
@@ -252,13 +251,29 @@ namespace KogMaw
                 {
                     Orbwalker.DisableMovement = true;
                 }
+            }
+		}
+
+        private static void WLaneClear()
+        {
+            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
+            var MinW = LaneClearMenu["minW"].Cast<Slider>().CurrentValue;
+            var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
+            var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            if (Player.Instance.ManaPercent < mana) return;
+            if (minions != null)
+            {
+                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(750) >= MinW)
+                {
+                    W.Cast();
+                }
                 if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") && minions.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
                 {
                     Orbwalker.DisableMovement = true;
                 }
             }
-		}
-
+        }
         private static void Ultimate()
         {
             var Rlimit = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
@@ -300,14 +315,12 @@ namespace KogMaw
         private static void LaneClear()
         {
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
-            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var useR = LaneClearMenu["RLC"].Cast<CheckBox>().CurrentValue;
             var Rlimit = LaneClearMenu["MinRLC"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var MinE = LaneClearMenu["minE"].Cast<Slider>().CurrentValue;
-            var MinW = LaneClearMenu["minW"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
+            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, E.Width, (int) E.Range);
             if (Player.Instance.ManaPercent < mana) return;
@@ -316,10 +329,6 @@ namespace KogMaw
                 if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
                 {
                     Q.Cast(minions);
-                }
-                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150) && _Player.CountEnemyMinionsInRange(750) >= MinW)
-                {
-                    W.Cast();
                 }
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
