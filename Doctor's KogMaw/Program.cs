@@ -76,7 +76,9 @@ namespace KogMaw
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
+            HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
             HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass"));
+            HarassMenu.Add("DisableH", new CheckBox("Dont Move While [W]", false));
             HarassMenu.Add("HRR", new CheckBox("Use [R] Harass"));
             HarassMenu.Add("MinRHR", new Slider("Max Stacks [R] Harass", 2, 1, 10));
             HarassMenu.Add("ManaHR", new Slider("Mana Harass", 50));
@@ -171,6 +173,7 @@ namespace KogMaw
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
+                Move();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
@@ -227,7 +230,7 @@ namespace KogMaw
                 {
                     E.Cast(target);
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 50) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 200) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
@@ -237,10 +240,18 @@ namespace KogMaw
         private static void Move()
         {
             var DisW = ComboMenu["Disable"].Cast<CheckBox>().CurrentValue;
+            var DisWH = HarassMenu["DisableH"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            if (target != null && DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie)
+            if (target != null)
             {
-                Orbwalker.DisableMovement = true;
+                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie)
+                {
+                    Orbwalker.DisableMovement = true;
+                }
+                if (DisWH && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie)
+                {
+                    Orbwalker.DisableMovement = true;
+                }
             }
 		}
 
@@ -252,7 +263,7 @@ namespace KogMaw
             var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
             if (target != null)
             {
-                if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit && Player.Instance.ManaPercent > mana && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana*Player.Instance.GetBuffCount("KogMawLivingArtillery"))
+                if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit && Player.Instance.ManaPercent > mana && Player.Instance.Mana > W.Handle.SData.Mana + 50*Player.Instance.GetBuffCount("KogMawLivingArtillery"))
                 {
                     if (ComboMenu["RMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
@@ -345,6 +356,7 @@ namespace KogMaw
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
+            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaHR"].Cast<Slider>().CurrentValue;
             var Rlimit = HarassMenu["MinRHR"].Cast<Slider>().CurrentValue;
@@ -365,6 +377,10 @@ namespace KogMaw
                 {
                     R.Cast(target);
 				}
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 200) && !target.IsDead && !target.IsZombie)
+                {
+                    W.Cast();
+                }
             }
         }
 
