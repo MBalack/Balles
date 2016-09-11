@@ -239,7 +239,9 @@ namespace KogMaw
         {
             var DisW = ComboMenu["Disable"].Cast<CheckBox>().CurrentValue;
             var DisWH = HarassMenu["DisableH"].Cast<CheckBox>().CurrentValue;
+            var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             if (target != null)
             {
                 if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
@@ -247,6 +249,10 @@ namespace KogMaw
                     Orbwalker.DisableMovement = true;
                 }
                 if (DisWH && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+                {
+                    Orbwalker.DisableMovement = true;
+                }
+                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") && minions.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
                 {
                     Orbwalker.DisableMovement = true;
                 }
@@ -297,7 +303,6 @@ namespace KogMaw
             var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var useR = LaneClearMenu["RLC"].Cast<CheckBox>().CurrentValue;
-            var DisW = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
             var Rlimit = LaneClearMenu["MinRLC"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var MinE = LaneClearMenu["minE"].Cast<Slider>().CurrentValue;
@@ -319,10 +324,6 @@ namespace KogMaw
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(minions);
-                }
-                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && minions.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
-                {
-                    Orbwalker.DisableMovement = true;
                 }
             }
             foreach (var minionEE in minionE)
