@@ -83,9 +83,6 @@ namespace KogMaw
             LaneClearMenu.Add("QLC", new CheckBox("Use [Q] LaneClear", false));
             LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
             LaneClearMenu.Add("minE", new Slider("Min Hit Minion Use [E]", 3, 1, 6));
-            LaneClearMenu.Add("WLC", new CheckBox("Use [W] LaneClear", false));
-            LaneClearMenu.Add("DisLane", new CheckBox("Dont Move While [W]", false));
-            LaneClearMenu.Add("minW", new Slider("Min Minion Around Use [W]", 3, 1, 6));
             LaneClearMenu.AddGroupLabel("Ultimate Settings");
             LaneClearMenu.Add("RLC", new CheckBox("Use [R] LaneClear"));
             LaneClearMenu.Add("MinRLC", new Slider("Max Stacks [R] LaneClear", 1, 1, 10));
@@ -164,7 +161,6 @@ namespace KogMaw
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
-                WLaneClear();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
@@ -253,26 +249,6 @@ namespace KogMaw
                 }
             }
 		}
-
-        private static void WLaneClear()
-        {
-            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
-            var DisWL = LaneClearMenu["DisLane"].Cast<CheckBox>().CurrentValue;
-            var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
-            if (Player.Instance.ManaPercent < mana) return;
-            if (minions != null)
-            {
-                if (useW && W.IsReady() && minions.IsValidTarget(W.Range + 150))
-                {
-                    W.Cast();
-                }
-                if (DisWL && Player.HasBuff("KogMawBioArcaneBarrage") && W.IsInRange(minions))
-                {
-                    Orbwalker.DisableMovement = true;
-                }
-            }
-        }
         private static void Ultimate()
         {
             var Rlimit = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
