@@ -190,7 +190,7 @@ namespace Yi
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 175))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
                 {
                     Q.Cast(target);
                 }
@@ -260,13 +260,13 @@ namespace Yi
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var useQC = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            if (useW && W.IsReady() && _Player.Distance(target) < 100 && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            if (useW && W.IsReady() && _Player.Distance(target) < 125 && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 W.Cast();
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackTo, target);
             }
-            if (useQC && W.IsReady() && _Player.Distance(target) < 100 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useQC && W.IsReady() && _Player.Distance(target) < 125 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 W.Cast();
                 Orbwalker.ResetAutoAttack();
@@ -282,7 +282,7 @@ namespace Yi
             if (_Player.ManaPercent < mana) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 175))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 300))
                 {
                     Q.Cast(target);
                 }
