@@ -275,13 +275,13 @@ namespace Yi
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var useQC = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            if (useW && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange()) && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            if (useW && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange() - 50) && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 W.Cast();
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackTo, target);
             }
-            if (useQC && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange()) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useQC && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange() - 50) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 W.Cast();
                 Orbwalker.ResetAutoAttack();
