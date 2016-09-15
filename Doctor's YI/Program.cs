@@ -200,7 +200,7 @@ namespace Yi
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.HealthPercent <= 35))
                 {
                     Q.Cast(target);
                 }
@@ -292,7 +292,7 @@ namespace Yi
             if (_Player.ManaPercent < mana) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 300))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.HealthPercent <= 35))
                 {
                     Q.Cast(target);
                 }
