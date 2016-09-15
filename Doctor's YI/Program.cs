@@ -52,6 +52,7 @@ namespace Yi
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] Target Dashing"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
@@ -195,14 +196,28 @@ namespace Yi
         public static void Combo()
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var SaveQ = ComboMenu["ComboQ2"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.HealthPercent <= 35))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(target);
+                    if (SaveQ)
+                    {
+                        if (target.IsDashing() || _Player.HealthPercent <= 35)
+                        {
+                            Q.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                        if (_Player.Distance(target) > 325 || target.IsDashing())
+                        {
+                            Q.Cast(target);
+                        }
+                    }
                 }
                 if (useE && E.IsReady() && _Player.Distance(target) < 275)
                 {
@@ -292,7 +307,7 @@ namespace Yi
             if (_Player.ManaPercent < mana) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.HealthPercent <= 35))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
                 {
                     Q.Cast(target);
                 }
