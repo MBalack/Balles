@@ -52,8 +52,10 @@ namespace Yi
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] If Target Dashing" ,false));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
+            ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Count Enemies Around"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
             ComboMenu.AddGroupLabel("Use [W] Low HP");
@@ -184,14 +186,28 @@ namespace Yi
         public static void Combo()
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var SaveQ = ComboMenu["ComboQ2"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(target);
+                    if (SaveQ)
+                    {
+                        if (target.IsDashing() || _Player.Distance(target) > 325)
+                        {
+                            Q.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                        if (target.IsDashing())
+                        {
+                            Q.Cast(target);
+                        }
+                    }
                 }
                 if (useE && E.IsReady() && _Player.Distance(target) < 275)
                 {
