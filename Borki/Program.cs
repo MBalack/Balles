@@ -168,7 +168,7 @@ namespace Borki7
             var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) &&  && !Orbwalker.IsAutoAttacking)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(target);
                 }

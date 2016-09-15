@@ -270,6 +270,7 @@ namespace Ezreal7
                     Botrk.Cast(target);
                 }
             }
+        }
 		
         public static void Combo()
         {
