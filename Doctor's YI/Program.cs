@@ -274,7 +274,7 @@ namespace Yi
         public static void WLogic()
         {
             var MinHealth = ComboMenu["minHealth"].Cast<Slider>().CurrentValue;
-            if (!_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(1000) >= 1 && (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR")))
+            if (!_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(450) >= 1 && (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR")))
             {
                 W.Cast();
             }
@@ -339,22 +339,25 @@ namespace Yi
         }
         public static void QEvade()
         {
+            var useQ = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
             var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range));
-            if (Enemies != null)
+            if (useQ && Q.IsReady())
             {
-                Core.DelayAction(() => Q.Cast(Enemies), ComboMenu["delay"].Cast<Slider>().CurrentValue);
-            }
-            if (minions != null)
-            {
-                Core.DelayAction(() => Q.Cast(minions), ComboMenu["delay"].Cast<Slider>().CurrentValue);
+                if (Enemies != null)
+                {
+                    Core.DelayAction(() => Q.Cast(Enemies), ComboMenu["delay"].Cast<Slider>().CurrentValue);
+                }
+                if (minions != null)
+                {
+                    Core.DelayAction(() => Q.Cast(minions), ComboMenu["delay"].Cast<Slider>().CurrentValue);
+                }
             }
         }
 
         private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            var useQ = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
-            if (useQ && sender.IsEnemy && Q.IsReady())
+            if (sender.IsEnemy && Q.IsReady())
             {
                     if (_Player.Distance(sender) <= args.SData.CastRange)
                     {
