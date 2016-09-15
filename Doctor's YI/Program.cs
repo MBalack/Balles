@@ -201,12 +201,9 @@ namespace Yi
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
                 {
-                    if (target.IsDashing() || _Player.Distance(target) > 325)
-                    {
-                        Q.Cast(target);
-                    }
+                    Q.Cast(target);
                 }
                 if (useE && E.IsReady() && _Player.Distance(target) < 275)
                 {
