@@ -52,7 +52,7 @@ namespace Yi
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] Target Dashing"));
+            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] Target Dashing", false));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
@@ -223,7 +223,7 @@ namespace Yi
                 {
                     E.Cast();
                 }
-                if (useR && R.IsReady() && _Player.CountEnemiesInRange(525) >= MinR)
+                if (useR && R.IsReady() && _Player.CountEnemiesInRange(675) >= MinR)
                 {
                     R.Cast();
 	    		}
@@ -237,10 +237,9 @@ namespace Yi
             var useE = LaneClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.ServerPosition, 625).FirstOrDefault(x => x.IsValidTarget(Q.Range));
-            if (_Player.ManaPercent < mana) return;
             if (monster != null)
             {
-                if (useQ && Q.IsReady())
+                if (useQ && Q.IsReady() && _Player.ManaPercent > mana)
 		    	{
                     Q.Cast(monster);
                 }
@@ -257,10 +256,9 @@ namespace Yi
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
-            if (_Player.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && _Player.CountEnemyMinionsInRange(625) >= 3)
+                if (useQ && Q.IsReady() && _Player.ManaPercent > mana && _Player.CountEnemyMinionsInRange(625) >= 3)
                 {
                     Q.Cast(minion);
                 }
@@ -274,7 +272,7 @@ namespace Yi
         public static void WLogic()
         {
             var MinHealth = ComboMenu["minHealth"].Cast<Slider>().CurrentValue;
-            if (!_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(450) >= 1 && (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR")))
+            if (!_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(425) >= 1 && (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR")))
             {
                 W.Cast();
             }
@@ -304,10 +302,9 @@ namespace Yi
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            if (_Player.ManaPercent < mana) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (target.IsDashing() || _Player.Distance(target) > 325))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.ManaPercent > mana && (target.IsDashing() || _Player.Distance(target) > 325))
                 {
                     Q.Cast(target);
                 }
@@ -322,14 +319,14 @@ namespace Yi
         {
             var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range));
-            if (Enemies != null)
+            if (Enemies != null && Q.IsReady())
             {
                 if (Enemies.IsInRange(Game.CursorPos, 200))
                 {
                     Q.Cast(Enemies);
                 }
             }
-            if (minions != null)
+            if (minions != null && Q.IsReady())
             {
                 if (minions.IsInRange(Game.CursorPos, 200))
                 {
