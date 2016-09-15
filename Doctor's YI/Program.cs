@@ -52,7 +52,6 @@ namespace Yi
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] If Target Dashing" ,false));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
@@ -62,6 +61,7 @@ namespace Yi
             ComboMenu.Add("minHealth", new Slider("Use [W] If My Hp <=", 50));
             ComboMenu.AddGroupLabel("Use [Q] Dodge Spell");
             ComboMenu.Add("dodge", new CheckBox("Use [Q] Dodge"));
+            ComboMenu.Add("antiGap", new CheckBox("Use [Q] Anti Gap"));
             ComboMenu.Add("delay", new Slider("Use [Q] Dodge Delay", 1, 1, 1000));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
@@ -106,6 +106,7 @@ namespace Yi
             Game.OnTick += Game_OnTick;
             Obj_AI_Base.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             Orbwalker.OnPostAttack += ResetAttack;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -182,6 +183,14 @@ namespace Yi
                 }
             }
         }
+
+        private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
+        {
+            if (ComboMenu["antiGap"].Cast<CheckBox>().CurrentValue && Q.IsReady() && args.Sender.Distance(_Player) < 325)
+            {
+                Q.Cast(args.Sender);
+            }
+        }
 		
         public static void Combo()
         {
@@ -194,19 +203,9 @@ namespace Yi
      	    {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (SaveQ)
+                    if (target.IsDashing() || _Player.Distance(target) > 325)
                     {
-                        if (target.IsDashing() || _Player.Distance(target) > 325)
-                        {
-                            Q.Cast(target);
-                        }
-                    }
-                    else
-                    {
-                        if (target.IsDashing())
-                        {
-                            Q.Cast(target);
-                        }
+                        Q.Cast(target);
                     }
                 }
                 if (useE && E.IsReady() && _Player.Distance(target) < 275)

@@ -430,7 +430,7 @@ namespace Bristana
 
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
-            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && args.Sender.Distance(_Player) < 325)
+            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && R.IsReady() && args.Sender.Distance(_Player) < 325)
             {
                 R.Cast(args.Sender);
             }
