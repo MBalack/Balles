@@ -186,15 +186,15 @@ namespace Jax
             var useE = Autos["AutoE"].Cast<CheckBox>().CurrentValue;
             var MinE = Autos["minE"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(550, DamageType.Physical);
-            if (target != null)
+            foreach (var targeti in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(475) && !e.IsDead))
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(550))
+                if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(targeti))
                 {
-                    Bil.Cast(target);
+                    Bil.Cast(targeti);
                 }
-                else if (item && Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(550))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && Botrk.IsInRange(targeti)) && (Player.Instance.HealthPercent <= Minhp || targeti.HealthPercent < Minhpp))
                 {
-                    Botrk.Cast(target);
+                    Botrk.Cast(targeti);
                 }
             }
             if (useR && R.IsReady() && ObjectManager.Player.Position.CountEnemiesInRange(Q.Range) >= 1 && Player.Instance.HealthPercent <= MinR)

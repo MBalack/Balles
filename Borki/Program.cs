@@ -168,7 +168,7 @@ namespace Borki7
             var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) &&  && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(target);
                 }
@@ -180,7 +180,7 @@ namespace Borki7
                         R.Cast(Pred.CastPosition);
                     }
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
                 }
@@ -200,7 +200,7 @@ namespace Borki7
             if (_Player.ManaPercent < mana) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(target);
                 }
@@ -212,7 +212,7 @@ namespace Borki7
                         R.Cast(Pred.CastPosition);
                     }
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
                 }
@@ -236,11 +236,11 @@ namespace Borki7
                 {
                     R.Cast(minion);
                 }
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(minion);
                 }
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
                 }
@@ -321,14 +321,13 @@ namespace Borki7
             var item = items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(450, DamageType.Physical);
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(475) && !e.IsDead))
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(target))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && Botrk.IsInRange(target)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
