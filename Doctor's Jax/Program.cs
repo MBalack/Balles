@@ -192,7 +192,7 @@ namespace Jax
                 {
                     Bil.Cast(targeti);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && Botrk.IsInRange(targeti)) && (Player.Instance.HealthPercent <= Minhp || targeti.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && targeti.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || targeti.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(targeti);
                 }
