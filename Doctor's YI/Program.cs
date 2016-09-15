@@ -169,11 +169,11 @@ namespace Yi
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(475) && !e.IsDead))
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && Item.HasItem(Bil.Id) && Item.CanUseItem(Bil.Id))
+                if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(target))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && Item.HasItem(Botrk.Id) && Item.CanUseItem(Botrk.Id)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
