@@ -50,7 +50,6 @@ namespace Ezreal7
         {
             if (!_Player.ChampionName.Contains("Ezreal")) return;
             Chat.Print("Doctor's Ezreal Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 1150, SkillShotType.Linear, 250, 2000, 60);
             W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
             W.AllowedCollisionCount = int.MaxValue;
@@ -63,7 +62,6 @@ namespace Ezreal7
             Thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Menu = MainMenu.AddMenu("Ezreal", "Ezreal");
-            Menu.AddGroupLabel("Doctor7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));

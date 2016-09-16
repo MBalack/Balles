@@ -226,12 +226,12 @@ namespace Kayle7
             var almin = Ulti["Alhp"].Cast<Slider>().CurrentValue;
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var target = EntityManager.Heroes.Allies.OrderByDescending
-                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("Recall"));
+                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             foreach (var target2 in target)
             {
                 if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
                 {
-                    if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("Zed_Base_R_buf_tell.troy")))
+                    if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("ZedR")))
                     {
                         R.Cast(target2);
                     }
@@ -245,20 +245,16 @@ namespace Kayle7
             var useW2 = Heal["healW2"].Cast<CheckBox>().CurrentValue;
             var mana = Heal["ManaHeal"].Cast<Slider>().CurrentValue;
             var target = EntityManager.Heroes.Allies.OrderByDescending
-                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= W.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Recall"));
+                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= W.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             if (Player.Instance.ManaPercent <= mana) return;
             foreach (var target2 in target)
             {
                 if (useW2 && W.IsReady() && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
                 {
-                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && target2.HealthPercent <= almin)
+                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || !target2.HasBuff("ZedR")))
                     {
                         W.Cast(target2);
                     }
-                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && !R.IsReady() && target2.HasBuff("Zed_Base_R_buf_tell.troy"))
-                    {
-                        W.Cast(target2);
-					}
                 }
             }
         }
@@ -276,6 +272,7 @@ namespace Kayle7
                 {
                     E.Cast();
                 }
+				
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth())
                 {
                     Q.Cast(minion);
@@ -316,6 +313,7 @@ namespace Kayle7
                 {
                     Q.Cast(target);
                 }
+				
                 if (useE && E.IsReady() && target.IsValidTarget(550) && !target.IsDead && !target.IsZombie)
                 {
                     E.Cast();
@@ -336,6 +334,7 @@ namespace Kayle7
                 {
                     Q.Cast(monster);
                 }
+				
                 if (useE && E.IsReady() && monster.IsValidTarget(Q.Range))
                 {
                     E.Cast();
@@ -353,6 +352,7 @@ namespace Kayle7
                     Q.Cast(target);
                 }
             }
+			
             if (W.IsReady())
             {
                 W.Cast(Player.Instance);

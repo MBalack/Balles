@@ -43,10 +43,8 @@ namespace Graves7
 
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
-            if(Player.Instance.Hero != Champion.Graves)
-                return;
+            if(Player.Instance.Hero != Champion.Graves) return;
             Chat.Print("Doctor's Graves Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 850, SkillShotType.Linear, 250, 2000, 60);
             Q.AllowedCollisionCount = int.MaxValue;
             W = new Spell.Skillshot(SpellSlot.W, 950, SkillShotType.Circular, 250, 1650, 150);
@@ -155,25 +153,29 @@ namespace Graves7
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
 				JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
 			if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
-			    KillSteal();
-                QStun();
-                Item();
+		    KillSteal();
+            QStun();
+            Item();
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -187,6 +189,7 @@ namespace Graves7
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -194,24 +197,28 @@ namespace Graves7
 		
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (Drawings["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
-                return;
+            if (Drawings["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
+			
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue && Q.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(Player.Instance.Position);
             }
+			
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(Player.Instance.Position);
             }
+			
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue && E.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(Player.Instance.Position);
             }
+			
             if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = R.Range }.Draw(Player.Instance.Position);
             }
+			
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
@@ -235,16 +242,19 @@ namespace Graves7
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
+			
             if (target != null)
             {
                 if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
+				
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
+				
                 if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(550) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Youmuu.Cast();
@@ -275,6 +285,32 @@ namespace Graves7
 			}
 		}
 
+        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        {
+            var useJ = JungleMenu["JungleAA"].Cast<CheckBox>().CurrentValue;
+            var manaJ = JungleMenu["EJung"].Cast<Slider>().CurrentValue;
+            var useL = ClearMenu["LaneAA"].Cast<CheckBox>().CurrentValue;
+            var mana = ClearMenu["ELane"].Cast<Slider>().CurrentValue;
+			
+            if (useJ && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent >= manaJ)
+            {
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
+            }
+			
+            if (useL && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= mana)
+            {
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
+            }
+			
+            if (HarassMenu["HarassAA"].Cast<CheckBox>().CurrentValue && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= HarassMenu["ManaHarass"].Cast<Slider>().CurrentValue)
+            {
+                Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                Orbwalker.ResetAutoAttack();
+            }
+        }
+
         public static void Combo()
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
@@ -282,7 +318,9 @@ namespace Graves7
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            if (useQ && Q.IsReady())
+			
+            if (!useQ && !Q.IsReady()) return;
+
             foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (ComboMenu["combo" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
@@ -295,25 +333,27 @@ namespace Graves7
                 }
 			}
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (target == null)
-            {
-                return;
-            }
+			
+            if (target == null) return;
+
             if (useW && W.IsReady() && target.IsValidTarget(W.Range))
      	    {
                 W.Cast(target);
 			}
+			
             if (useE && E.IsReady())
             {
                 if (ComboMode.CurrentValue == 1 && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
                 {
                     Player.CastSpell(SpellSlot.E, Game.CursorPos);
                 }
+				
                 if (ComboMode.CurrentValue == 0 && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
                 {
       	    	    Player.CastSpell(SpellSlot.E, Game.CursorPos);
                 }
             }
+
             if (useR && R.IsReady() && target.IsValidTarget(R.Range))
             {
                 var pred = R.GetPrediction(target);
@@ -330,6 +370,7 @@ namespace Graves7
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
             if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaW)
+
             foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
             {
                 if (HarassMenu["haras" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
@@ -341,11 +382,11 @@ namespace Graves7
                     }
                 }
 			}
+
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (target == null)
-            {
-                return;
-            }
+
+            if (target == null) return;
+
             if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && target.IsValidTarget(W.Range))
             {
                W.Cast(target);
@@ -359,6 +400,7 @@ namespace Graves7
             var MinQ = ClearMenu["minQ"].Cast<Slider>().CurrentValue;
             var minionQ = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, Q.Width, (int) Q.Range);
+
             foreach (var minion in minionQ)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > ManaQ && quang.HitNumber >= MinQ)
@@ -376,36 +418,15 @@ namespace Graves7
             var jungManaW = JungleMenu["JungleManaW"].Cast<Slider>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (monster == null) return;
+			
             if (Q.IsReady() && useQ && monster.Distance(_Player) <= Q.Range && _Player.ManaPercent > jungMana)
             {
                 Q.Cast(monster);
             }
+			
             if (W.IsReady() && useW && monster.Distance(_Player) <= W.Range && _Player.ManaPercent > jungManaW)
             {
                 W.Cast(monster);
-            }
-        }
-		
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
-        {
-            var useJ = JungleMenu["JungleAA"].Cast<CheckBox>().CurrentValue;
-            var manaJ = JungleMenu["EJung"].Cast<Slider>().CurrentValue;
-            var useL = ClearMenu["LaneAA"].Cast<CheckBox>().CurrentValue;
-            var mana = ClearMenu["ELane"].Cast<Slider>().CurrentValue;
-            if (useJ && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent >= manaJ)
-            {
-                Player.CastSpell(SpellSlot.E, Game.CursorPos);
-                Orbwalker.ResetAutoAttack();
-            }
-            if (useL && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= mana)
-            {
-                Player.CastSpell(SpellSlot.E, Game.CursorPos);
-                Orbwalker.ResetAutoAttack();
-            }
-            if (HarassMenu["HarassAA"].Cast<CheckBox>().CurrentValue && E.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= HarassMenu["ManaHarass"].Cast<Slider>().CurrentValue)
-            {
-                Player.CastSpell(SpellSlot.E, Game.CursorPos);
-                Orbwalker.ResetAutoAttack();
             }
         }
 		
@@ -442,6 +463,7 @@ namespace Graves7
                         }
                     }
                 }
+				
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
@@ -453,8 +475,10 @@ namespace Graves7
                         }
 					}
                 }
+				
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
+				
                 if (KsR && R.IsReady())
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, R.Range) && !target.IsInRange(Player.Instance, minKsR))
@@ -466,6 +490,7 @@ namespace Graves7
                         }
                     }
                 }
+				
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))

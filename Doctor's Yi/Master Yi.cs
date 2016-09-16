@@ -356,10 +356,9 @@ namespace Yi
         }
         public static void QEvade()
         {
-            var useQ = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
             var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
             var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(Q.Range));
-            if (useQ && Q.IsReady())
+            if (Q.IsReady())
             {
                 if (Enemies != null)
                 {
@@ -374,11 +373,47 @@ namespace Yi
 
         private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!_Player.IsDead && sender.IsEnemy)
+            var useQ = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
+            if (useQ && !_Player.IsDead && sender.IsEnemy)
             {
                 if (_Player.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget() && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
                 {
                     QEvade();
+                }
+
+                if (args.SData.Name == "ZedR")
+                {
+                    if (Q.IsReady())
+                    {
+                        Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                    }
+                    else
+                    {
+                        if (W.IsReady())
+                        {
+                            W.Cast();
+                        }
+                    }
+                }
+
+                if (args.SData.Name == "KarthusFallenOne")
+                {
+                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                }
+
+                if (args.SData.Name == "SoulShackles")
+                {
+                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                }
+
+                if (args.SData.Name == "AbsoluteZero")
+                {
+                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                }
+
+                if (args.SData.Name == "NocturneUnspeakableHorror")
+                {
+                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
                 }
             }
         }
@@ -386,7 +421,7 @@ namespace Yi
         public static void KillSteal()
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2500) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {

@@ -389,21 +389,20 @@ namespace XinZhao7
 
         public static void Flee()
         {
-            if (E.IsReady())
+            var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(E.Range));
+            var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(E.Range));
+            if (Enemies != null && E.IsReady())
             {
-                var CursorPos = Game.CursorPos;
-                Obj_AI_Base fl = EntityManager.MinionsAndMonsters.Minions.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
-                if (fl != default(Obj_AI_Base))
+                if (Enemies.IsInRange(Game.CursorPos, 250))
                 {
-                    E.Cast(fl);
+                    E.Cast(Enemies);
                 }
-                else
+            }
+            if (minions != null && E.IsReady())
+            {
+                if (minions.IsInRange(Game.CursorPos, 250))
                 {
-                    fl = EntityManager.Heroes.Enemies.FirstOrDefault(w => w.Distance(CursorPos) <= 250 && E.IsInRange(w));
-                    if (fl != default(Obj_AI_Base))
-                    {
-                        E.Cast(fl);
-                    }
+                    E.Cast(minions);
                 }
             }
         }
