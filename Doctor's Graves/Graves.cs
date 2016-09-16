@@ -61,15 +61,9 @@ namespace Graves7
             ComboMenu = Menu.AddSubMenu("Combo Settings", "ComboMenu");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.AddLabel("Use [Q] On");
-            foreach (var Selector in EntityManager.Heroes.Enemies)
-            {
-                ComboMenu.Add("combo" + Selector.ChampionName, new CheckBox("" + Selector.ChampionName));
-            }
-            ComboMenu.AddSeparator();
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
 			ComboMode = ComboMenu.Add("comboMode", new Slider("Min Stack Use [E] Reload", 1, 0, 1));
-            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe In Combo", false));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
 
@@ -318,50 +312,41 @@ namespace Graves7
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-			
-            if (!useQ && !Q.IsReady()) return;
 
-            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead && !e.IsZombie))
             {
-                if (ComboMenu["combo" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
+                if (!useQ && !Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    var predQ = Q.GetPrediction(Selector);
-                    if (predQ.HitChance >= HitChance.Medium)
+                    Q.Cast(target);
+		    	}
+
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+     	        {
+                    W.Cast(target);
+		    	}
+			
+                if (useE && E.IsReady())
+                {
+                    if (ComboMode.CurrentValue == 1 && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
                     {
-                        Q.Cast(predQ.CastPosition);
+                        Player.CastSpell(SpellSlot.E, Game.CursorPos);
+                    }
+				
+                    if (ComboMode.CurrentValue == 0 && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
+                    {
+      	        	    Player.CastSpell(SpellSlot.E, Game.CursorPos);
                     }
                 }
-			}
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-			
-            if (target == null) return;
 
-            if (useW && W.IsReady() && target.IsValidTarget(W.Range))
-     	    {
-                W.Cast(target);
-			}
-			
-            if (useE && E.IsReady())
-            {
-                if (ComboMode.CurrentValue == 1 && !Player.HasBuff("GravesBasicAttackAmmo2") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    Player.CastSpell(SpellSlot.E, Game.CursorPos);
-                }
-				
-                if (ComboMode.CurrentValue == 0 && !Player.HasBuff("GravesBasicAttackAmmo2") && !Player.HasBuff("GravesBasicAttackAmmo1") && _Player.Position.CountEnemiesInRange(R.Range) >= 1)
-                {
-      	    	    Player.CastSpell(SpellSlot.E, Game.CursorPos);
-                }
+                    var pred = R.GetPrediction(target);
+                    if (pred.CastPosition.CountEnemiesInRange(R.Range) >= MinR && pred.HitChance >= HitChance.High)
+                    {
+                        R.Cast(pred.CastPosition);
+                    }
+		    	}
             }
-
-            if (useR && R.IsReady() && target.IsValidTarget(R.Range))
-            {
-                var pred = R.GetPrediction(target);
-                if (pred.CastPosition.CountEnemiesInRange(R.Range) >= MinR && pred.HitChance >= HitChance.High)
-                {
-                    R.Cast(pred.CastPosition);
-                }
-			}
         }
 
         private static void Harass()
@@ -369,29 +354,24 @@ namespace Graves7
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-            if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= ManaW)
-
-            foreach (var Selector in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
+            if (Player.Instance.ManaPercent < ManaW) return;
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead && !e.IsZombie))
             {
-                if (HarassMenu["haras" + Selector.ChampionName].Cast<CheckBox>().CurrentValue)
+                if (useQ && Q.IsReady() && HarassMenu["haras" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                 {
-                    var predQ = Q.GetPrediction(Selector);
+                    var predQ = Q.GetPrediction(target);
                     if (predQ.HitChance >= HitChance.Medium)
                     {
                         Q.Cast(predQ.CastPosition);
                     }
                 }
-			}
 
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-
-            if (target == null) return;
-
-            if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && target.IsValidTarget(W.Range))
-            {
-               W.Cast(target);
-            }
-		}
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                {
+                    W.Cast(target);
+                }
+	    	}
+        }
 
         private static void LaneClear()
         {
@@ -417,14 +397,14 @@ namespace Graves7
             var jungMana = JungleMenu["JungleMana"].Cast<Slider>().CurrentValue;
             var jungManaW = JungleMenu["JungleManaW"].Cast<Slider>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
-            if (monster == null) return;
-			
-            if (Q.IsReady() && useQ && monster.Distance(_Player) <= Q.Range && _Player.ManaPercent > jungMana)
+            if (monster == null && _Player.ManaPercent < jungMana) return;
+
+            if (Q.IsReady() && useQ && monster.Distance(_Player) <= Q.Range)
             {
                 Q.Cast(monster);
             }
 			
-            if (W.IsReady() && useW && monster.Distance(_Player) <= W.Range && _Player.ManaPercent > jungManaW)
+            if (W.IsReady() && useW && monster.Distance(_Player) <= W.Range)
             {
                 W.Cast(monster);
             }
