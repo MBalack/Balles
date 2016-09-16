@@ -54,7 +54,7 @@ namespace Vladimir
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
             ComboMenu.AddLabel("Use [R] Aoe");
             ComboMenu.Add("ComboR2", new CheckBox("Use [R] Aoe"));
-            ComboMenu.Add("MinR", new Slider("Use [R] Aoe Enemies >=", 1, 1, 5));
+            ComboMenu.Add("MinR", new Slider("Use [R] Aoe Enemies >=", 2, 1, 5));
             ComboMenu.AddLabel("Auto [Q-W] Low HP");
             ComboMenu.Add("Wtoggle", new CheckBox("Auto [W] Low MyHp"));
             ComboMenu.Add("minHealth", new Slider("Use [W] My Hp <", 20));
