@@ -111,6 +111,7 @@ namespace Renekton7
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
             Orbwalker.OnPostAttack += ResetAttack;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -186,10 +187,12 @@ namespace Renekton7
                 {
                     W.Cast();
                 }
+				
                 if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
                 }
+				
                 if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
@@ -199,11 +202,10 @@ namespace Renekton7
 
         private static void QLogic()
         {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var targetR in target2)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
@@ -220,9 +222,29 @@ namespace Renekton7
             {
                 R.Cast();
             }
+			
             if (useR2 && !Player.Instance.IsInShopRange() && _Player.Position.CountEnemiesInRange(450) >= minE)
             {
                 R.Cast();
+            }
+        }
+
+        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            var target = (AIHeroClient)sender;
+            if (sender is AIHeroClient)
+            {
+                if (target.ChampionName == "Pantheon" && target.GetSpellSlotFromName(args.SData.Name) == SpellSlot.W)
+                {
+                    if (args.Target.IsMe)
+                    {
+                        if (target.IsValidTarget(_Player.GetAutoAttackRange()))
+                        {
+                            W.Cast();
+                            Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                        }
+                    }
+                }
             }
         }
 
@@ -284,7 +306,7 @@ namespace Renekton7
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minions.Count() >= 3)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && _Player.CountEnemyMinionsInRange(Q.Range) >= 2)
                 {
                     Q.Cast();
                 }
@@ -302,6 +324,7 @@ namespace Renekton7
                 {
                     Q.Cast();
                 }
+
                 if (useW && W.IsReady() && minion.IsValidTarget(325) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) >= minion.TotalShieldHealth())
                 {
                     W.Cast();
@@ -312,10 +335,9 @@ namespace Renekton7
         private static void Harass()
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead);
-            foreach (var targetR in target2)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
