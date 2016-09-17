@@ -386,7 +386,7 @@ namespace Talon7
             var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
 
-            if (useQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target.ServerPosition) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (useQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Q.Cast();
                 Orbwalker.ResetAutoAttack();
@@ -398,7 +398,7 @@ namespace Talon7
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if (HasQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target.ServerPosition) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
+            if (HasQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
             {
                 Q.Cast();
                 Orbwalker.ResetAutoAttack();
