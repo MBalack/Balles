@@ -166,6 +166,10 @@ namespace Talon7
             {
                 LastHit();
             }
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+            {
+                Flee();
+            }
             KillSteal();
             RStun();
             AutoR();
@@ -246,7 +250,7 @@ namespace Talon7
                     R.Cast();
                 }
             }
-            if (Rcount && R.IsReady() && _Player.Position.CountEnemiesInRange(400) >= MinR)
+            if (Rcount && R.IsReady() && _Player.Position.CountEnemiesInRange(450) >= MinR)
             {
                 R.Cast();
             }
@@ -287,6 +291,27 @@ namespace Talon7
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range))
                 {
                     W.Cast(minion);
+                }
+            }
+        }
+
+        public static void Flee()
+        {
+            var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(E.Range));
+            var minions = EntityManager.MinionsAndMonsters.EnemyMinions.FirstOrDefault(m => m.IsValidTarget(E.Range));
+            if (Enemies != null && E.IsReady())
+            {
+                if (Enemies.IsInRange(Game.CursorPos, 250))
+                {
+                    E.Cast(Enemies);
+                }
+            }
+
+            if (minions != null && E.IsReady())
+            {
+                if (minions.IsInRange(Game.CursorPos, 250))
+                {
+                    E.Cast(minions);
                 }
             }
         }

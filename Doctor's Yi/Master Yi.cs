@@ -354,6 +354,7 @@ namespace Yi
                 }
             }
         }
+
         public static void QEvade()
         {
             var Enemies = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
