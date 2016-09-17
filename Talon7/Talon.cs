@@ -294,7 +294,6 @@ namespace Talon7
 
         public static void Item()
         {
-
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var yous = Items["you"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
@@ -441,7 +440,7 @@ namespace Talon7
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < WDamage(target))
+                        if (target.Health + target.AttackShield < WDamage(target) * 2)
                         {
                             W.Cast(target);
                         }
