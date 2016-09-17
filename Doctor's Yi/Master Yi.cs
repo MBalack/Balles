@@ -374,46 +374,50 @@ namespace Yi
         private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var useQ = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
-            if (useQ && !_Player.IsDead && sender.IsEnemy)
+            if (Player.Instance.IsDead || !(sender is AIHeroClient)) return;
+            if (useQ)
             {
-                if (_Player.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget() && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
+                if (sender.IsEnemy && _Player.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget())
                 {
-                    QEvade();
-                }
+                    if (Evade[args.SData.Name].Cast<CheckBox>().CurrentValue && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    {
+                        QEvade();
+                    }
 
-                if (args.SData.Name == "ZedR")
-                {
-                    if (Q.IsReady())
+                    if (args.SData.Name == "ZedR")
+                    {
+                        if (Q.IsReady())
+                        {
+                            Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                        }
+                        else
+                        {
+                            if (W.IsReady())
+                            {
+                                W.Cast();
+                            }
+                        }
+                    }
+
+                    if (args.SData.Name == "KarthusFallenOne")
                     {
                         Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
                     }
-                    else
+
+                    if (args.SData.Name == "SoulShackles")
                     {
-                        if (W.IsReady())
-                        {
-                            W.Cast();
-                        }
+                        Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
                     }
-                }
 
-                if (args.SData.Name == "KarthusFallenOne")
-                {
-                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
-                }
-
-                if (args.SData.Name == "SoulShackles")
-                {
-                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
-                }
-
-                if (args.SData.Name == "AbsoluteZero")
-                {
-                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
-                }
-
-                if (args.SData.Name == "NocturneUnspeakableHorror")
-                {
-                    Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                    if (args.SData.Name == "AbsoluteZero")
+                    {
+                        Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                    }
+    
+                    if (args.SData.Name == "NocturneUnspeakableHorror")
+                    {
+                        Core.DelayAction(() => QEvade(), 2000 - Game.Ping - 200);
+                    }
                 }
             }
         }

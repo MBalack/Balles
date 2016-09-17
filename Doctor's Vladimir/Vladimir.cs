@@ -281,6 +281,7 @@ namespace Vladimir
                 if (_Player.HealthPercent <= HealthGap)
                 {
                     W.Cast();
+					Debug.WriteChat("W AntiGap ");
                 }
             }
         }
@@ -314,10 +315,12 @@ namespace Vladimir
                     if (EActive() && _Player.Distance(target) <= 375)
                     {
                         W.Cast();
+						Debug.WriteChat("W EActive Combo ");
                     }
                     else if (target.IsValidTarget(325))
                     {
                         W.Cast();
+						Debug.WriteChat("W Combo ");
                     }
 					
                 }
@@ -409,6 +412,7 @@ namespace Vladimir
                 if (_Player.CountEnemiesInRange(600) >= 1 && _Player.HealthPercent < MinHealth)
                 {
                     W.Cast();
+					Debug.WriteChat("WLOGIC Min Health ");
                 }
             }
         }
@@ -445,43 +449,54 @@ namespace Vladimir
             if (W.IsReady())
             {
                 W.Cast();
+				Debug.WriteChat("W Flee ");
             }
         }
 
 
-        private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        public static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var useW = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
-            if (useW && !_Player.IsDead && sender.IsEnemy && W.IsReady())
+            if (Player.Instance.IsDead || !(sender is AIHeroClient)) return;
+            if (useW && W.IsReady())
             {
-                if (_Player.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget() && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
+                if (sender.IsEnemy && Player.Instance.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget())
                 {
-                    W.Cast();
-                }
+                    if (Evade[args.SData.Name].Cast<CheckBox>().CurrentValue && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    {
+                        W.Cast();
+		        		Debug.WriteChat("W EVADEEEEEEEEEEEEEEE ");
+                    }
 
-                if (args.SData.Name == "KarthusFallenOne")
-                {
-                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                }
+                    if (args.SData.Name == "KarthusFallenOne")
+                    {
+                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+			    		Debug.WriteChat("W KATHUS ");
+                    }
 
-                if (args.SData.Name == "ZedR")
-                {
-                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                }
+                    if (args.SData.Name == "ZedR")
+                    {
+                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+			    		Debug.WriteChat("W ZED ");
+                    }
 
-                if (args.SData.Name == "SoulShackles")
-                {
-                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                }
+                    if (args.SData.Name == "SoulShackles")
+                    {
+                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+			    		Debug.WriteChat("W SoulShackles ");
+                    }
 
-                if (args.SData.Name == "AbsoluteZero")
-                {
-                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                }
+                    if (args.SData.Name == "AbsoluteZero")
+                    {
+                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+			    		Debug.WriteChat("W AbsoluteZero ");
+                    }
 
-                if (args.SData.Name == "NocturneUnspeakableHorror")
-                {
-                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                    if (args.SData.Name == "NocturneUnspeakableHorror")
+                    {
+                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+			    		Debug.WriteChat("W NocturneUnspeakableHorror ");
+                    }
                 }
             }
         }
