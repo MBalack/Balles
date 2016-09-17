@@ -215,7 +215,7 @@ namespace Talon7
             var hp = ComboMenu["myhp"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking && !QPassive())
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
                     {
@@ -347,7 +347,7 @@ namespace Talon7
             if (Player.Instance.ManaPercent < ManaW) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking && !QPassive())
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
                     {
