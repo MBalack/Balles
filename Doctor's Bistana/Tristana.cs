@@ -47,8 +47,7 @@ namespace Tristana
             E = new Spell.Targeted(SpellSlot.E, 550 + level * 7);
             R = new Spell.Targeted(SpellSlot.R, 550 + level * 7);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-            Menu = MainMenu.AddMenu("Tristana", "Tristana");
-            Menu.AddGroupLabel("Tristana");
+            Menu = MainMenu.AddMenu("Doctor's Tristana", "Tristana");
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
@@ -62,10 +61,11 @@ namespace Tristana
             SpellMenu.Add("ERKs", new CheckBox("KillSteal [ER]"));
             SpellMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
             SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
+            SpellMenu.AddGroupLabel("[W] KillSteal Settings");
             SpellMenu.Add("WKs", new CheckBox("Use [W] KillSteal", false));
             SpellMenu.Add("CTurret", new CheckBox("Dont Use [W] KillSteal Under Turet"));
             SpellMenu.Add("Attack", new Slider("Use [W] KillSteal If Can Kill Enemy With x Attack", 2, 1, 6));
-            SpellMenu.Add("MinW", new Slider("Use [W] KillSteal If Enemies Around Target <", 2, 1, 5));
+            SpellMenu.Add("MinW", new Slider("Use [W] KillSteal If Enemies Around Target <=", 2, 1, 5));
             SpellMenu.AddLabel("Always Use [W] KillSteal If Slider Enemies Around = 5");
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
@@ -150,6 +150,7 @@ namespace Tristana
             {
                 return;
             }
+			
             if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
             {
                 R.Cast(sender);
@@ -169,7 +170,8 @@ namespace Tristana
                 {
                     Q.Cast();
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent > 10 && _Player.ManaPercent > mana)
+				
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent >= 10 && _Player.ManaPercent > mana)
                 {
                     if (HarassMenu["HarassE" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -191,7 +193,8 @@ namespace Tristana
                 {
                     Q.Cast();
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent > 10)
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent >= 10)
                 {
                     if (SpellMenu["useECombo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -208,14 +211,15 @@ namespace Tristana
             var useQ = LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
             var useE = LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue;
             var mana = LaneMenu["manaFarm"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            foreach (var minion in minions)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < E.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (minion != null)
             {
                 if (useE && E.IsReady() && minion.HealthPercent > 70 && minion.IsValidTarget(E.Range) && _Player.ManaPercent > mana)
                 {
                     E.Cast(minion);
                 }
-                if (useQ && Q.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3)
+
+                if (useQ && Q.IsReady() && minion.IsValidTarget(E.Range) && _Player.CountEnemyMinionsInRange(E.Range) >= 3)
                 {
                     Q.Cast();
                 }
@@ -226,7 +230,7 @@ namespace Tristana
 
         private static void JungleClear()
         {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(E.Range));
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().Where(a => a.Distance(Player.Instance) < E.Range).OrderByDescending(a => a.Health).FirstOrDefault();
             var useQ = JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue;
             var useW = JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue;
             var useE = JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue;
@@ -237,11 +241,15 @@ namespace Tristana
                 {
                     Q.Cast();
                 }
-                if (useW && W.IsReady() && monster.IsValidTarget(W.Range) && _Player.ManaPercent > mana)
+				
+                if (_Player.ManaPercent < mana) return;
+
+                if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast(monster.Position);
                 }
-                if (useE && E.IsReady() && monster.IsValidTarget(E.Range) && _Player.ManaPercent > mana)
+				
+                if (useE && E.IsReady() && monster.IsValidTarget(E.Range))
                 {
                     E.Cast(monster);
                 }
@@ -266,6 +274,7 @@ namespace Tristana
                     R.Cast(renga);
                 }
             }
+
             if (khazix != null)
             {
                 if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
@@ -346,6 +355,7 @@ namespace Tristana
                     }
                 }
             }
+
             foreach (var target3 in targetE)
             {
                 if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady())
