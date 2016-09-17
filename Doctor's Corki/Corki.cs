@@ -42,7 +42,6 @@ namespace Borki7
         {
             if (!_Player.ChampionName.Contains("Corki")) return;
             Chat.Print("Doctor's Corki Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Skillshot(SpellSlot.Q, 825, SkillShotType.Circular, 300 , 1000 ,250);
             W = new Spell.Skillshot(SpellSlot.W, 800, SkillShotType.Linear);
             E = new Spell.Active(SpellSlot.E, 600);

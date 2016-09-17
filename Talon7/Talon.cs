@@ -272,9 +272,13 @@ namespace Talon7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(300))
+                if (useQ && Q.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range))
                 {
@@ -392,12 +396,16 @@ namespace Talon7
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minionQ = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            if (Player.Instance.ManaPercent > mana)
+            if (Player.Instance.ManaPercent < mana) return;
             foreach (var minions in minionQ)
             {
-                if (useQ && Q.IsReady() && minions.IsValidTarget(250) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minions.IsValidTarget(275) && minions.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minions.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) + Player.Instance.GetAutoAttackDamage(minions)
+                >= minions.TotalShieldHealth())
                 {
                     Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minions);
                 }
                 if (useW && W.IsReady() && minions.IsValidTarget(W.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.W) > minions.TotalShieldHealth())
                 {
