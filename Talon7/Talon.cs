@@ -20,14 +20,6 @@ namespace Talon7
         public static Item Tiamat;
         public static Item Bil;
         public static Item Youmuu;
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
-        private static float HealthPercent()
-        {
-            return (PlayerInstance.Health / PlayerInstance.MaxHealth) * 100;
-        }
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }

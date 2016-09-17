@@ -38,7 +38,6 @@ namespace Jax
         {
             if (!_Player.ChampionName.Contains("Jax")) return;
             Chat.Print("Doctor's Jax Loaded!", Color.Yellow);
-            Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 700);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Active(SpellSlot.E,350);
@@ -264,35 +263,25 @@ namespace Jax
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var useWJ = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
-            var manaJ = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
-            var useWL = LaneClearMenu["LCW"].Cast<CheckBox>().CurrentValue;
-            var manaL = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(225))
+                if (useW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
-                if (HasW && W.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && target.IsValidTarget(225))
-                {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (useWJ && W.IsReady() && Player.Instance.ManaPercent > manaJ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && target.IsValidTarget(225))
-                {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (useWL && W.IsReady() && Player.Instance.ManaPercent > manaL && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && target.IsValidTarget(225))
+
+                if (HasW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && _Player.ManaPercent >= mana)
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
@@ -303,7 +292,7 @@ namespace Jax
 
         public static void JungleClear()
         {
-
+            var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
@@ -314,12 +303,20 @@ namespace Jax
 		    	{
                     Q.Cast(jungleMonsters);
                 }
+
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(275) && jungleMonsters.IsInAutoAttackRange(Player.Instance) && Player.Instance.Distance(jungleMonsters.ServerPosition) <= 225f)
+		    	{
+                    W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, jungleMonsters);
+                }
+
                 if (useE && E.IsReady())
                 {
                     if (!Player.HasBuff("JaxCounterStrike"))
                     {
                         E.Cast();
                     }
+
                     else if (Player.HasBuff("JaxCounterStrike") && jungleMonsters.IsValidTarget(E.Range))
                     {
                         Core.DelayAction(() => E.Cast(), 1000);
@@ -331,6 +328,7 @@ namespace Jax
         public static void LaneClear()
         {
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var useW = LaneClearMenu["LCW"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["LCQ"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["LCE"].Cast<CheckBox>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
@@ -341,10 +339,19 @@ namespace Jax
 		    	{
                     Q.Cast(minion);
                 }
+
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.CountEnemyMinionsInRange(E.Range) >= 2)
                 {
                     E.Cast();
 	    		}
+                if (useW && W.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
+                {
+                    W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                }
             }
         }
 
@@ -361,10 +368,15 @@ namespace Jax
 		    	{
                     Q.Cast(minion);
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(_Player.AttackRange) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) > minion.TotalShieldHealth())
+
+                if (useW && W.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     W.Cast();
-	    		}
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                }
             }
         }
 
