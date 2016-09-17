@@ -70,7 +70,7 @@ namespace Talon7
             ComboMenu.AddGroupLabel("[E] Combo Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
             ComboMenu.Add("myhp", new Slider("MyHP Use [E] >", 40, 0, 100));
-            ComboMenu.Add("DisE", new Slider("Distance Use [E]", 300, 0, 700));
+            ComboMenu.Add("DisE", new Slider("Use [E] If Distance Target >", 300, 0, 700));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("autor", new CheckBox("Use [R] Escape"));
             ComboMenu.Add("mau", new Slider("MyHP Use [R] Escape <", 20, 0, 100));
@@ -189,6 +189,11 @@ namespace Talon7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
+        public static bool QPassive()
+        {
+            return _Player.HasBuff("talonnoxiandiplomacybuff");
+        }
+
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {
             if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) < 300)
@@ -207,7 +212,7 @@ namespace Talon7
             var hp = ComboMenu["myhp"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
                     {
@@ -319,7 +324,7 @@ namespace Talon7
             if (Player.Instance.ManaPercent < ManaW) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !Q.IsReady())
                     {
@@ -376,7 +381,7 @@ namespace Talon7
                 Orbwalker.ResetAutoAttack();
                 Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
-            if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+            if ((useriu && !Q.IsReady() && !QPassive()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
             {
                 if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
                 {
