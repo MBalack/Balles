@@ -227,14 +227,14 @@ namespace Yi
                 {
                     if (SaveQ)
                     {
-                        if (target.IsDashing() || _Player.HealthPercent <= 35)
+                        if (target.IsDashing() || _Player.HealthPercent <= 30)
                         {
                             Q.Cast(target);
                         }
                     }
                     else
                     {
-                        if (_Player.Distance(target) > 325 || target.IsDashing())
+                        if (_Player.Distance(target) > 325 || target.IsDashing() || _Player.HealthPercent <= 30)
                         {
                             Q.Cast(target);
                         }
