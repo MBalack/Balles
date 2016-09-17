@@ -279,7 +279,7 @@ namespace Olaf7
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {	
-            if (Drawings["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player)<300)
+            if (Drawings["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) < 300 && !e.Sender.ChampionName.ToLower().Contains("MasterYi"))
             {
                 Q.Cast(e.Sender);
             }
