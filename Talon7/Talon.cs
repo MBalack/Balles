@@ -115,7 +115,6 @@ namespace Talon7
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
-            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
             KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
@@ -431,7 +430,6 @@ namespace Talon7
 
         public static void KillSteal()
         {
-            var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(W.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
@@ -451,7 +449,7 @@ namespace Talon7
                 {
                     if (target != null)
                     {
-                        if (target.Health + target.AttackShield < RDamage(target))
+                        if (target.Health + target.AttackShield < RDamage(target) + WDamage(target))
                         {
                             R.Cast();
                         }
