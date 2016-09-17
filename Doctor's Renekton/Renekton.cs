@@ -174,6 +174,16 @@ namespace Renekton7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
+        public static bool PassiveW()
+        {
+            return _Player.HasBuff("renektonpreexecute");
+        }
+
+        public static bool PassiveE()
+        {
+            return _Player.HasBuff("RenekthonSliceAndDiceDelay");
+        }
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
@@ -188,12 +198,12 @@ namespace Renekton7
                     W.Cast();
                 }
 				
-                if (!Player.HasBuff("RenekthonSliceAndDiceDelay") && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
+                if (!PassiveE() && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
                 }
 				
-                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && Player.HasBuff("RenekthonSliceAndDiceDelay") && E2dis <= target.Distance(Player.Instance))
+                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && PassiveE() && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
                 }
@@ -205,7 +215,7 @@ namespace Renekton7
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && !PassiveW() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
@@ -292,7 +302,7 @@ namespace Renekton7
                     {
                         Tiamat.Cast();
                     }
-                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
+                    if (Titanic.IsOwned() && Titanic.IsReady() && target.IsValidTarget(325))
                     {
                         Titanic.Cast();
                     }
@@ -358,11 +368,11 @@ namespace Renekton7
                 }
                 if (useE && E.IsReady())
                 {
-                    if (!Player.HasBuff("RenekthonSliceAndDiceDelay"))
+                    if (!PassiveE())
                     {
                         E.Cast(jungleMonsters.Position);
                     }
-                    if (Player.HasBuff("RenekthonSliceAndDiceDelay") && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
+                    if (PassiveE() && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
                     {
                         E.Cast(jungleMonsters.Position);
                     }
@@ -391,7 +401,7 @@ namespace Renekton7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast();
                     }
@@ -399,7 +409,7 @@ namespace Renekton7
 
                 if (KsW && W.IsReady() && target.IsValidTarget(325))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.W))
                     {
                         W.Cast();
                     }
@@ -407,7 +417,7 @@ namespace Renekton7
 
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target.Position);
                     }
@@ -415,7 +425,7 @@ namespace Renekton7
 
                 if (KsEQ && E.IsReady() && Q.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q) + Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q) + Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target.Position);
                     }
