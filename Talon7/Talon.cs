@@ -258,12 +258,19 @@ namespace Talon7
 
         public static void JungleClear()
         {
+            var jungQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
             if (Player.Instance.ManaPercent < mana) return;
             if (jungleMonsters != null)
             {
+                if (jungQ && Q.IsReady() && jungleMonsters.IsValidTarget(300))
+                {
+                    Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, jungleMonsters);
+                }
+
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(500))
                 {
                     W.Cast(jungleMonsters);
@@ -377,43 +384,43 @@ namespace Talon7
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useriu = ComboMenu["riu"].Cast<CheckBox>().CurrentValue;
-            var jungQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
-            var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-
-            if (useQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
             {
-                Q.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if (jungQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent > mana)
-            {
-                Q.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if (HasQ && Q.IsReady() && target.IsValidTarget() && Player.Instance.Distance(target) <= 225f && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
-            {
-                Q.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if ((useriu && !Q.IsReady() && !QPassive()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
-            {
-                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    Hydra.Cast();
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
-
-                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
+			
+                if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > ManaW)
                 {
-                    Tiamat.Cast();
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+			
+                if ((useriu && !Q.IsReady() && !QPassive()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                {
+                    if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
+                    {
+                        Hydra.Cast();
+                    }
+
+                    if (Tiamat.IsOwned(Player.Instance) && Tiamat.IsReady() && target.IsValidTarget(250))
+                    {
+                        Tiamat.Cast();
+                    }
                 }
             }
         }
