@@ -55,14 +55,15 @@ namespace Yi
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboQ2", new CheckBox("Only [Q] Target Dashing", false));
+            ComboMenu.Add("ComboQ2", new CheckBox("Only If [Q] Target Dashing", false));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Count Enemies Around"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
             ComboMenu.AddGroupLabel("Use [W] Low HP");
-            ComboMenu.Add("minHealth", new Slider("Use [W] If My Hp <=", 50));
+            ComboMenu.Add("WLowHp", new CheckBox("Use [W] Low Hp"));
+            ComboMenu.Add("minHealth", new Slider("Use [W] If My Hp <=", 25));
             ComboMenu.AddGroupLabel("Use [Q] Dodge Spell");
             ComboMenu.Add("dodge", new CheckBox("Use [Q] Dodge"));
             ComboMenu.Add("antiGap", new CheckBox("Use [Q] Anti Gap"));
@@ -243,7 +244,7 @@ namespace Yi
                 {
                     E.Cast();
                 }
-                if (useR && R.IsReady() && _Player.CountEnemiesInRange(675) >= MinR)
+                if (useR && R.IsReady() && (_Player.CountEnemiesInRange(675) >= MinR || _Player.HealthPercent <= 35))
                 {
                     R.Cast();
 	    		}
@@ -291,29 +292,41 @@ namespace Yi
 
         public static void WLogic()
         {
+            var useW = ComboMenu["WLowHp"].Cast<CheckBox>().CurrentValue;
             var MinHealth = ComboMenu["minHealth"].Cast<Slider>().CurrentValue;
-            if (!_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(425) >= 1 && (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR")))
+            if (useW && !_Player.IsRecalling() && !_Player.IsInShopRange() && _Player.CountEnemiesInRange(425) >= 1)
             {
-                W.Cast();
+                if (_Player.HealthPercent < MinHealth || _Player.HasBuff("ZedR"))
+                {
+                    W.Cast();
+                }
             }
         }
 
-        public static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var useQC = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            if (useW && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange() - 50) && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
             {
-                W.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackTo, target);
-            }
-            if (useQC && W.IsReady() && target.IsValidTarget(_Player.GetAutoAttackRange() - 50) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-            {
-                W.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackTo, target);
+                if (useW && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+                {
+                    W.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackTo, target);
+                }
+
+                if (useQC && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    W.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackTo, target);
+                }
             }
         }
 
