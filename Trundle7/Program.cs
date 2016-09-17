@@ -242,7 +242,6 @@ namespace Trundle7
 
         public static void Item()
         {
-
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
@@ -260,68 +259,65 @@ namespace Trundle7
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useriu = Items["hydra"].Cast<CheckBox>().CurrentValue;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
-            var LaneQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
-            var JungleQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
-            var Jmana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
             var Hmana = HarassMenu["MHR"].Cast<Slider>().CurrentValue;
-            var Lmana = LaneClearMenu["MLC"].Cast<Slider>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+                if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+			
+                if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > Hmana)
+                {
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+			
+                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                {
+                    if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
                         Hydra.Cast();
                     }
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
+
+                    if (Tiamat.IsOwned(Player.Instance) && Tiamat.IsReady() && target.IsValidTarget(250))
                     {
                         Tiamat.Cast();
                     }
-                    if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
-                    {
-                        Titanic.Cast();
-                    }
-                }
-                if (useQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (HasQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > Hmana)
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (JungleQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) && Player.Instance.ManaPercent > Jmana)
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (LaneQ && Q.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent > Lmana)
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
             }
         }
 
         private static void LaneClear()
         {
+            var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
             var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["MLC"].Cast<Slider>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
+                if (useQ && Q.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+				&& Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
+                {
+                    Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                }
+
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
                 {
                     W.Cast(minion);
@@ -337,9 +333,13 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(350) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+				&& Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
             }
         }
@@ -367,12 +367,18 @@ namespace Trundle7
 
         public static void JungleClear()
         {
+            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
             if (Player.Instance.ManaPercent < mana) return;
             if (monster != null)
             {
+                if (useQ && Q.IsReady() && monster.IsValidTarget(300))
+                {
+                    Q.Cast();
+                }
+
                 if (useW && W.IsReady() && W.IsInRange(monster))
                 {
                     W.Cast(monster);
