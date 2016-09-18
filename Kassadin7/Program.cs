@@ -252,28 +252,29 @@ namespace Kassadin7
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var JungleW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
-            if (useW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
             {
-                W.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if (HasW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-            {
-                W.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-            }
-            if (JungleW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-            {
-                W.Cast();
-                Orbwalker.ResetAutoAttack();
-                Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                if (useW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    W.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+			
+                if (HasW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+                {
+                    W.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
             }
         }
 
@@ -290,19 +291,27 @@ namespace Kassadin7
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, E.Width, (int) E.Range);
             foreach (var minions in minionQ)
             {
-                if (useW && W.IsReady() && minions.IsValidTarget(175) && Player.Instance.GetSpellDamage(minions, SpellSlot.W) + _Player.GetAutoAttackDamage(minions) > minions.TotalShieldHealth())
+                if (useW && W.IsReady() && minions.IsValidTarget(275) && minions.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minions.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minions, SpellSlot.W) + Player.Instance.GetAutoAttackDamage(minions)
+                >= minions.TotalShieldHealth())
                 {
                     W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minions);
                 }
+
+				
                 if (Player.Instance.ManaPercent < mana) return;
-                if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth() && (_Player.Distance(minions) > 225 || !W.IsReady()))
                 {
                     Q.Cast(minions);
                 }
+				
                 if (useE && E.IsReady() && EReady && minions.IsValidTarget(E.Range) && quang.HitNumber >= MinE)
                 {
                     E.Cast(minions);
                 }
+				
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && !UnderTuret(minions) && Player.Instance.GetBuffCount("RiftWalk") < minRs)
                 {
                     R.Cast(minions);
@@ -318,13 +327,19 @@ namespace Kassadin7
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth() && Player.Instance.ManaPercent >= mana)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth() 
+                && Player.Instance.ManaPercent >= mana && (_Player.Distance(minion) > 225 || !W.IsReady()))
                 {
                     Q.Cast(minion);
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(300) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + _Player.GetAutoAttackDamage(minion) > minion.TotalShieldHealth() && !Q.IsReady())
+				
+                if (useW && W.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.W) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
             }
         }
@@ -353,17 +368,20 @@ namespace Kassadin7
                 {
                     E.Cast(target);
                 }
+				
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !W.IsReady())
                     {
                         Q.Cast(target);
                     }
+					
                     else if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                     {
                         Q.Cast(target);
                     }
                 }
+				
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.Position.CountEnemiesInRange(R.Range) <= minR && _Player.HealthPercent >= Minhp && Player.Instance.GetBuffCount("RiftWalk") < minRs)
                 {
                     if (turret)
@@ -373,6 +391,7 @@ namespace Kassadin7
                            R.Cast(target);
                         }
                     }
+					
                     else
                     {
                        R.Cast(target);
@@ -384,6 +403,7 @@ namespace Kassadin7
         public static void JungleClear()
         {
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
+            var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var useR = JungleClearMenu["RJungle"].Cast<CheckBox>().CurrentValue;
             var minRs = JungleClearMenu["StackRJ"].Cast<Slider>().CurrentValue;
@@ -396,10 +416,18 @@ namespace Kassadin7
                 {
                     Q.Cast(jungleMonsters);
                 }
+				
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(275) && jungleMonsters.IsInAutoAttackRange(Player.Instance) && Player.Instance.Distance(jungleMonsters.ServerPosition) <= 225f)
+                {
+                    W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, jungleMonsters);
+                }
+				
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range) && EReady)
                 {
                     E.Cast(jungleMonsters);
                 }
+				
                 if (useR && R.IsReady() && jungleMonsters.IsValidTarget(R.Range) && Player.Instance.GetBuffCount("RiftWalk") < minRs)
                 {
                     R.Cast(jungleMonsters);
@@ -427,6 +455,7 @@ namespace Kassadin7
             {
                 return;
             }
+			
             if (Inter && Q.IsReady() && i.DangerLevel == DangerLevel.High && Q.IsInRange(sender))
             {
                 Q.Cast(sender);
@@ -468,6 +497,7 @@ namespace Kassadin7
                         E.Cast(target);
                     }
                 }
+				
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
@@ -475,6 +505,7 @@ namespace Kassadin7
                         R.Cast(target);
                     }
                 }
+				
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
@@ -482,6 +513,7 @@ namespace Kassadin7
                         Q.Cast(target);
                     }
                 }
+				
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
