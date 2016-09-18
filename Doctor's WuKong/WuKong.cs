@@ -43,7 +43,7 @@ namespace Doctor_s_WuKong
             if (!_Player.ChampionName.Contains("MonkeyKing")) return;
             Chat.Print("Doctor's Wukong Loaded!", Color.Orange);
             Bootstrap.Init(null);
-            Q = new Spell.Active(SpellSlot.Q, 375);
+            Q = new Spell.Active(SpellSlot.Q, 300);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Targeted(SpellSlot.E, 650);
             R = new Spell.Active(SpellSlot.R, 375);
@@ -95,6 +95,7 @@ namespace Doctor_s_WuKong
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
+            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal", false));
             KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal", false));
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
@@ -179,15 +180,25 @@ namespace Doctor_s_WuKong
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
+        public static bool QPassive()
+        {
+            return _Player.HasBuff("monkeykingdoubleattack");
+        }
+
+        public static bool RActive()
+        {
+            return _Player.HasBuff("MonkeyKingSpinToWin");
+        }
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
@@ -208,14 +219,12 @@ namespace Doctor_s_WuKong
                        E.Cast(target);
                     }
                 }
+
                 if (useW && W.IsReady() && target.IsValidTarget(375) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
                 }
-                if (useQ && Q.IsReady() && target.IsValidTarget(300) && _Player.Distance(target) > 175 && !target.IsDead && !target.IsZombie)
-                {
-                    Q.Cast();
-                }
+
             }
         }
 
@@ -237,15 +246,15 @@ namespace Doctor_s_WuKong
             var auto = Ulti["follow"].Cast<CheckBox>().CurrentValue;
             var autow = Ulti["wulti"].Cast<CheckBox>().CurrentValue;
             var mauW = Ulti["MauW"].Cast<Slider>().CurrentValue;
-            if (_Player.HasBuff("MonkeyKingSpinToWin"))
+            if (RActive())
             {
                 Orbwalker.DisableAttacking = true;
             }
-            if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR)
+            if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR && !RActive())
             {
                 R.Cast();
             }
-            if (useR2 && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+            if (useR2 && !RActive() && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
             }
@@ -254,42 +263,40 @@ namespace Doctor_s_WuKong
                 W.Cast();
             }
             if (target == null) return;
-            if (auto && target.IsValidTarget() && !target.IsDead && !target.IsZombie && _Player.HasBuff("MonkeyKingSpinToWin"))
+            if (auto && target.IsValidTarget() && !target.IsDead && !target.IsZombie && RActive())
             {
                 Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            var useQJ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useriu && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+                if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && !Q.IsReady() && target.IsValidTarget(325))
+                    Q.Cast();
+                    Orbwalker.ResetAutoAttack();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
+
+                if ((useriu && !Q.IsReady() && !QPassive()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                {
+                    if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && !Q.IsReady() && target.IsValidTarget(325))
+                    if (Tiamat.IsOwned(Player.Instance) && Tiamat.IsReady() && target.IsValidTarget(250))
                     {
                         Tiamat.Cast();
                     }
-                }
-                if (useQ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (useQJ && Q.IsReady() && target.IsValidTarget(250) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-                {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
             }
         }
@@ -303,10 +310,15 @@ namespace Doctor_s_WuKong
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(350) && minions.Count() >= 3)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(300) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 300
+                && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
+
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range))
                 {
                     E.Cast(minion);
@@ -322,11 +334,12 @@ namespace Doctor_s_WuKong
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(325) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(300) && _Player.Distance(target) > 175)
                 {
                     Q.Cast();
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast(target);
                 }
@@ -335,14 +348,20 @@ namespace Doctor_s_WuKong
 
         public static void JungleClear()
         {
+            var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(375));
+            var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(625));
             if (jungleMonsters != null && Player.Instance.ManaPercent >= mana)
             {
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range))
                 {
                     E.Cast(jungleMonsters);
+                }
+
+                if (useQ && Q.IsReady() && jungleMonsters.IsValidTarget(300))
+                {
+                    Q.Cast();
                 }
             }
         }
@@ -354,7 +373,7 @@ namespace Doctor_s_WuKong
             {
                 return;
             }
-            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
+            if (Inter && R.IsReady() && !RActive() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
             {
                 R.Cast();
             }
@@ -393,24 +412,35 @@ namespace Doctor_s_WuKong
 
         private static void KillSteal()
         {
+            var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E) + Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         E.Cast(target);
                     }
                 }
-                if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
+
+                if (KsQ && Q.IsReady() && target.IsValidTarget(300))
+                {
+                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    {
+                        Q.Cast();
+                    }
+                }
+
+                if (KsR && R.IsReady() && !RActive() && target.IsValidTarget(R.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
                         R.Cast();
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
