@@ -446,6 +446,7 @@ namespace Talon7
             return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
                 (float)(new[] { 0, 60, 110, 160, 210, 260 }[Program.R.Level] + 0.6f * _Player.FlatPhysicalDamageMod));
         }
+
         public static float RDamage(Obj_AI_Base target)
         {
             return _Player.CalculateDamageOnUnit(target, DamageType.Physical,

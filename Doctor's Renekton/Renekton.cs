@@ -39,7 +39,6 @@ namespace Renekton7
         {
             if (!_Player.ChampionName.Contains("Renekton")) return;
             Chat.Print("Doctor's Renekton Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q, 325);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Skillshot(SpellSlot.E, 450, SkillShotType.Linear);
@@ -49,14 +48,11 @@ namespace Renekton7
             Hydra = new Item(ItemId.Ravenous_Hydra_Melee_Only, 400);
             Titanic = new Item(ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
 
-            Menu = MainMenu.AddMenu("Renekton", "Renekton");
-            Menu.AddSeparator();
+            Menu = MainMenu.AddMenu("Doctor's Renekton", "Renekton");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-            ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboW", new CheckBox("Use [W] Reset AA", false));
-            ComboMenu.Add("FastW", new CheckBox("Use [W] Fast"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("ComboE2", new CheckBox("Use [E2] Combo"));
@@ -97,7 +93,6 @@ namespace Renekton7
             KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
             KillStealMenu.Add("KsW", new CheckBox("Use [W] KillSteal"));
             KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
-            KillStealMenu.Add("KsEQ", new CheckBox("Use [E-Q] KillSteal", false));
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
@@ -107,22 +102,29 @@ namespace Renekton7
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawQ", new CheckBox("Q Range"));
             Misc.Add("DrawE", new CheckBox("E Range", false));
+            Misc.Add("DrawE2", new CheckBox("Drawings Distance Use E2 If Distance Target >"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnTick += Game_OnTick;
             Orbwalker.OnPostAttack += ResetAttack;
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
+
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+
+            if (Misc["DrawE2"].Cast<CheckBox>().CurrentValue)
+            {
+                new Circle() { Color = Color.Red, BorderWidth = 1, Radius = E2dis }.Draw(_Player.Position);
             }
         }
 
@@ -152,7 +154,6 @@ namespace Renekton7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
-                QLogic();
             }
             KillSteal();
             Ultimate();
@@ -184,21 +185,58 @@ namespace Renekton7
             return _Player.HasBuff("RenekthonSliceAndDiceDelay");
         }
 
+        public static bool Fury()
+        {
+            return _Player.HasBuff("renektonrageready");
+        }
+
+        public static float QDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+                (float)(new[] { 0, 60, 90, 120, 150, 190 }[Q.Level] + 0.8f * _Player.FlatPhysicalDamageMod));
+        }
+
+        public static float WDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+                (float)(new[] { 0, 5, 15, 25, 35, 45 }[W.Level] + 0.75f * _Player.FlatPhysicalDamageMod));
+        }
+
+        public static float EDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+                (float)(new[] { 0, 30, 60, 90, 120, 150 }[E.Level] + 0.9f * _Player.FlatPhysicalDamageMod));
+        }
+
+        public static float GetDamage(AIHeroClient target)
+        {
+            if (target != null)
+            {
+                float Damage = 0;
+
+                if (Q.IsReady()) { Damage += QDamage(target); }
+                if (E.IsReady()) { Damage += EDamage(target); }
+                if (W.IsReady()) { Damage += WDamage(target); }
+
+                return Damage;
+            }
+            return 0;
+        }
+
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
-            var useW = ComboMenu["FastW"].Cast<CheckBox>().CurrentValue;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useE2 = ComboMenu["ComboE2"].Cast<CheckBox>().CurrentValue;
             var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useW && W.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && !PassiveW() && target.IsValidTarget(Q.Range))
                 {
-                    W.Cast();
+                    Q.Cast();
                 }
-				
-                if (!PassiveE() && useE && E.IsReady() && target.IsValidTarget(E.Range) && 200 <= target.Distance(Player.Instance))
+
+                if (!PassiveE() && useE && E.IsReady() && target.IsValidTarget(E.Range) && (200 <= target.Distance(Player.Instance) || !Q.IsReady() && !W.IsReady()))
                 {
                     E.Cast(target.Position);
                 }
@@ -206,18 +244,6 @@ namespace Renekton7
                 if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && PassiveE() && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
-                }
-            }
-        }
-
-        private static void QLogic()
-        {
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
-            {
-                if (useQ && Q.IsReady() && !PassiveW() && target.IsValidTarget(Q.Range))
-                {
-                    Q.Cast();
                 }
             }
         }
@@ -239,70 +265,44 @@ namespace Renekton7
             }
         }
 
-        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
-            var target = (AIHeroClient)sender;
-            if (sender is AIHeroClient)
-            {
-                if (target.ChampionName == "Pantheon" && target.GetSpellSlotFromName(args.SData.Name) == SpellSlot.W)
-                {
-                    if (args.Target.IsMe)
-                    {
-                        if (target.IsValidTarget(_Player.GetAutoAttackRange()))
-                        {
-                            W.Cast();
-                            Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
-        {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
             var useriu = ComboMenu["hydra"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            var laneW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var HasW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var jungW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
-                if (laneW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
+			
+                if (HasW && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
-                if (HasW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+
+                if ((useriu && !W.IsReady() && !PassiveW()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if (jungW && W.IsReady() && target.IsValidTarget(300) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-                {
-                    W.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                if ((useriu && !W.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
-                {
-                    if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                    if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
                         Hydra.Cast();
                     }
 
-                    if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
+                    if (Tiamat.IsOwned(Player.Instance) && Tiamat.IsReady() && target.IsValidTarget(250))
                     {
                         Tiamat.Cast();
                     }
-                    if (Titanic.IsOwned() && Titanic.IsReady() && target.IsValidTarget(325))
+
+                    if (Titanic.IsOwned(Player.Instance) && Titanic.IsReady() && target.IsValidTarget(250))
                     {
                         Titanic.Cast();
                     }
@@ -313,12 +313,22 @@ namespace Renekton7
         private static void LaneClear()
         {
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
+            var useW = LaneClearMenu["WLC"].Cast<CheckBox>().CurrentValue;
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && _Player.CountEnemyMinionsInRange(Q.Range) >= 2)
                 {
                     Q.Cast();
+                }
+
+                if (useW && W.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && WDamage(minion) * 2 + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
+                {
+                    W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
             }
         }
@@ -330,14 +340,18 @@ namespace Renekton7
             var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && Q.IsInRange(minion) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && Q.IsInRange(minion) && QDamage(minion) >= minion.TotalShieldHealth())
                 {
                     Q.Cast();
                 }
 
-                if (useW && W.IsReady() && minion.IsValidTarget(325) && Player.Instance.GetSpellDamage(minion, SpellSlot.W) >= minion.TotalShieldHealth())
+                if (useW && W.IsReady() && minion.IsValidTarget(275) && minion.IsInAutoAttackRange(Player.Instance)
+                && Player.Instance.Distance(minion.ServerPosition) <= 225f
+                && WDamage(minion) * 2 + Player.Instance.GetAutoAttackDamage(minion)
+                >= minion.TotalShieldHealth())
                 {
                     W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
                 }
             }
         }
@@ -356,7 +370,7 @@ namespace Renekton7
 
         public static void JungleClear()
         {
-
+            var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
@@ -366,12 +380,20 @@ namespace Renekton7
                 {
                     Q.Cast();
                 }
+
+                if (useW && W.IsReady() && jungleMonsters.IsValidTarget(275) && jungleMonsters.IsInAutoAttackRange(Player.Instance) && Player.Instance.Distance(jungleMonsters.ServerPosition) <= 225f)
+                {
+                    W.Cast();
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, jungleMonsters);
+                }
+
                 if (useE && E.IsReady())
                 {
                     if (!PassiveE())
                     {
                         E.Cast(jungleMonsters.Position);
                     }
+
                     if (PassiveE() && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
                     {
                         E.Cast(jungleMonsters.Position);
@@ -396,36 +418,47 @@ namespace Renekton7
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            var KsEQ = KillStealMenu["KsEQ"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (Fury())
                     {
-                        Q.Cast();
+                        if (target.Health + target.AttackShield <= QDamage(target) * 0.5)
+                        {
+                            Q.Cast();
+                        }
+                    }
+                    else
+                    {
+                        if (target.Health + target.AttackShield <= QDamage(target))
+                        {
+                            Q.Cast();
+                        }
                     }
                 }
 
-                if (KsW && W.IsReady() && target.IsValidTarget(325))
+                if (KsW && W.IsReady() && target.IsValidTarget(250))
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.W))
+                    if (Fury())
                     {
-                        W.Cast();
+                        if (target.Health + target.AttackShield <= WDamage(target) * 3)
+                        {
+                            W.Cast();
+                        }
+                    }
+                    else
+                    {
+                        if (target.Health + target.AttackShield <= WDamage(target) * 2)
+                        {
+                            W.Cast();
+                        }
                     }
                 }
 
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
-                    {
-                        E.Cast(target.Position);
-                    }
-                }
-
-                if (KsEQ && E.IsReady() && Q.IsReady() && target.IsValidTarget(E.Range))
-                {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q) + Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= EDamage(target))
                     {
                         E.Cast(target.Position);
                     }
