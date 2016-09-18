@@ -206,7 +206,7 @@ namespace Sejuani7
             }
             if (ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue)
             {
-                Orbwalker.OrbwalkTo(Game.CursorPos);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
         }
 
