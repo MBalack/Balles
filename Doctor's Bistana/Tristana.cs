@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Enumerations;
@@ -60,7 +57,7 @@ namespace Tristana
             SpellMenu.AddGroupLabel("KillSteal Settings");
             SpellMenu.Add("ERKs", new CheckBox("KillSteal [ER]"));
             SpellMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
-            SpellMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
+            SpellMenu.Add("RKb", new KeyBind(" Semi Manual [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'R'));
             SpellMenu.AddGroupLabel("[W] KillSteal Settings");
             SpellMenu.Add("WKs", new CheckBox("Use [W] KillSteal", false));
             SpellMenu.Add("CTurret", new CheckBox("Dont Use [W] KillSteal Under Turet"));
@@ -214,7 +211,7 @@ namespace Tristana
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < E.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (minion != null)
             {
-                if (useE && E.IsReady() && minion.HealthPercent > 70 && minion.IsValidTarget(E.Range) && _Player.ManaPercent > mana)
+                if (useE && E.IsReady() && minion.HealthPercent >= 70 && minion.IsValidTarget(E.Range) && _Player.ManaPercent >= mana)
                 {
                     E.Cast(minion);
                 }
@@ -243,7 +240,6 @@ namespace Tristana
                 }
 				
                 if (_Player.ManaPercent < mana) return;
-
                 if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast(monster.Position);
@@ -309,14 +305,15 @@ namespace Tristana
             var minW = SpellMenu["MinW"].Cast<Slider>().CurrentValue;
             foreach (var target2 in target)
             {
-                if (RKill && R.IsReady() || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue)
+                if (R.IsReady() && target.IsValidTarget(R.Range) && (RKill || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue))
                 {
                     if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(R.Range))
                     {
                         R.Cast(target2);
                     }
                 }
-                if (WKill && W.IsReady())
+
+                if (WKill && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     if (target2.Health + target2.AttackShield < Player.Instance.GetAutoAttackDamage(target2) * WAttack && Player.Instance.Mana > W.Handle.SData.Mana * 2 && Player.Instance.HealthPercent > 25 && target2.Position.CountEnemiesInRange(400) <= minW)
                     {
@@ -358,7 +355,7 @@ namespace Tristana
 
             foreach (var target3 in targetE)
             {
-                if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady())
+                if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     if (target3.Health + target3.AttackShield < Player.Instance.GetSpellDamage(target3, SpellSlot.R) + EDamage(target3))
                     {
