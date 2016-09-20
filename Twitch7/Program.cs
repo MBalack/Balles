@@ -28,10 +28,6 @@ namespace Twitch7
         {
             get { return Player.Instance; }
         }
-        private static float HealthPercent()
-        {
-            return (PlayerInstance.Health / PlayerInstance.MaxHealth) * 100;
-        }
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -133,9 +129,6 @@ namespace Twitch7
             Misc.AddGroupLabel("Use [E] Before Death");
             Misc.Add("Ebe", new CheckBox("Use [E] Before Death ", false));
             Misc.Add("Ebes", new Slider("Min Health Use [E] Before Death ", 15));
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 7, "Default", "1", "2", "3", "4", "5", "6", "7"));
             Misc.AddGroupLabel("Draw Settings");
             Misc.Add("DrawW", new CheckBox("[W] Range"));
             Misc.Add("DrawE", new CheckBox("[E] Range"));
@@ -150,7 +143,7 @@ namespace Twitch7
 
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Damage;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
         }
@@ -167,7 +160,7 @@ namespace Twitch7
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
@@ -193,22 +186,6 @@ namespace Twitch7
             KillSteal();
             Item();
             Escape();
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         public static void Combo()
@@ -282,19 +259,31 @@ namespace Twitch7
             var yous = Items["you"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(475) && !e.IsDead))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(900) && !e.IsDead))
             {
                 if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(target))
                 {
                     Bil.Cast(target);
                 }
+
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
-                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && _Player.Distance(target) < 325 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+
+                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && _Player.Distance(target) <= Player.Instance.GetAutoAttackRange() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    Youmuu.Cast();
+                    if (_Player.HasBuff("TwitchFullAutomatic"))
+                    {
+                        Youmuu.Cast();
+                    }
+                    else
+                    {
+                        if (_Player.Distance(target) <= 550)
+                        {
+                            Youmuu.Cast();
+                        }
+                    }
                 }
             }
         }
