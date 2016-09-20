@@ -232,11 +232,11 @@ namespace Olaf7
             if (target != null)
             {
                 var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead)
                 {
                     Q.Cast(pos.To3DWorld());
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead)
          	    {				
                     W.Cast();
 	    		}

@@ -47,8 +47,7 @@ namespace Hecarim7
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-			Menu = MainMenu.AddMenu("Hecarim", "Hecarim");
-            Menu.AddSeparator();
+			Menu = MainMenu.AddMenu("Doctor's Hecarim", "Hecarim");
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
