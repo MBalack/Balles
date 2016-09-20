@@ -44,7 +44,6 @@ namespace Irelia
         {
             if (!_Player.ChampionName.Contains("Irelia")) return;
             Chat.Print("Doctor's Irelia Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 625);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Targeted(SpellSlot.E, 425);
@@ -217,7 +216,6 @@ namespace Irelia
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useQ2 = ComboMenu["ComboQ2"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
@@ -225,10 +223,11 @@ namespace Irelia
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var HealthE = ComboMenu["AlwaysE"].Cast<CheckBox>().CurrentValue;
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
-            foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200)))
             {
-                var targetQ = TargetSelector.GetTarget(1200, DamageType.Physical);
-                if (useQ2 && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(targetQ) > Q.Range && minion.Distance(targetQ) < _Player.Distance(targetQ))
+                var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.Distance(Player.Instance) < Q.Range && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()).OrderBy(m => m.Health).FirstOrDefault();
+                if (minion == null) return;
+                if (useQ2 && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(target) > Q.Range && minion.Distance(target) < _Player.Distance(target))
                 {
                     if (turret)
                     {
@@ -242,74 +241,77 @@ namespace Irelia
                         Q.Cast(minion);
                     }
                 }
-            }
-            if (target == null) return;
-            if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
-            {
-                if (turret)
+
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
-                    if (!UnderTuret(target))
+                    if (turret)
+                    {
+                        if (!UnderTuret(target))
+                        {
+                            Q.Cast(target);
+                        }
+                    }
+                    else
                     {
                         Q.Cast(target);
                     }
                 }
-                else
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    Q.Cast(target);
-                }
-            }
-            if (useE && E.IsReady() && target.IsValidTarget(E.Range))
-            {
-                if (HealthE)
-                {
-                    if (target.HealthPercent > _Player.HealthPercent || target.HealthPercent < 30)
+                    if (HealthE)
+                    {
+                        if (target.HealthPercent > _Player.HealthPercent || target.HealthPercent < 30)
+                        {
+                            E.Cast(target);
+                        }
+                    }
+                    else
                     {
                         E.Cast(target);
                     }
                 }
-                else
+
+                if (useW && W.IsReady() && target.IsValidTarget(E.Range) && Player.Instance.GetAutoAttackRange() > target.Distance(Player.Instance))
                 {
-                    E.Cast(target);
+                    W.Cast();
                 }
-            }
-            if (useW && W.IsReady() && target.IsValidTarget(E.Range) && Player.Instance.GetAutoAttackRange() > target.Distance(Player.Instance))
-            {
-                W.Cast();
-            }
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead && !e.IsZombie);
-            var Rhealth = ComboMenu["RHeatlh"].Cast<CheckBox>().CurrentValue;
-            var mauR = ComboMenu["MauR"].Cast<Slider>().CurrentValue;
-            var RSheen = ComboMenu["RShen"].Cast<CheckBox>().CurrentValue;
-            var useR = ComboMenu["useRCombo"].Cast<CheckBox>().CurrentValue;
-            if (!useR) return;
-            foreach (var targetR in target2)
-            {
-                if (Rhealth && R.IsReady() && targetR.IsValidTarget(R.Range))
+
+                var Rhealth = ComboMenu["RHeatlh"].Cast<CheckBox>().CurrentValue;
+                var mauR = ComboMenu["MauR"].Cast<Slider>().CurrentValue;
+                var RSheen = ComboMenu["RShen"].Cast<CheckBox>().CurrentValue;
+                var useR = ComboMenu["useRCombo"].Cast<CheckBox>().CurrentValue;
+                if (useR)
                 {
-                    if (_Player.HealthPercent < mauR)
+                    if (Rhealth && R.IsReady() && target.IsValidTarget(R.Range))
                     {
-                        R.Cast(targetR);
+                        if (_Player.HealthPercent < mauR)
+                        {
+                            R.Cast(target);
+                        }
                     }
-                }
-                if (RSheen)
-                {
-                    if (targetR.IsValidTarget(R.Range) && R.IsReady() && Player.Instance.GetAutoAttackRange() < targetR.Distance(Player.Instance) && !_Player.HasBuff("Sheen") && (Sheen.IsOwned() || Tryn.IsOwned()))
+					
+                    if (RSheen)
                     {
-                        R.Cast(targetR);
+                        if (target.IsValidTarget(R.Range) && R.IsReady() && Player.Instance.GetAutoAttackRange() < target.Distance(Player.Instance) && !_Player.HasBuff("Sheen") && (Sheen.IsOwned() || Tryn.IsOwned()))
+                        {
+                            R.Cast(target);
+                        }
                     }
-                }
-                else
-                {
-                    if (targetR.IsValidTarget(R.Range) && _Player.HasBuff("IreliaTranscendentBlades"))
+                    else
                     {
-                        R.Cast(targetR);
+                        if (target.IsValidTarget(R.Range) && _Player.HasBuff("IreliaTranscendentBlades"))
+                        {
+                            R.Cast(target);
+                        }
                     }
-                }
-                if (!Sheen.IsOwned() || !Tryn.IsOwned())
-                {
-                    if (targetR.IsValidTarget(R.Range) && _Player.HasBuff("IreliaTranscendentBlades"))
+					
+                    if (!Sheen.IsOwned() || !Tryn.IsOwned())
                     {
-                        R.Cast(targetR);
+                        if (target.IsValidTarget(R.Range) && _Player.HasBuff("IreliaTranscendentBlades"))
+                        {
+                            R.Cast(target);
+                        }
                     }
                 }
             }
@@ -352,10 +354,12 @@ namespace Irelia
                         Q.Cast(minion);
                     }
                 }
+
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && _Player.HealthPercent <= minW)
                 {
                     W.Cast();
                 }
+
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.E))
                 {
                     E.Cast(minion);
@@ -387,6 +391,7 @@ namespace Irelia
                         Q.Cast(minion);
                     }
                 }
+
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.E))
                 {
                     E.Cast(minion);
@@ -408,10 +413,12 @@ namespace Irelia
                 {
                     Q.Cast(monters);
                 }
+				
                 if (useE && E.IsReady() && monters.IsValidTarget(E.Range))
                 {
                     E.Cast(monters);
                 }
+				
                 if (useW && W.IsReady() && monters.IsValidTarget(E.Range) && Player.Instance.GetAutoAttackRange() <= monters.Distance(Player.Instance))
                 {
                     W.Cast();
@@ -429,12 +436,11 @@ namespace Irelia
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
-            var target = TargetSelector.GetTarget(1200, DamageType.Physical);
             if (Player.Instance.ManaPercent < ManaQ) return;
-            foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200)))
             {
-                var targetQ = TargetSelector.GetTarget(1200, DamageType.Physical);
-                if (useQ2 && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(targetQ) > Q.Range && minion.Distance(targetQ) < _Player.Distance(targetQ))
+                var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.Distance(Player.Instance) < Q.Range && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()).OrderBy(m => m.Health).FirstOrDefault();
+                if (useQ2 && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(target) > Q.Range && minion.Distance(target) < _Player.Distance(target))
                 {
                     if (turret)
                     {
@@ -448,39 +454,41 @@ namespace Irelia
                         Q.Cast(minion);
                     }
                 }
-            }
-            if (target == null) return;
-            if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
-            {
-                if (turret)
+
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
-                    if (!UnderTuret(target))
+                    if (turret)
+                    {
+                        if (!UnderTuret(target))
+                        {
+                            Q.Cast(target);
+                        }
+                    }
+                    else
                     {
                         Q.Cast(target);
                     }
                 }
-                else
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    Q.Cast(target);
-                }
-            }
-            if (useE && E.IsReady() && target.IsValidTarget(E.Range))
-            {
-                if (HealthE)
-                {
-                    if (target.HealthPercent > _Player.HealthPercent || target.HealthPercent < 30)
+                    if (HealthE)
+                    {
+                        if (target.HealthPercent > _Player.HealthPercent || target.HealthPercent < 30)
+                        {
+                            E.Cast(target);
+                        }
+                    }
+                    else
                     {
                         E.Cast(target);
                     }
                 }
-                else
+
+                if (useW && W.IsReady() && target.IsValidTarget(E.Range) && Player.Instance.GetAutoAttackRange() > target.Distance(Player.Instance))
                 {
-                    E.Cast(target);
+                    W.Cast();
                 }
-            }
-            if (useW && W.IsReady() && target.IsValidTarget(E.Range) && Player.Instance.GetAutoAttackRange() > target.Distance(Player.Instance))
-            {
-                W.Cast();
             }
         }
 
@@ -491,14 +499,13 @@ namespace Irelia
             var item = Misc["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Misc["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Misc["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(450, DamageType.Physical);
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(475) && !e.IsDead))
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(target))
                 {
                     Bil.Cast(target);
                 }
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
@@ -587,6 +594,7 @@ namespace Irelia
                         Q.Cast(target);
                     }
                 }
+
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
@@ -594,6 +602,7 @@ namespace Irelia
                         E.Cast(target);
                     }
                 }
+
                 if (KsR && R.IsReady())
                 {
                     if (target.Health + target.AttackShield < RDamage(target) * 4 && (_Player.Distance(target) > 325 || !Q.IsReady()))
@@ -601,6 +610,7 @@ namespace Irelia
                         R.Cast(target);
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
