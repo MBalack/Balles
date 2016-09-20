@@ -395,6 +395,7 @@ namespace Jax
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (Player.Instance.ManaPercent < mana) return;
             if (target != null)
+            {
                 if (useE && E.IsReady())
                 {
                     if (!ECasting() && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
