@@ -170,9 +170,15 @@ namespace Jax
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
+        }
+
+        public static bool ECasting()
+        {
+            return _Player.HasBuff("JaxCounterStrike");
         }
 
         public static void Item()
@@ -219,15 +225,16 @@ namespace Jax
      	        {
                     if (useE && E.IsReady())
                     {
-                        if (!Player.HasBuff("JaxCounterStrike") && target.IsValidTarget(Q.Range) || !Player.HasBuff("JaxCounterStrike") && target.IsValidTarget(E.Range))
+                        if (!ECasting() && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
                         {
                             E.Cast();
                         }
-                        else if (Player.HasBuff("JaxCounterStrike") && target.IsValidTarget(E.Range))
+                        else if (ECasting() && target.IsValidTarget(E.Range))
                         {
                             E.Cast();
                         }
 	    	    	}
+
                     if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance))
                     {
                         if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
@@ -312,12 +319,12 @@ namespace Jax
 
                 if (useE && E.IsReady())
                 {
-                    if (!Player.HasBuff("JaxCounterStrike"))
+                    if (!ECasting())
                     {
                         E.Cast();
                     }
 
-                    else if (Player.HasBuff("JaxCounterStrike") && jungleMonsters.IsValidTarget(E.Range))
+                    else if (ECasting() && jungleMonsters.IsValidTarget(E.Range))
                     {
                         Core.DelayAction(() => E.Cast(), 1000);
 	    	    	}
@@ -384,18 +391,22 @@ namespace Jax
         {
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
-            var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
+            var mana = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
-            if (target != null && Player.Instance.ManaPercent >= ManaQ)
-     	    {
-                if (useE && E.IsReady() && !Player.HasBuff("JaxCounterStrike") && target.IsValidTarget(Q.Range))
+            if (Player.Instance.ManaPercent < mana) return;
+            if (target != null)
+                if (useE && E.IsReady())
                 {
-                    E.Cast();
-	    		}
-                if (useE && E.IsReady() && Player.HasBuff("JaxCounterStrike") && target.IsValidTarget(E.Range))
-                {
-                    E.Cast();
-	    		}
+                    if (!ECasting() && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
+                    {
+                        E.Cast();
+                    }
+                    else if (ECasting() && target.IsValidTarget(E.Range))
+                    {
+                        E.Cast();
+                    }
+    	    	}
+
                 if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance))
                 {
                     if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
@@ -457,6 +468,7 @@ namespace Jax
         {
             return WardIds.Select(wardId => Player.Instance.InventoryItems.FirstOrDefault(a => a.Id == wardId)).FirstOrDefault(slot => slot != null && slot.CanUseItem());
         }
+
         public static void KillSteal()
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
@@ -469,6 +481,7 @@ namespace Jax
                         Q.Cast(target);
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
