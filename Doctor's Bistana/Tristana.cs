@@ -25,7 +25,7 @@ namespace Tristana
         {
             get { return ObjectManager.Player; }
         }
-        public static Menu Menu, SpellMenu, JungleMenu, HarassMenu, LaneMenu, Misc, Skin;
+        public static Menu Menu, SpellMenu, JungleMenu, HarassMenu, LaneMenu, Misc;
 
         static void Main(string[] args)
         {
@@ -102,10 +102,6 @@ namespace Tristana
             Misc.Add("DrawW", new CheckBox("Draw [W]", false));
             Misc.Add("Notifications", new CheckBox("Notifications Can Kill With [R]"));
 
-            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 0, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"));
-
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
@@ -124,18 +120,6 @@ namespace Tristana
                 var castPos = Player.Instance.Position.Distance(cursorPos) <= W.Range ? cursorPos : Player.Instance.Position.Extend(cursorPos, W.Range).To3D();
                 W.Cast(castPos);
             }
-        }
-
-// Skin Changer
-
-        public static int SkinId()
-        {
-            return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-
-        public static bool checkSkin()
-        {
-            return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
 // Interrupt
@@ -373,11 +357,11 @@ namespace Tristana
             if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -426,13 +410,6 @@ namespace Tristana
                 LaneClear();
             }
             KillSteal();
-            if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
         }
 
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
