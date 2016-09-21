@@ -189,7 +189,6 @@ namespace Sejuani7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
-                RLogic();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
