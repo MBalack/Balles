@@ -18,10 +18,6 @@ namespace Graves7
     internal static class Program
     {
         private static Menu Menu, ComboMenu, HarassMenu, ClearMenu, JungleMenu, Drawings, KillStealMenu, Items, Misc;
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -235,21 +231,18 @@ namespace Graves7
             var yous = Items["you"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-			
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(550) && !e.IsDead))
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (item && Bil.IsReady() && Bil.IsOwned() && Bil.IsInRange(target))
                 {
                     Bil.Cast(target);
                 }
-				
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
 				
-                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(550) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (yous && Youmuu.IsReady() && Youmuu.IsOwned() && target.IsValidTarget(530) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Youmuu.Cast();
                 }
@@ -263,7 +256,7 @@ namespace Graves7
                 E.Cast(Player.Instance.Position.Shorten(sender.Position, E.Range));
             }	
 
-            if (Misc["AntiGapW"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player)<300)
+            if (Misc["AntiGapW"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) <= 300)
             {
                 W.Cast(e.Sender);
             }
@@ -430,7 +423,7 @@ namespace Graves7
 		{
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(1200) && !e.HasBuff("BlitzcrankManaBarrierCD") && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("BlitzcrankManaBarrierCD") && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
