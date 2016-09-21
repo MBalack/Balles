@@ -221,43 +221,38 @@ namespace Sejuani7
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Magical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var disQ = ComboMenu["DisQ"].Cast<Slider>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            if (target == null) return;
-            if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
-            {
-                Q.Cast(target);
-            }
-            if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost"))
-            {
-                E.Cast();
-            }
-        }
-
-        private static void RLogic()
-        {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead);
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
-            foreach (var targetR in target2)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead))
             {
-                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
-                    var RPred = R.GetPrediction(targetR);
+                    Q.Cast(target);
+                }
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance) && target.HasBuff("SejuaniFrost"))
+                {
+                    E.Cast();
+                }
+
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
+                {
+                    var RPred = R.GetPrediction(target);
                     if (RPred.CastPosition.CountEnemiesInRange(400) >= MinR && RPred.HitChance >= HitChance.High)
                     {
                         R.Cast(RPred.CastPosition);
                     }
                 }
-                if (useW && W.IsReady() && targetR.IsValidTarget(W.Range))
+
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
-            }
         }
 
 
@@ -281,28 +276,31 @@ namespace Sejuani7
 
         private static void LaneClear()
         {
-            var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
             var useWLH = LaneClearMenu["LastWLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["LaneE"].Cast<CheckBox>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            if (Player.Instance.ManaPercent < laneQMN) return;
-            foreach (var minion in minions)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= E.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (Player.Instance.ManaPercent < mana) return;
+            if (minion != null)
             {
                 if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range))
                 {
                     Q.Cast(minion);
                 }
-                else if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion))
+				
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion))
                 {
                     Q.Cast(minion);
                 }
-                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
+				
+                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && _Player.Position.CountEnemyMinionsInRange(W.Range) >= 3)
                 {
                     W.Cast();
                 }
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3 && minion.HasBuff("SejuaniFrost"))
+				
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.Position.CountEnemyMinionsInRange(E.Range) >= 3 && minion.HasBuff("SejuaniFrost"))
                 {
                     E.Cast();
                 }
@@ -323,10 +321,12 @@ namespace Sejuani7
                 {
                     Q.Cast(monters);
                 }
+				
                 if (useE && E.IsReady() && monters.IsValidTarget(E.Range) && monters.HasBuff("SejuaniFrost"))
                 {
                     E.Cast();
                 }
+				
                 if (useW && W.IsReady() && monters.IsValidTarget(W.Range))
                 {
                     W.Cast();
@@ -342,9 +342,8 @@ namespace Sejuani7
             var disE = HarassMenu["DisE2"].Cast<Slider>().CurrentValue;
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent < ManaQ) return;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead))
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
@@ -422,28 +421,31 @@ namespace Sejuani7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < QDamage(target))
+                    if (target.Health + target.AttackShield <= QDamage(target))
                     {
                         Q.Cast(target);
                     }
                 }
+
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range) && target.HasBuff("SejuaniFrost"))
                 {
-                    if (target.Health + target.AttackShield < EDamage(target))
+                    if (target.Health + target.AttackShield <= EDamage(target))
                     {
                         E.Cast();
                     }
                 }
+
                 if (KsR && R.IsReady())
                 {
-                    if (target.Health + target.AttackShield < RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
                     {
                         R.Cast(target);
                     }
                 }
+
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target.Health + target.AttackShield < RDamage(target))
+                    if (target.Health + target.AttackShield <= RDamage(target))
                     {
                         var pred = R.GetPrediction(target);
                         if (pred.HitChancePercent >= 70)
@@ -452,9 +454,10 @@ namespace Sejuani7
                         }
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
