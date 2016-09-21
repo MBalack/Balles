@@ -335,7 +335,6 @@ namespace Malphite
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
-            var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             if (Player.Instance.ManaPercent < ManaQ) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
