@@ -271,7 +271,7 @@ namespace Ashe
                 if (RAoe && R.IsReady() && target.IsValidTarget(2000))
                 {
                     var RPred = R.GetPrediction(target);
-                    if (RPred.CastPosition.CountEnemiesInRange(325) >= MinR && RPred.HitChance >= HitChance.Medium)
+                    if (RPred.CastPosition.CountEnemiesInRange(350) >= MinR && RPred.HitChance >= HitChance.Medium)
                     {
                         R.Cast(RPred.CastPosition);
                     }
