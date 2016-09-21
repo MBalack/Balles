@@ -176,7 +176,7 @@ namespace Jax
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        public static bool ECasting()
+        public static bool ECasting
         {
             return _Player.HasBuff("JaxCounterStrike");
         }
@@ -227,11 +227,11 @@ namespace Jax
      	        {
                     if (useE && E.IsReady())
                     {
-                        if (!ECasting() && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
+                        if (!ECasting && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
                         {
                             E.Cast();
                         }
-                        else if (ECasting() && target.IsValidTarget(E.Range))
+                        else if (ECasting && target.IsValidTarget(E.Range))
                         {
                             E.Cast();
                         }
@@ -321,12 +321,12 @@ namespace Jax
 
                 if (useE && E.IsReady())
                 {
-                    if (!ECasting())
+                    if (!ECasting)
                     {
                         E.Cast();
                     }
 
-                    else if (ECasting() && jungleMonsters.IsValidTarget(E.Range))
+                    else if (ECasting && jungleMonsters.IsValidTarget(E.Range))
                     {
                         Core.DelayAction(() => E.Cast(), 1000);
 	    	    	}
@@ -400,11 +400,11 @@ namespace Jax
             {
                 if (useE && E.IsReady())
                 {
-                    if (!ECasting() && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
+                    if (!ECasting && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
                     {
                         E.Cast();
                     }
-                    else if (ECasting() && target.IsValidTarget(E.Range))
+                    else if (ECasting && target.IsValidTarget(E.Range))
                     {
                         E.Cast();
                     }
