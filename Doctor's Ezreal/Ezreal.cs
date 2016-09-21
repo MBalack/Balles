@@ -12,7 +12,7 @@ using Font = SharpDX.Direct3D9.Font;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
-namespace Ezreal7
+namespace Ezreal
 {
     internal class Program
     {
@@ -21,25 +21,17 @@ namespace Ezreal7
         public static Item Bil;
         public static Font Thm;
         public static Font Thn;
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
-        private static float HealthPercent()
-        {
-            return (PlayerInstance.Health / PlayerInstance.MaxHealth) * 100;
-        }
         private static readonly Item Tear = new Item(ItemId.Tear_of_the_Goddess);
         private static readonly Item Manamune = new Item(ItemId.Manamune);
-        public static AIHeroClient _Player
-        {
-            get { return ObjectManager.Player; }
-        }
         public static Spell.Skillshot Q;
         public static Spell.Skillshot W;
         public static Spell.Skillshot E;
         public static Spell.Skillshot R;
         public static Spell.Targeted Ignite;
+        public static AIHeroClient _Player
+        {
+            get { return ObjectManager.Player; }
+        }
 
         static void Main(string[] args)
         {
@@ -271,7 +263,6 @@ namespace Ezreal7
 		
         public static void Combo()
         {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2500) && !e.IsDead);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
@@ -295,12 +286,10 @@ namespace Ezreal7
                         W.Cast(Wpred.CastPosition);
                     }
 	    		}
-            }
-            foreach (var targetR in target2)
-     	    {
-                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range) && targetR.IsInRange(Player.Instance, 2500) && !targetR.IsInRange(Player.Instance, MinRangeR))
+
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, MinRangeR))
                 {
-                    var pred = R.GetPrediction(targetR);
+                    var pred = R.GetPrediction(target);
                     if (pred.CastPosition.CountEnemiesInRange(R.Width) > MinR && pred.HitChance >= HitChance.High)
                     {
                         R.Cast(pred.CastPosition);
@@ -361,7 +350,7 @@ namespace Ezreal7
             if (target == null) return;
             if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
-                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay))
+                if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay) && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(target);
                 }
@@ -384,6 +373,7 @@ namespace Ezreal7
                         Q.Cast(Qpred.CastPosition);
                     }
                 }
+
                 if (useW && Player.Instance.ManaPercent >= ManaW && W.IsReady() && Selector.IsValidTarget(W.Range))
                 {
                     var Wpred = W.GetPrediction(Selector);
@@ -429,6 +419,7 @@ namespace Ezreal7
                             Q.Cast(predQ.CastPosition);
                         }
                     }
+
                     if (useW && W.IsReady() && !Orbwalker.IsAutoAttacking && automanaw <= Player.Instance.ManaPercent)
                     {
                         var predW = W.GetPrediction(Selector);
@@ -478,7 +469,7 @@ namespace Ezreal7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         var Qpred = Q.GetPrediction(target);
                         if (Qpred.HitChancePercent >= 70)
@@ -487,9 +478,10 @@ namespace Ezreal7
                         }
                     }
                 }
+
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.W))
                     {
                         var Wpred = W.GetPrediction(target);
                         if (Wpred.HitChancePercent >= 70)
@@ -498,11 +490,12 @@ namespace Ezreal7
                         }
                     }
                 }
+
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
                 var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, minKsR))
                     {
                         var pred = R.GetPrediction(target);
                         if (pred.HitChancePercent >= 80)
@@ -511,9 +504,10 @@ namespace Ezreal7
                         }
                     }
                 }
+
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
                         var pred = R.GetPrediction(target);
                         if (pred.HitChancePercent >= 70)
@@ -522,9 +516,10 @@ namespace Ezreal7
                         }
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
@@ -539,6 +534,7 @@ namespace Ezreal7
             {
                 Q.Cast(Game.CursorPos);
             }
+
             var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
             if (Misc["Stackk"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
             (!Player.Instance.IsInShopRange() && _Player.CountEnemiesInRange(1400) <= 0 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range))
