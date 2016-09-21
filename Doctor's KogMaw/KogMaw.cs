@@ -121,7 +121,6 @@ namespace KogMaw
             Misc.Add("DrawIE", new CheckBox("DrawText [Move]"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Game.OnUpdate += Game_OnUpdate;
         }
@@ -155,49 +154,11 @@ namespace KogMaw
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
-        {
-            Orbwalker.DisableMovement = false;
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
-            {
-                LaneClear();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
-            {
-                LastHit();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-            {
-                Harass();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-            {
-                JungleClear();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
-            {
-                Flee();
-            }
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-            {
-                Combo();
-                Ultimate();
-            }
-            KillSteal();
-            Move();
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
         public static int SkinId()
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -207,6 +168,48 @@ namespace KogMaw
         {
             R = new Spell.Skillshot(SpellSlot.R, 900 + 300 * (uint)Player.Instance.Spellbook.GetSpell(SpellSlot.R).Level, SkillShotType.Circular, 1200, int.MaxValue, 120);
             W = new Spell.Active(SpellSlot.W, (uint)Player.Instance.GetAutoAttackRange());
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
+            {
+                LaneClear();
+            }
+			
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
+            {
+                LastHit();
+            }
+			
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+            {
+                Harass();
+            }
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+            {
+                JungleClear();
+            }
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+            {
+                Flee();
+            }
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+            {
+                Combo();
+                Ultimate();
+            }
+
+            KillSteal();
+            Move();
+
+            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
+            {
+                if (checkSkin())
+                {
+                    Player.SetSkinId(SkinId());
+                }
+            }
         }
 
         private static void Combo()
@@ -239,16 +242,32 @@ namespace KogMaw
             var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (target != null)
             {
-                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (DisW && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
-                    Orbwalker.DisableMovement = true;
+                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
+                    {
+                        Orbwalker.DisableMovement = true;
+                    }
+                    else
+                    {
+                        Orbwalker.DisableMovement = false;
+                    }
                 }
-                if (DisWH && Player.HasBuff("KogMawBioArcaneBarrage") && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+
+                if (DisWH && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
-                    Orbwalker.DisableMovement = true;
+                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
+                    {
+                        Orbwalker.DisableMovement = true;
+                    }
+                    else
+                    {
+                        Orbwalker.DisableMovement = false;
+                    }
                 }
             }
 		}
+
         private static void Ultimate()
         {
             var Rlimit = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
@@ -267,6 +286,7 @@ namespace KogMaw
                             R.Cast(Rpred.CastPosition);
                         }
                     }
+					
                     if (ComboMenu["RMode"].Cast<ComboBox>().CurrentValue == 1 && target.HealthPercent <= 50)
                     {
                         var Rpred = R.GetPrediction(target);
@@ -275,6 +295,7 @@ namespace KogMaw
                             R.Cast(Rpred.CastPosition);
                         }
                     }
+					
                     if (ComboMenu["RMode"].Cast<ComboBox>().CurrentValue == 2 && target.HealthPercent <= 25)
                     {
                         var Rpred = R.GetPrediction(target);
@@ -304,6 +325,7 @@ namespace KogMaw
                 {
                     Q.Cast(minions);
                 }
+				
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(minions);
@@ -337,7 +359,7 @@ namespace KogMaw
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minion in minions)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast(minion);
                 }
@@ -360,14 +382,17 @@ namespace KogMaw
                 {
                     Q.Cast(target);
                 }
+				
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
                 {
                     E.Cast(target);
                 }
+				
                 if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(target);
 				}
+				
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range + 150) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
@@ -392,21 +417,32 @@ namespace KogMaw
                 {
                     Q.Cast(monster);
                 }
+				
                 if (useE && E.IsReady() && monster.IsValidTarget(E.Range))
                 {
                     E.Cast(monster);
                 }
+				
                 if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
+				
                 if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(monster);
                 }
-                if (DisW && Player.HasBuff("KogMawBioArcaneBarrage") && monster.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+				
+                if (DisW && monster.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    Orbwalker.DisableMovement = true;
+                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
+                    {
+                        Orbwalker.DisableMovement = true;
+                    }
+                    else
+                    {
+                        Orbwalker.DisableMovement = false;
+                    }
                 }
             }
         }
