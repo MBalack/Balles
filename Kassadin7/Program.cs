@@ -206,7 +206,7 @@ namespace Kassadin7
         }
         public static bool EReady
         {
-            get { return Player.HasBuff("ForcePulseAvailable"); }
+            get { return Player.Instance.HasBuff("ForcePulseAvailable"); }
         }
 
         private static void Combo()
