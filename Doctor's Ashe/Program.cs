@@ -55,7 +55,7 @@ namespace Ashe
             Bil = new Item(3144, 475f);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Menu = MainMenu.AddMenu("Doctor's Ashe", "Ashe");
-            Menu.AddGroupLabel("Doctor7");
+            Menu.AddGroupLabel("Mercedes7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
@@ -132,7 +132,6 @@ namespace Ashe
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
-                RLogic();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
@@ -269,11 +268,13 @@ namespace Ashe
         private static void Combo()
         {
             var targetS = TargetSelector.SelectedTarget;
+            var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
+            var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
             var useSL = ComboMenu["ComboSL"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead && !e.IsZombie))
             {
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana)
                 {
@@ -289,11 +290,22 @@ namespace Ashe
                         W.Cast(target);
                     }
                 }
+				
                 if (useR && R.IsReady() && target.IsValidTarget(W.Range) && _Player.HealthPercent <= 70)
                 {
                     R.Cast(target);
                 }
+
+                if (RAoe && R.IsReady() && target.IsValidTarget(2000))
+                {
+                    var RPred = R.GetPrediction(target);
+                    if (RPred.CastPosition.CountEnemiesInRange(300) >= MinR && RPred.HitChance >= HitChance.High)
+                    {
+                        R.Cast(RPred.CastPosition);
+                    }
+		    	}
             }
+
             if (useSL && targetS != null)
             {
                 if (R.IsReady() && targetS.IsValidTarget(1500))
@@ -386,21 +398,23 @@ namespace Ashe
             {
                 if (RKill && R.IsReady())
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000) && !target2.IsInRange(Player.Instance, 1000))
+                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000) && !target2.IsInRange(Player.Instance, 700))
                     {
                         R.Cast(target2);
                     }
                 }
+				
                 if (RKey && R.IsReady())
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000))
+                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000))
                     {
                         R.Cast(target2);
                     }
                 }
+				
                 if (WKill && W.IsReady())
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.W) && target2.IsValidTarget(W.Range))
+                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.W) && target2.IsValidTarget(W.Range))
                     {
                         W.Cast(target2);
                     }
@@ -435,26 +449,6 @@ namespace Ashe
                 {
                     Botrk.Cast(target);
                 }
-            }
-        }
-
-//R Logic
-
-        private static void RLogic()
-        {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead);
-            var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
-            var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
-            foreach (var target in target2)
-            {
-                if (RAoe && R.IsReady() && target.IsValidTarget(2000))
-                {
-                    var RPred = R.GetPrediction(target);
-                    if (RPred.CastPosition.CountEnemiesInRange(300) >= MinR && RPred.HitChance >= HitChance.High)
-                    {
-                        R.Cast(RPred.CastPosition);
-                    }
-		    	}
             }
         }
     }
