@@ -112,7 +112,7 @@ namespace Doctor_s_WuKong
             Misc.Add("AntiGap", new CheckBox("Use [W] Anti Gapcloser"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnPostAttack += ResetAttack;
             Interrupter.OnInterruptableSpell += Interupt;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
@@ -142,31 +142,35 @@ namespace Doctor_s_WuKong
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
-            Orbwalker.DisableAttacking = false;
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
 				Combo();
             }
                 KillSteal();
                 Ultimate();
+
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -186,14 +190,14 @@ namespace Doctor_s_WuKong
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        public static bool QPassive()
+        public static bool QPassive
         {
-            return _Player.HasBuff("monkeykingdoubleattack");
+            get { return Player.Instance.HasBuff("monkeykingdoubleattack"); }
         }
 
-        public static bool RActive()
+        public static bool RActive
         {
-            return _Player.HasBuff("MonkeyKingSpinToWin");
+            get { return Player.Instance.HasBuff("MonkeyKingSpinToWin"); }
         }
 
         private static void Combo()
@@ -246,26 +250,36 @@ namespace Doctor_s_WuKong
             var auto = Ulti["follow"].Cast<CheckBox>().CurrentValue;
             var autow = Ulti["wulti"].Cast<CheckBox>().CurrentValue;
             var mauW = Ulti["MauW"].Cast<Slider>().CurrentValue;
-            if (RActive())
+            if (RActive)
             {
                 Orbwalker.DisableAttacking = true;
             }
-            if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR && !RActive())
+            else
             {
-                R.Cast();
+                Orbwalker.DisableAttacking = false;
             }
-            if (useR2 && !RActive() && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+
+            if (target != null)
             {
-                R.Cast();
-            }
-            if (autow && _Player.HealthPercent <= mauW && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
-            {
-                W.Cast();
-            }
-            if (target == null) return;
-            if (auto && target.IsValidTarget() && !target.IsDead && !target.IsZombie && RActive())
-            {
-                Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
+                if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR && !RActive)
+                {
+                    R.Cast();
+                }
+				
+                if (useR2 && !RActive && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+                {
+                    R.Cast();
+                }
+				
+                if (autow && _Player.HealthPercent <= mauW && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+                {
+                    W.Cast();
+                }
+				
+                if (auto && target.IsValidTarget() && RActive)
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, target.Position);
+                }
             }
         }
 
@@ -286,7 +300,7 @@ namespace Doctor_s_WuKong
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 
-                if ((useriu && !Q.IsReady() && !QPassive()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu && !Q.IsReady() && !QPassive) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
@@ -373,7 +387,8 @@ namespace Doctor_s_WuKong
             {
                 return;
             }
-            if (Inter && R.IsReady() && !RActive() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
+			
+            if (Inter && R.IsReady() && !RActive && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
             {
                 R.Cast();
             }
@@ -433,7 +448,7 @@ namespace Doctor_s_WuKong
                     }
                 }
 
-                if (KsR && R.IsReady() && !RActive() && target.IsValidTarget(R.Range))
+                if (KsR && R.IsReady() && !RActive && target.IsValidTarget(R.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
