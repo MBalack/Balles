@@ -25,10 +25,6 @@ namespace Olaf7
         {
             get { return ObjectManager.Player; }
         }
-        private static float HealthPercent()
-        {
-            return (Player.Instance.Health / Player.Instance.MaxHealth) * 100;
-        }
         public static Spell.Skillshot Q;
         public static Spell.Active W;
         public static Spell.Targeted E;
@@ -44,7 +40,6 @@ namespace Olaf7
         {
                 if (!_Player.ChampionName.Contains("Olaf")) return;
                 Chat.Print("Doctor's Olaf Loaded!", Color.Orange);
-                Bootstrap.Init(null);
                 Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1550, 75);
                 Q.AllowedCollisionCount = int.MaxValue;
                 W = new Spell.Active(SpellSlot.W);
@@ -79,6 +74,7 @@ namespace Olaf7
                 LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
                 LaneClearMenu.AddGroupLabel("LaneClear Settings");
                 LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
+                LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
                 LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
                 LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
                 LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
@@ -236,18 +232,22 @@ namespace Olaf7
                 {
                     Q.Cast(pos.To3DWorld());
                 }
+				
                 if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead)
          	    {				
                     W.Cast();
 	    		}
+				
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast(target);
                 }
+				
                 if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
                 {
                     Bil.Cast(target);
                 }
+				
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
@@ -255,24 +255,26 @@ namespace Olaf7
             }
         }
 
-        private static void ResetAttack(AttackableUnit target, EventArgs args)
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
-            var item = ComboMenu["hyd"].Cast<CheckBox>().CurrentValue;
-            if ((item && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear)))
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var champ = (AIHeroClient)e;
+            var useriu = ComboMenu["hyd"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
             {
-                if (Hydra.IsOwned() && Hydra.IsReady() && target.IsValidTarget(325))
+                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
-                    Hydra.Cast();
-                }
+                    if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
+                    {
+                        Hydra.Cast();
+                    }
 
-                if (Tiamat.IsOwned() && Tiamat.IsReady() && target.IsValidTarget(325))
-                {
-                    Tiamat.Cast();
-                }
-
-                if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
-                {
-                    Titanic.Cast();
+                    if (Tiamat.IsOwned(Player.Instance) && Tiamat.IsReady() && target.IsValidTarget(250))
+                    {
+                        Tiamat.Cast();
+                    }
                 }
             }
         }
@@ -298,10 +300,12 @@ namespace Olaf7
                 {
                     Q.Cast(jungle);
                 }
+				
                 if (useW && W.IsReady() && jungle.IsValidTarget(325) && Player.Instance.ManaPercent >= mana)
                 {
                     W.Cast();
                 }
+				
                 if (useE && E.IsReady() && E.IsInRange(jungle))
                 {
                     E.Cast(jungle);
@@ -316,18 +320,22 @@ namespace Olaf7
             var useE = LaneClearMenu["ClearE"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var manaW = LaneClearMenu["Wlc"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            foreach (var minion in minions)
+            var MinQ = LaneClearMenu["minQ"].Cast<Slider>().CurrentValue;
+            var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
+            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, Q.Width, (int) Q.Range);
+            foreach (var minion in minionE)
             {
                 if (useW && W.IsReady() && Player.Instance.ManaPercent > mana && Player.Instance.HealthPercent < manaW && minion.IsValidTarget(E.Range))
                 {
                     W.Cast();
                 }
-                if (useE && E.IsReady() && !minion.IsValidTarget(_Player.AttackRange) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.E))
+
+                if (useE && E.IsReady() && !minion.IsValidTarget(_Player.AttackRange) && minion.Health <= Player.Instance.GetSpellDamage(minion, SpellSlot.E))
                 {
                     E.Cast(minion);
                 }
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && minions.Count() > 3)
+
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && quang.HitNumber >= MinQ)
                 {
                     Q.Cast(minion);
                 }
@@ -378,10 +386,12 @@ namespace Olaf7
                 {
                     Q.Cast(pos.To3DWorld());
                 }
+				
                 if (useW && W.IsReady() && target.IsValidTarget(325) && Player.Instance.ManaPercent >= ManaQ)
                 {				
                     W.Cast();
 		    	}
+				
                 if (E.IsReady() && useE && target.IsValidTarget(E.Range))
                 {
                     E.Cast(target);
@@ -394,13 +404,14 @@ namespace Olaf7
             var useE = LastHitMenu["LastE"].Cast<CheckBox>().CurrentValue;
             var useQ = LastHitMenu["LastQ"].Cast<CheckBox>().CurrentValue;
             var LhM = LastHitMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            foreach (var minion in minions)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (minion != null)
             {
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent > LhM && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast(minion);
                 }
+
                 if (useE && E.IsReady() && Player.Instance.GetSpellDamage(minion, SpellSlot.E) >= minion.TotalShieldHealth())
                 {
                     E.Cast(minion);
@@ -443,12 +454,12 @@ namespace Olaf7
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(Q.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady())
                 {
                     var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(pos.To3DWorld());
                     }
@@ -456,14 +467,14 @@ namespace Olaf7
 
                 if (KsE && E.IsReady())
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target);
                     }
                 }
                 if (Ignite != null && KillStealMenu["KsIgnite"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
@@ -493,7 +504,7 @@ namespace Olaf7
             || (Misc["stun"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Stun))
             || (Misc["rot"].Cast<CheckBox>().CurrentValue && _Player.IsRooted)
             || (Misc["fear"].Cast<CheckBox>().CurrentValue && Player.HasBuffOfType(BuffType.Fear));
-            if (R.IsReady() && ulti && cc && _Player.CountEnemiesInRange(800) >= minR && Player.Instance.HealthPercent <= heal)
+            if (R.IsReady() && ulti && cc && _Player.Position.CountEnemiesInRange(800) >= minR && Player.Instance.HealthPercent <= heal)
             {
                 Core.DelayAction(() => R.Cast(), Misc["delay"].Cast<Slider>().CurrentValue);
             }
