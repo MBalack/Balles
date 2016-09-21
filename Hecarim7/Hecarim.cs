@@ -245,7 +245,7 @@ namespace Hecarim7
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
             var useWLH = LaneClearMenu["LastWLC"].Cast<CheckBox>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < W.Range).OrderBy(a => a.Health).FirstOrDefault();
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= W.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (minion != null)
             {
                 if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent >= laneQMN)
