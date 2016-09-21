@@ -326,8 +326,8 @@ namespace Kassadin7
             var useQ = LastHitMenu["QLH"].Cast<CheckBox>().CurrentValue;
             var useW = LastHitMenu["WLH"].Cast<CheckBox>().CurrentValue;
             var mana = LastHitMenu["ManaLH"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
-            foreach (var minion in minions)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (minion != null)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth() 
                 && Player.Instance.ManaPercent >= mana && (_Player.Distance(minion) > 225 || !W.IsReady()))
