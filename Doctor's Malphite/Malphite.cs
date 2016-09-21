@@ -290,7 +290,7 @@ namespace Malphite
         {
             var mana = LaneClearMenu["ManaLH"].Cast<Slider>().CurrentValue;
             var useQ = LaneClearMenu["LastHitQ"].Cast<CheckBox>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
             if (minion != null)
             {

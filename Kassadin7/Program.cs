@@ -224,6 +224,7 @@ namespace Kassadin7
                 {
                     E.Cast(target);
                 }
+				
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     if (_Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && !W.IsReady())
@@ -235,6 +236,7 @@ namespace Kassadin7
                         Q.Cast(target);
                     }
                 }
+				
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.Position.CountEnemiesInRange(R.Range) <= minR && _Player.HealthPercent >= Minhp)
                 {
                     if (turret)
@@ -324,7 +326,7 @@ namespace Kassadin7
             var useQ = LastHitMenu["QLH"].Cast<CheckBox>().CurrentValue;
             var useW = LastHitMenu["WLH"].Cast<CheckBox>().CurrentValue;
             var mana = LastHitMenu["ManaLH"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             foreach (var minion in minions)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth() 
@@ -391,7 +393,6 @@ namespace Kassadin7
                            R.Cast(target);
                         }
                     }
-					
                     else
                     {
                        R.Cast(target);
@@ -492,7 +493,7 @@ namespace Kassadin7
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range) && EReady)
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target);
                     }
@@ -500,7 +501,7 @@ namespace Kassadin7
 				
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
                         R.Cast(target);
                     }
@@ -508,7 +509,7 @@ namespace Kassadin7
 				
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(target);
                     }
@@ -516,7 +517,7 @@ namespace Kassadin7
 				
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
