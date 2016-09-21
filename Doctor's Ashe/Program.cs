@@ -109,7 +109,7 @@ namespace Ashe
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Skin.Add("skin.Id", new ComboBox("Skin Mode", 6, "1", "2", "3", "4", "5", "6", "7", "8"));
 
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
             Interrupter.OnInterruptableSpell += Interupt;
@@ -117,9 +117,7 @@ namespace Ashe
 
         }
 
-        // Game OnTick
-
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
@@ -157,15 +155,19 @@ namespace Ashe
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (_Player.IsDead) return;
+			
             if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
+			
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = W.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
@@ -214,6 +216,7 @@ namespace Ashe
             {
                 return;
             }
+			
             if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && _Player.Distance(sender) <= 1200)
             {
                 R.Cast(sender);
@@ -368,6 +371,7 @@ namespace Ashe
                 {
                     W.Cast(minion);
                 }
+				
                 if (useQ && minion.IsValidTarget(Q.Range) && QReady && minions.Count() >= 3)
                 {
                     Q.Cast();
@@ -390,6 +394,7 @@ namespace Ashe
                 {
                     Q.Cast();
                 }
+				
                 if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast(monster);
