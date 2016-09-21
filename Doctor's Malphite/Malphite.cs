@@ -172,7 +172,6 @@ namespace Malphite
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
-                HarassLogic();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
@@ -181,7 +180,6 @@ namespace Malphite
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
-                RLogic();
             }
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
@@ -198,7 +196,7 @@ namespace Malphite
             }
             if (ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue)
             {
-                Orbwalker.OrbwalkTo(Game.CursorPos);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
         }
 
@@ -213,40 +211,36 @@ namespace Malphite
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            var disQ = ComboMenu["DisQ"].Cast<Slider>().CurrentValue;
-            if (target == null) return;
-            if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ < target.Distance(Player.Instance))
-            {
-                Q.Cast(target);
-            }
-        }
-
-        private static void RLogic()
-        {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead);
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            foreach (var targetR in target2)
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var disQ = ComboMenu["DisQ"].Cast<Slider>().CurrentValue;
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead))
             {
-                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ < target.Distance(Player.Instance))
                 {
-                    var RPred = R.GetPrediction(targetR);
+                    Q.Cast(target);
+                }
+				
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                {
+                    W.Cast();
+                }
+				
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                {
+                    E.Cast();
+                }
+
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
+                {
+                    var RPred = R.GetPrediction(target);
                     if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR && RPred.HitChance >= HitChance.High)
                     {
                         R.Cast(RPred.CastPosition);
                     }
-                }
-                if (useW && W.IsReady() && targetR.IsValidTarget(W.Range))
-                {
-                    W.Cast();
-                }
-                if (useE && E.IsReady() && targetR.IsValidTarget(E.Range))
-                {
-                    E.Cast();
                 }
             }
         }
@@ -271,19 +265,21 @@ namespace Malphite
             var useQ = LaneClearMenu["LaneClearQ"].Cast<CheckBox>().CurrentValue;
             var useW = LaneClearMenu["LaneClearW"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["LaneClearE"].Cast<CheckBox>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
-            foreach (var minion in minions)
+            if (minion != null)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.Q))
                 {
                     Q.Cast(minion);
                 }
-                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
+				
+                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && _Player.CountEnemyMinionsInRange(Q.Range) >= 3)
                 {
                     W.Cast();
                 }
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.Position.CountEnemyMinionsInRange(400) >= 3)
+				
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.CountEnemyMinionsInRange(E.Range) >= 3)
                 {
                     E.Cast();
                 }
@@ -294,9 +290,9 @@ namespace Malphite
         {
             var mana = LaneClearMenu["ManaLH"].Cast<Slider>().CurrentValue;
             var useQ = LaneClearMenu["LastHitQ"].Cast<CheckBox>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
-            foreach (var minion in minions)
+            if (minion != null)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && _Player.Distance(minion) > 175)
                 {
@@ -319,10 +315,12 @@ namespace Malphite
                 {
                     Q.Cast(monters);
                 }
+				
                 if (useE && E.IsReady() && monters.IsValidTarget(E.Range))
                 {
                     E.Cast();
                 }
+				
                 if (useW && W.IsReady() && monters.IsValidTarget(W.Range))
                 {
                     W.Cast();
@@ -332,34 +330,26 @@ namespace Malphite
 
         private static void Harass()
         {
+            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
+            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
+            var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent < ManaQ) return;
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))
                 {
                     Q.Cast(target);
                 }
-            }
-        }
 
-        private static void HarassLogic()
-        {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead);
-            var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
-            var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
-            var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
-            if (Player.Instance.ManaPercent < ManaQ) return;
-            foreach (var targetR in target2)
-            {
-                if (useW && W.IsReady() && targetR.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
-                if (useE && E.IsReady() && targetR.IsValidTarget(E.Range))
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast();
                 }
@@ -404,28 +394,31 @@ namespace Malphite
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(target);
                     }
                 }
+				
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast();
                     }
                 }
+				
                 if (KsR && R.IsReady())
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R) && !target.IsInRange(Player.Instance, minKsR))
                     {
                         R.Cast(target);
                     }
                 }
+				
                 if (R.IsReady() && KillStealMenu["RKb"].Cast<KeyBind>().CurrentValue)
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.R))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R))
                     {
                         var pred = R.GetPrediction(target);
                         if (pred.HitChancePercent >= 70)
@@ -434,9 +427,10 @@ namespace Malphite
                         }
                     }
                 }
+				
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
