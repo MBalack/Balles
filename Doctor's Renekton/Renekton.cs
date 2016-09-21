@@ -175,19 +175,19 @@ namespace Renekton7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        public static bool PassiveW()
+        public static bool PassiveW
         {
-            return _Player.HasBuff("renektonpreexecute");
+            get { return Player.Instance.HasBuff("renektonpreexecute"); }
         }
 
-        public static bool PassiveE()
+        public static bool PassiveE
         {
-            return _Player.HasBuff("RenekthonSliceAndDiceDelay");
+            get { return Player.Instance.HasBuff("RenekthonSliceAndDiceDelay"); }
         }
 
-        public static bool Fury()
+        public static bool Fury
         {
-            return _Player.HasBuff("renektonrageready");
+            get { return Player.Instance.HasBuff("renektonrageready"); }
         }
 
         public static float QDamage(Obj_AI_Base target)
@@ -231,17 +231,17 @@ namespace Renekton7
             var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && !PassiveW() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && !PassiveW && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
 
-                if (!PassiveE() && useE && E.IsReady() && target.IsValidTarget(E.Range) && (200 <= target.Distance(Player.Instance) || !Q.IsReady() && !W.IsReady()))
+                if (!PassiveE && useE && E.IsReady() && target.IsValidTarget(E.Range) && (200 <= target.Distance(Player.Instance) || !Q.IsReady() && !W.IsReady()))
                 {
                     E.Cast(target.Position);
                 }
 				
-                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && PassiveE() && E2dis <= target.Distance(Player.Instance))
+                if (useE2 && E.IsReady() && target.IsValidTarget(E.Range) && PassiveE && E2dis <= target.Distance(Player.Instance))
                 {
                     E.Cast(target.Position);
                 }
@@ -290,7 +290,7 @@ namespace Renekton7
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 
-                if ((useriu && !W.IsReady() && !PassiveW()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu && !W.IsReady() && !PassiveW) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
@@ -389,12 +389,12 @@ namespace Renekton7
 
                 if (useE && E.IsReady())
                 {
-                    if (!PassiveE())
+                    if (!PassiveE)
                     {
                         E.Cast(jungleMonsters.Position);
                     }
 
-                    if (PassiveE() && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
+                    if (PassiveE && jungleMonsters.IsValidTarget(E.Range) && !Q.IsReady() && !W.IsReady())
                     {
                         E.Cast(jungleMonsters.Position);
                     }
@@ -422,7 +422,7 @@ namespace Renekton7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (Fury())
+                    if (Fury)
                     {
                         if (target.Health + target.AttackShield <= QDamage(target) * 0.5)
                         {
@@ -440,7 +440,7 @@ namespace Renekton7
 
                 if (KsW && W.IsReady() && target.IsValidTarget(250))
                 {
-                    if (Fury())
+                    if (Fury)
                     {
                         if (target.Health + target.AttackShield <= WDamage(target) * 3)
                         {
