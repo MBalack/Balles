@@ -178,7 +178,7 @@ namespace Jax
 
         public static bool ECasting
         {
-            return _Player.HasBuff("JaxCounterStrike");
+            get { return Player.Instance.HasBuff("JaxCounterStrike"); }
         }
 
         public static void Item()
