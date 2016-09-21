@@ -260,11 +260,11 @@ namespace Yi
             var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.ServerPosition, 625).FirstOrDefault(x => x.IsValidTarget(Q.Range));
             if (monster != null)
             {
-                if (useQ && Q.IsReady() && _Player.ManaPercent > mana)
+                if (useQ && Q.IsReady() && _Player.ManaPercent > mana && monster.IsValidTarget(Q.Range))
 		    	{
                     Q.Cast(monster);
                 }
-                if (useE && E.IsReady())
+                if (useE && E.IsReady() && monster.IsValidTarget(225))
 		    	{
                     E.Cast();
                 }

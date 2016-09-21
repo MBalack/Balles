@@ -251,7 +251,7 @@ namespace Kayle7
             {
                 if (useW2 && W.IsReady() && !Player.Instance.IsInShopRange() && !Player.Instance.IsRecalling())
                 {
-                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || !target2.HasBuff("ZedR")))
+                    if (Heal["useWon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("ZedR")))
                     {
                         W.Cast(target2);
                     }

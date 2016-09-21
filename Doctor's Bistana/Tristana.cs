@@ -282,14 +282,13 @@ namespace Tristana
         private static void KillSteal()
         {
             var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
-            var targetE = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && e.HasBuff("tristanaecharge") && !e.IsDead && !e.IsZombie);
             var RKill = SpellMenu["RKs"].Cast<CheckBox>().CurrentValue;
             var WKill = SpellMenu["WKs"].Cast<CheckBox>().CurrentValue;
             var WAttack = SpellMenu["Attack"].Cast<Slider>().CurrentValue;
             var minW = SpellMenu["MinW"].Cast<Slider>().CurrentValue;
             foreach (var target2 in target)
             {
-                if (R.IsReady() && target.IsValidTarget(R.Range) && (RKill || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue))
+                if (R.IsReady() && target2.IsValidTarget(R.Range) && (RKill || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue))
                 {
                     if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(R.Range))
                     {
@@ -297,7 +296,7 @@ namespace Tristana
                     }
                 }
 
-                if (WKill && W.IsReady() && target.IsValidTarget(W.Range))
+                if (WKill && W.IsReady() && target2.IsValidTarget(W.Range))
                 {
                     if (target2.Health + target2.AttackShield < Player.Instance.GetAutoAttackDamage(target2) * WAttack && Player.Instance.Mana > W.Handle.SData.Mana * 2 && Player.Instance.HealthPercent > 25 && target2.Position.CountEnemiesInRange(400) <= minW)
                     {
@@ -335,15 +334,12 @@ namespace Tristana
                         }
                     }
                 }
-            }
 
-            foreach (var target3 in targetE)
-            {
-                if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady() && target.IsValidTarget(R.Range))
+                if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady() && target2.IsValidTarget(R.Range) && target2.HasBuff("tristanaecharge"))
                 {
-                    if (target3.Health + target3.AttackShield < Player.Instance.GetSpellDamage(target3, SpellSlot.R) + EDamage(target3))
+                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) + EDamage(target2))
                     {
-                        R.Cast(target3);
+                        R.Cast(target2);
                     }
                 }
             }
