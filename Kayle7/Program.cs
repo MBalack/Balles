@@ -24,10 +24,6 @@ namespace Kayle7
         {
             get { return ObjectManager.Player; }
         }
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
         public static Spell.Targeted Q;
         public static Spell.Targeted W;
         public static Spell.Active E;
@@ -44,7 +40,6 @@ namespace Kayle7
         {
             if (!_Player.ChampionName.Contains("Kayle")) return;
             Chat.Print("Doctor's Kayle Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Targeted(SpellSlot.Q, 650);
             W = new Spell.Targeted(SpellSlot.W, 900);
             E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
@@ -116,7 +111,6 @@ namespace Kayle7
             Misc.Add("DrawIE", new CheckBox("DrawText [E]"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
             Game.OnUpdate += Game_OnUpdate;
         }
 
@@ -148,8 +142,10 @@ namespace Kayle7
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
+            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
+
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -195,23 +191,18 @@ namespace Kayle7
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        private static void Game_OnUpdate(EventArgs args)
-        {
-            E = new Spell.Active(SpellSlot.E, (uint)Player.Instance.GetAutoAttackRange());
-        }
-
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast(target);
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(550) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(550))
                 {
                     E.Cast();
                 }
@@ -229,7 +220,7 @@ namespace Kayle7
                 (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             foreach (var target2 in target)
             {
-                if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (ObjectManager.Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
+                if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (_Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
                 {
                     if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("ZedR")))
                     {
@@ -264,16 +255,16 @@ namespace Kayle7
             var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ELC"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
-            foreach (var minion in minions)
+            if (minion != null)
             {
-                if (useE && E.IsReady() && minion.IsValidTarget(550) && minions.Count() >= 3)
+                if (useE && E.IsReady() && minion.IsValidTarget(550) && _Player.Position.CountEnemyMinionsInRange(550) >= 3)
                 {
                     E.Cast();
                 }
 				
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast(minion);
                 }
@@ -289,11 +280,11 @@ namespace Kayle7
         {
             var useQ = LaneClearMenu["QLH"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLH"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
-            foreach (var minion in minions)
+            if (minion != null)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) > minion.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minion, SpellSlot.Q) >= minion.TotalShieldHealth())
                 {
                     Q.Cast(minion);
                 }
@@ -305,16 +296,16 @@ namespace Kayle7
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaHR"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
             if (Player.Instance.ManaPercent <= mana) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast(target);
                 }
 				
-                if (useE && E.IsReady() && target.IsValidTarget(550) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(550))
                 {
                     E.Cast();
                 }
@@ -347,7 +338,7 @@ namespace Kayle7
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             if (target != null)
             {
-                if (Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast(target);
                 }
@@ -366,7 +357,7 @@ namespace Kayle7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(target);
                     }
@@ -374,7 +365,7 @@ namespace Kayle7
 
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }
