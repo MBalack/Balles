@@ -16,7 +16,7 @@ namespace Jax
     internal class Program
     {
         public const string ChampionName = "Jax";
-        public static Menu Menu, ComboMenu, Autos, HarassMenu, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Drawings;
+        public static Menu Menu, ComboMenu, Autos, HarassMenu, LaneClearMenu, Debugs, JungleClearMenu, Misc, KillStealMenu, Drawings;
         public static Item Botrk;
         public static Item Bil;
         public static AIHeroClient _Player
@@ -112,8 +112,12 @@ namespace Jax
             Drawings.Add("DrawQ", new CheckBox("Q Range"));
             Drawings.Add("DrawE", new CheckBox("E Range", false));
 
+            Debugs = Menu.AddSubMenu("Debug", "Debugs");
+            Debugs.AddGroupLabel("Debug Settings");
+            Debugs.Add("Debug", new CheckBox("Debug"));
+
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnPostAttack += ResetAttack;
         }
 
@@ -129,7 +133,7 @@ namespace Jax
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         { 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
@@ -227,17 +231,23 @@ namespace Jax
      	        {
                     if (useE && E.IsReady())
                     {
-                        if (!ECasting && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
+                        if (!ECasting && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsValidTarget(E.Range))
                         {
                             E.Cast();
                         }
-                        else if (ECasting && target.IsValidTarget(E.Range))
+
+                        if (!ECasting && target.IsValidTarget(E.Range))
+                        {
+                            E.Cast();
+                        }
+
+                        if (ECasting && target.IsValidTarget(E.Range))
                         {
                             E.Cast();
                         }
 	    	    	}
 
-                    if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance))
+                    if (useQ && Q.IsReady() && (Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 20))
                     {
                         if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
                         {
@@ -246,6 +256,7 @@ namespace Jax
                     }
                 }
             }
+
             if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
             {
                 if (target != null)
@@ -257,12 +268,22 @@ namespace Jax
                             Q.Cast(target);
                         }
                     }
-                    if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+
+                    if (useE && E.IsReady())
                     {
-                        E.Cast();
-	    	    	}
+                        if (!ECasting && target.IsValidTarget(E.Range))
+                        {
+                            E.Cast();
+	    	        	}
+
+                        if (ECasting && target.IsValidTarget(E.Range))
+                        {
+                            E.Cast();
+                        }
+                    }
                 }
             }
+
             if (useR && R.IsReady())
             {
                 if (ObjectManager.Player.Position.CountEnemiesInRange(Q.Range) >= MinR)
@@ -487,7 +508,7 @@ namespace Jax
 
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite) && (Player.Instance.GetAutoAttackDamage(target) < target.Health || !target.IsValidTarget(Player.Instance.GetAutoAttackRange())))
                     {
                         Ignite.Cast(target);
                     }
