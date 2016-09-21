@@ -131,13 +131,13 @@ namespace Graves7
             Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
             Drawings.Add("Notifications", new CheckBox("Notifications Can Kill [R]"));
 
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalker.OnPostAttack += ResetAttack;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
 		{
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {

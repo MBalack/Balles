@@ -144,7 +144,7 @@ namespace Olaf7
                 Drawings.Add("Axe", new CheckBox("Axe Draw"));
 
                 Drawing.OnDraw += Drawing_OnDraw;
-                Game.OnTick += Game_OnTick;
+                Game.OnUpdate += Game_OnUpdate;
                 Orbwalker.OnPostAttack += ResetAttack;
                 Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
                 GameObject.OnCreate += GameObject_OnCreate;
@@ -168,7 +168,7 @@ namespace Olaf7
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         { 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {

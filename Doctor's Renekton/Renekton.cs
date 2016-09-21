@@ -105,7 +105,7 @@ namespace Renekton7
             Misc.Add("DrawE2", new CheckBox("Drawings Distance Use E2 If Distance Target >"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnPostAttack += ResetAttack;
         }
 
@@ -128,7 +128,7 @@ namespace Renekton7
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))

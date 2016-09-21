@@ -117,7 +117,7 @@ namespace Malphite
             Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Interrupter.OnInterruptableSpell += Interupt;
         }
 
@@ -159,7 +159,7 @@ namespace Malphite
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {

@@ -125,7 +125,7 @@ namespace Kassadin7
             Misc.Add("Hp", new Slider("HP For Seraph", 30, 0, 100));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Interrupter.OnInterruptableSpell += Interupt;
             Orbwalker.OnPostAttack += ResetAttack;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
@@ -159,7 +159,7 @@ namespace Kassadin7
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {

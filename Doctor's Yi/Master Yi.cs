@@ -125,7 +125,7 @@ namespace Yi
             Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             Orbwalker.OnPostAttack += ResetAttack;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
@@ -140,7 +140,7 @@ namespace Yi
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         { 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {

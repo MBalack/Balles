@@ -113,7 +113,7 @@ namespace Hecarim7
             Drawings.Add("DrawRhit", new CheckBox("[R] Draw Hit"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Interrupter.OnInterruptableSpell += Interupt;
         }
 
@@ -153,7 +153,7 @@ namespace Hecarim7
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         {
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
