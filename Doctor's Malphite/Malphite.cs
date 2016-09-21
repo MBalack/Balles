@@ -265,7 +265,7 @@ namespace Malphite
             var useQ = LaneClearMenu["LaneClearQ"].Cast<CheckBox>().CurrentValue;
             var useW = LaneClearMenu["LaneClearW"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["LaneClearE"].Cast<CheckBox>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < Q.Range).OrderBy(a => a.Health).FirstOrDefault();
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
             if (minion != null)
             {
