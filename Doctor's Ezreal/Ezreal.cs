@@ -46,7 +46,7 @@ namespace Ezreal
             W = new Spell.Skillshot(SpellSlot.W,1000,SkillShotType.Linear,250,1550,80);
             W.AllowedCollisionCount = int.MaxValue;
             E = new Spell.Skillshot(SpellSlot.E,475,SkillShotType.Linear,250,2000,100);
-            R= new Spell.Skillshot(SpellSlot.R,5000,SkillShotType.Linear,1000,2000,160);
+            R = new Spell.Skillshot(SpellSlot.R,5000,SkillShotType.Linear,1000,2000,160);
             R.AllowedCollisionCount = int.MaxValue;
             Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
@@ -60,10 +60,7 @@ namespace Ezreal
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe"));
-            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 0, 5));
-            ComboMenu.AddSeparator();
-            ComboMenu.Add("MinRangeR", new Slider("Min Distance Cast [R]", 1000, 0, 5000));
-            ComboMenu.AddLabel("Recommended Distance 1000");
+            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -98,17 +95,17 @@ namespace Ezreal
             LaneClearMenu.AddGroupLabel("LastHit Settings");
             LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit", false));
             LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
-            LaneClearMenu.Add("LhMana", new Slider("Min Mana Lasthit [Q]", 60));
+            LaneClearMenu.Add("LhMana", new Slider("Mana Lasthit", 60));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
             LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
             LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
-            LaneClearMenu.Add("ManaLC", new Slider("Min Mana LaneClear With [Q]", 70));
+            LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 70));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
-            JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear [Q]", 30));
+            JungleClearMenu.Add("MnJungle", new Slider("Mana JungleClear", 30));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("AntiGap Settings");
@@ -150,7 +147,7 @@ namespace Ezreal
             Drawings.Add("DrawAT", new CheckBox("Draw Auto Harass"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
         }
@@ -194,7 +191,7 @@ namespace Ezreal
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         { 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
@@ -266,9 +263,8 @@ namespace Ezreal
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
-            var MinRangeR = ComboMenu["MinRangeR"].Cast<Slider>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead))
      	    {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
@@ -278,6 +274,7 @@ namespace Ezreal
                         Q.Cast(Qpred.CastPosition);
                     }
                 }
+
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     var Wpred = W.GetPrediction(target);
@@ -287,10 +284,10 @@ namespace Ezreal
                     }
 	    		}
 
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, MinRangeR))
+                if (useR && R.IsReady() && target.IsValidTarget(2000) && target.IsInRange(Player.Instance, 2000) && !target.IsInRange(Player.Instance, 800))
                 {
                     var pred = R.GetPrediction(target);
-                    if (pred.CastPosition.CountEnemiesInRange(R.Width) > MinR && pred.HitChance >= HitChance.High)
+                    if (pred.CastPosition.CountEnemiesInRange(R.Width) > MinR && pred.HitChance >= HitChance.Medium)
                     {
                         R.Cast(pred.CastPosition);
                     }
