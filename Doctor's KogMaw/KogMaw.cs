@@ -295,11 +295,10 @@ namespace KogMaw
             var Rlimit = LaneClearMenu["MinRLC"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var MinE = LaneClearMenu["minE"].Cast<Slider>().CurrentValue;
-            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).FirstOrDefault(x => EntityManager.MinionsAndMonsters.EnemyMinions.Count(m => m.Distance(x) < R.Radius) > 2);
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, E.Width, (int) E.Range);
             if (Player.Instance.ManaPercent < mana) return;
-            if (minions != null)
+            foreach (var minions in minionE)
             {
                 if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
                 {
@@ -309,12 +308,10 @@ namespace KogMaw
                 {
                     R.Cast(minions);
                 }
-            }
-            foreach (var minionEE in minionE)
-            {
-                if (useE && E.IsReady() && minionEE.IsValidTarget(E.Range) && quang.HitNumber >= MinE && Player.Instance.ManaPercent >= mana)
+
+                if (useE && E.IsReady() && minions.IsValidTarget(E.Range) && quang.HitNumber >= MinE && Player.Instance.ManaPercent >= mana)
                 {
-                    E.Cast(minionEE);
+                    E.Cast(minions);
                 }
 			}
         }
