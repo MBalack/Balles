@@ -178,7 +178,6 @@ namespace Hecarim7
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
 			{
 				Combo();
-                RLogic();
 			}
 			
             KillSteal();
@@ -205,13 +204,14 @@ namespace Hecarim7
 		
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Mixed);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-			
-            if (target != null)
+            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
+            var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead))
             {
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(700))
                 {
                     E.Cast();
                 }
@@ -220,20 +220,10 @@ namespace Hecarim7
                 {
                     W.Cast();
                 }
-            }
-        }
-
-        private static void RLogic()
-        {
-            var target2 = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead);
-            var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
-            var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var targetR in target2)
-            {
-                if (useR && R.IsReady() && targetR.IsValidTarget(R.Range))
+				
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    var RPred = R.GetPrediction(targetR);
+                    var RPred = R.GetPrediction(target);
 					
                     if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR && RPred.HitChance >= HitChance.High)
                     {
@@ -241,13 +231,12 @@ namespace Hecarim7
                     }
 		    	}
 				
-                if (useQ && Q.IsReady() && targetR.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
             }
         }
-
 
         private static void LaneClear()
         {
@@ -256,21 +245,20 @@ namespace Hecarim7
             var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
             var useQ = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
             var useWLH = LaneClearMenu["LastWLC"].Cast<CheckBox>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-			
-            foreach (var minion in minions)
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < W.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (minion != null)
             {
-                if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > laneQMN)
+                if (useQLH && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent >= laneQMN)
                 {
                     Q.Cast();
                 }
 				
-                else if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion) && Player.Instance.ManaPercent > laneQMN)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion) && Player.Instance.ManaPercent >= laneQMN)
                 {
                     Q.Cast();
                 }
 				
-                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && Player.Instance.ManaPercent > laneWMN && minions.Count() >= 3)
+                if (useWLH && W.IsReady() && minion.IsValidTarget(W.Range) && Player.Instance.ManaPercent >= laneWMN && _Player.Position.CountEnemyMinionsInRange(W.Range) >= 3)
                 {
                     W.Cast();
                 }
@@ -284,9 +272,7 @@ namespace Hecarim7
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["JungleMana"].Cast<Slider>().CurrentValue;
             var jungleMonsters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(R.Range));
-			
             if (Player.Instance.ManaPercent <= mana) return;
-			
             if (jungleMonsters != null)
             {
                 if (useQ && Q.IsReady() && Q.IsInRange(jungleMonsters))
@@ -312,20 +298,14 @@ namespace Hecarim7
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var ManaQ = HarassMenu["ManaQ"].Cast<Slider>().CurrentValue;
             var ManaW = HarassMenu["ManaW"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Mixed);
-            var targetQ = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
-			
-            if (targetQ != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > ManaQ)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Player.Instance.ManaPercent >= ManaQ)
                 {
                     Q.Cast();
                 }
-            }
-			
-            if (target != null)
-            {
-                if (useW && W.IsReady() && Player.Instance.ManaPercent > ManaW && target.IsValidTarget(W.Range))
+
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.ManaPercent >= ManaW)
                 {
                     W.Cast();
                 }
@@ -350,11 +330,9 @@ namespace Hecarim7
         {
             var useQ = Auto["AutoQ"].Cast<CheckBox>().CurrentValue;
             var mana = Auto["ManaQ"].Cast<Slider>().CurrentValue;
-            var target = EntityManager.Heroes.Enemies.FirstOrDefault(e => e.IsValidTarget(Q.Range));
-			
-            if (target != null)
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
-                if (useQ && Q.IsReady() && !Tru(_Player.Position) && Player.Instance.ManaPercent > mana && target.IsValidTarget(Q.Range) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+                if (useQ && Q.IsReady() && !Tru(_Player.Position) && Player.Instance.ManaPercent >= mana && target.IsValidTarget(Q.Range) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
                     Q.Cast();
                 }
@@ -369,11 +347,11 @@ namespace Hecarim7
         private static void LastHit()
         {
             var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
-            var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
-            foreach (var minion in minions)
+            var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
+            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
+            if (minion != null)
             {
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > LhM && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion))
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= mana && minion.IsValidTarget(Q.Range) && minion.Health < QDamage(minion))
                 {
                     Q.Cast();
                 }
@@ -402,7 +380,7 @@ namespace Hecarim7
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast();
                     }
@@ -410,15 +388,15 @@ namespace Hecarim7
 				
                 if (KsW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.W))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.W))
                     {
                         W.Cast();
 					}
                 }
 				
-                if (KsR && R.IsReady())
+                if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    if (target.Health + target.AttackShield < RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
                     {
                         R.Cast(target);
                     }
@@ -426,7 +404,7 @@ namespace Hecarim7
 				
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
-                    if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
+                    if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
                     {
                         Ignite.Cast(target);
                     }

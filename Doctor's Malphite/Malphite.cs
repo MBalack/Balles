@@ -274,12 +274,12 @@ namespace Malphite
                     Q.Cast(minion);
                 }
 				
-                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && _Player.CountEnemyMinionsInRange(Q.Range) >= 3)
+                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && _Player.Position.CountEnemyMinionsInRange(Q.Range) >= 3)
                 {
                     W.Cast();
                 }
 				
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.CountEnemyMinionsInRange(E.Range) >= 3)
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && _Player.Position.CountEnemyMinionsInRange(E.Range) >= 3)
                 {
                     E.Cast();
                 }
