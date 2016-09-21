@@ -120,7 +120,7 @@ namespace Vladimir
             Drawings.Add("DrawAT", new CheckBox("Draw Auto Harass"));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
         }
@@ -154,7 +154,7 @@ namespace Vladimir
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void Game_OnUpdate(EventArgs args)
         { 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
@@ -208,14 +208,14 @@ namespace Vladimir
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
-        public static bool EActive()
+        public static bool EActive
         {
-            return _Player.HasBuff("VladimirE");
+            get { return Player.Instance.HasBuff("VladimirE"); }
         }
 
-        public static bool Frenzy()
+        public static bool Frenzy
         {
-            return _Player.HasBuff("vladimirqfrenzy");
+            get { return Player.Instance.HasBuff("vladimirqfrenzy"); }
         }
 
         public static float QDamage(Obj_AI_Base target)
@@ -304,14 +304,14 @@ namespace Vladimir
                     }
                 }
 
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !EActive())
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !EActive)
                 {
                     Q.Cast(target);
                 }
 
                 if (useW && W.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (EActive() && _Player.Distance(target) <= 375)
+                    if (EActive && _Player.Distance(target) <= 375)
                     {
                         W.Cast();
                     }
@@ -322,7 +322,7 @@ namespace Vladimir
 					
                 }
 
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !EActive())
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !EActive)
                 {
                     E.Cast();
                 }
@@ -354,7 +354,7 @@ namespace Vladimir
                     Q.Cast(monster);
                 }
 				
-                if (useE && E.IsReady() && monster.IsValidTarget(E.Range) && !EActive())
+                if (useE && E.IsReady() && monster.IsValidTarget(E.Range) && !EActive)
 		    	{
                     E.Cast();
                 }
@@ -393,7 +393,7 @@ namespace Vladimir
                     }
                 }
 
-                if (useE && E.IsReady() && _Player.CountEnemyMinionsInRange(E.Range) >= MinE && !EActive())
+                if (useE && E.IsReady() && _Player.CountEnemyMinionsInRange(E.Range) >= MinE && !EActive)
                 {
                     E.Cast();
                 }
@@ -424,7 +424,7 @@ namespace Vladimir
                     Q.Cast(target);
                 }
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !EActive())
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !EActive)
                 {
                     E.Cast();
                 }
@@ -519,7 +519,7 @@ namespace Vladimir
 				
                 if (KsE && E.IsReady() && E.IsInRange(target))
                 {
-                    if (target.Health + target.AttackShield <= EDamage(target) && !EActive())
+                    if (target.Health + target.AttackShield <= EDamage(target) && !EActive)
                     {
                         E.Cast();
                     }
