@@ -37,7 +37,7 @@ namespace Jax
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Jax")) return;
-            Chat.Print("Doctor's Jax Loaded!", Color.Yellow);
+            Chat.Print("Doctor's Jax Loaded!", Color.GreenYellow);
             Q = new Spell.Targeted(SpellSlot.Q, 700);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Active(SpellSlot.E,350);
@@ -57,6 +57,13 @@ namespace Jax
             ComboMenu.AddSeparator();
             ComboMenu.Add("ComboR", new CheckBox("Combo [R]"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
+
+            Autos = Menu.AddSubMenu("Auto E/R Settings", "Autos");
+            Autos.AddGroupLabel("Automatic Settings");
+            Autos.Add("AutoE", new CheckBox("Auto [E] Enemies In Range"));
+            Autos.Add("minE", new Slider("Min Enemies Auto [E]", 2, 1, 5));
+            Autos.Add("AutoR", new CheckBox("Auto [R] If My HP =<"));
+            Autos.Add("mauR", new Slider("My HP Auto [R]", 50));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -95,13 +102,6 @@ namespace Jax
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 1, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
-            Autos = Menu.AddSubMenu("Auto Spell Settings", "Autos");
-            Autos.AddGroupLabel("Automatic Settings");
-            Autos.Add("AutoE", new CheckBox("Auto [E] Enemies In Range"));
-            Autos.Add("minE", new Slider("Min Enemies Auto [E]", 2, 1, 5));
-            Autos.Add("AutoR", new CheckBox("Auto [R] If My HP =<"));
-            Autos.Add("mauR", new Slider("My HP Auto [R]", 50));
-
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
             KillStealMenu.Add("KsQ", new CheckBox("[Q] KillSteal", false));
@@ -139,28 +139,35 @@ namespace Jax
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             KillSteal();
             Item();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -247,11 +254,15 @@ namespace Jax
                         }
 	    	    	}
 
-                    if (useQ && Q.IsReady() && (Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 20))
+                    if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (Player.Instance.GetAutoAttackRange() < target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 25))
                     {
-                        if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                        if (ECasting)
                         {
-                            Core.DelayAction(() => Q.Cast(target), 500);
+                            Core.DelayAction(() => Q.Cast(target), 600);
+                        }
+                        else
+                        {
+                            Q.Cast(target);
                         }
                     }
                 }
@@ -261,9 +272,9 @@ namespace Jax
             {
                 if (target != null)
      	        {
-                    if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance))
+                    if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() < target.Distance(Player.Instance))
                     {
-                        if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                        if (target.IsValidTarget(Q.Range))
                         {
                             Q.Cast(target);
                         }
@@ -286,7 +297,7 @@ namespace Jax
 
             if (useR && R.IsReady())
             {
-                if (ObjectManager.Player.Position.CountEnemiesInRange(Q.Range) >= MinR)
+                if (_Player.Position.CountEnemiesInRange(Q.Range) >= MinR)
                 {
                     R.Cast();
                 }
@@ -421,21 +432,31 @@ namespace Jax
             {
                 if (useE && E.IsReady())
                 {
-                    if (!ECasting && (target.IsValidTarget(Q.Range) || target.IsValidTarget(E.Range)))
+                    if (!ECasting && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsValidTarget(E.Range))
                     {
                         E.Cast();
                     }
-                    else if (ECasting && target.IsValidTarget(E.Range))
+
+                    if (!ECasting && target.IsValidTarget(E.Range))
+                    {
+                        E.Cast();
+                    }
+
+                    if (ECasting && target.IsValidTarget(E.Range))
                     {
                         E.Cast();
                     }
     	    	}
 
-                if (useQ && Q.IsReady() && Player.Instance.GetAutoAttackRange() <= target.Distance(Player.Instance))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (Player.Instance.GetAutoAttackRange() < target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 25))
                 {
-                    if (target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                    if (ECasting)
                     {
-                        Core.DelayAction(() => Q.Cast(target), 500);
+                        Core.DelayAction(() => Q.Cast(target), 600);
+                    }
+                    else
+                    {
+                        Q.Cast(target);
                     }
                 }
      	    }
