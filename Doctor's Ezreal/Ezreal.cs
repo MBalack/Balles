@@ -111,7 +111,7 @@ namespace Ezreal
             Misc.AddGroupLabel("AntiGap Settings");
             Misc.Add("AntiGap", new CheckBox("Use [E] AntiGapcloser", false));
             Misc.AddGroupLabel("Ultimate On CC Settings");
-            Misc.Add("Rstun", new CheckBox("Use [R] Enemy Immobile"));
+            Misc.Add("Rstun", new CheckBox("Use [R] Enemies Immobile"));
             Misc.AddGroupLabel("Auto Stacks Settings");
             Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
             Misc.Add("Stackk", new CheckBox("Auto Stacks If Enemies Around = 0", false));
@@ -134,8 +134,6 @@ namespace Ezreal
             KillStealMenu.AddSeparator();
             KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("minKsR", new Slider("Use [R] KillSteal If Enemy Distance >", 900, 1, 5000));
-            KillStealMenu.AddLabel("Recommended Distance 900");
             KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'T'));
 
             Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
@@ -150,23 +148,28 @@ namespace Ezreal
             Game.OnUpdate += Game_OnUpdate;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
+            Orbwalker.OnPostAttack += ResetAttack;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (_Player.IsDead) return;
+			
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
@@ -176,6 +179,7 @@ namespace Ezreal
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
+			
             if (Drawings["DrawAT"].Cast<CheckBox>().CurrentValue)
             {
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
@@ -197,31 +201,38 @@ namespace Ezreal
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             KillSteal();
             Stacks();
             AutoHarass();
             RStun();
             Item();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -235,6 +246,7 @@ namespace Ezreal
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -251,13 +263,34 @@ namespace Ezreal
                 {
                     Bil.Cast(target);
                 }
+				
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
             }
         }
-		
+
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
+        {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            var champ = (AIHeroClient)e;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
+            {
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
+                {
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
+                }
+            }
+        }
+
         public static void Combo()
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
@@ -266,7 +299,7 @@ namespace Ezreal
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
                 {
                     var Qpred = Q.GetPrediction(target);
                     if (Qpred.HitChance >= HitChance.High)
@@ -287,7 +320,7 @@ namespace Ezreal
                 if (useR && R.IsReady() && target.IsValidTarget(2000) && target.IsInRange(Player.Instance, 2000) && !target.IsInRange(Player.Instance, 800))
                 {
                     var pred = R.GetPrediction(target);
-                    if (pred.CastPosition.CountEnemiesInRange(R.Width) > MinR && pred.HitChance >= HitChance.Medium)
+                    if (pred.CastPosition.CountEnemiesInRange(R.Width) >= MinR && pred.HitChance >= HitChance.Medium)
                     {
                         R.Cast(pred.CastPosition);
                     }
@@ -489,10 +522,9 @@ namespace Ezreal
                 }
 
                 var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
-                var minKsR = KillStealMenu["minKsR"].Cast<Slider>().CurrentValue;
                 if (KsR && R.IsReady())
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.R) && target.IsInRange(Player.Instance, 2500) && !target.IsInRange(Player.Instance, 900))
                     {
                         var pred = R.GetPrediction(target);
                         if (pred.HitChancePercent >= 80)
