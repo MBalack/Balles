@@ -117,6 +117,7 @@ namespace XinZhao7
             Misc.Add("DrawR", new CheckBox("R Range"));
             Misc.Add("DrawE", new CheckBox("E Range"));
             Misc.Add("Damage", new CheckBox("Damage Indicator [R]"));
+            Misc.Add("DrawTR", new CheckBox("Draw Text Under Turret"));
             Misc.AddGroupLabel("Interrupt Settings");
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
 
@@ -230,7 +231,7 @@ namespace XinZhao7
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             if (target != null)
             {
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && (disE <= target.Distance(Player.Instance) || target.IsDashing()))
                 {
                     if (turret)
                     {
@@ -273,6 +274,7 @@ namespace XinZhao7
             {
                 R.Cast();
             }
+
             if (useR2 && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
@@ -295,6 +297,7 @@ namespace XinZhao7
                     {
                         Tiamat.Cast();
                     }
+					
                     if (Titanic.IsOwned() && target.IsValidTarget(325) && Titanic.IsReady())
                     {
                         Titanic.Cast();
@@ -316,6 +319,7 @@ namespace XinZhao7
                 {
                     Q.Cast();
                 }
+				
                 if (useW && W.IsReady() && minion.IsValidTarget(250))
                 {
                     W.Cast();
@@ -335,6 +339,7 @@ namespace XinZhao7
                 {
                     Q.Cast();
                 }
+				
                 if (useW && W.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast();
@@ -356,10 +361,12 @@ namespace XinZhao7
                 {
                     Q.Cast();
                 }
+				
                 if (useW && W.IsReady() && jungleMonsters.IsValidTarget(W.Range))
                 {
                     W.Cast();
                 }
+				
                 if (useE && E.IsReady() && jungleMonsters.IsValidTarget(E.Range))
                 {
                     E.Cast(jungleMonsters);
@@ -374,6 +381,7 @@ namespace XinZhao7
             {
                 return;
             }
+			
             if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
             {
                 R.Cast();
@@ -391,6 +399,7 @@ namespace XinZhao7
                     E.Cast(Enemies);
                 }
             }
+			
             if (minions != null && E.IsReady())
             {
                 if (minions.IsInRange(Game.CursorPos, 250))
@@ -423,6 +432,7 @@ namespace XinZhao7
                         E.Cast(target);
                     }
                 }
+				
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     if (target.Health + target.AttackShield < RDamage(target))
@@ -430,6 +440,7 @@ namespace XinZhao7
                         R.Cast();
                     }
                 }
+				
                 if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
