@@ -311,7 +311,7 @@ namespace Kassadin7
 				
                 if (useE && E.IsReady() && EReady && minions.IsValidTarget(E.Range) && quang.HitNumber >= MinE)
                 {
-                    E.Cast(minions);
+                    E.Cast(quang.CastPosition);
                 }
 				
                 if (useR && R.IsReady() && minions.IsValidTarget(R.Range) && !UnderTuret(minions) && Player.Instance.GetBuffCount("RiftWalk") < minRs)
@@ -489,7 +489,7 @@ namespace Kassadin7
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(Q.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie && (hero.HealthPercent <= 25)))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(Q.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range) && EReady)
                 {

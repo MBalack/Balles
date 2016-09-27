@@ -337,7 +337,7 @@ namespace Olaf7
 
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && quang.HitNumber >= MinQ)
                 {
-                    Q.Cast(minion);
+                    Q.Cast(quang.CastPosition);
                 }
             }
         }
