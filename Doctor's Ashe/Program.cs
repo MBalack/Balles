@@ -305,7 +305,7 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (!QReady || _Player.Distance(target) > 600))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (!QReady || _Player.Distance(target) > 600) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
