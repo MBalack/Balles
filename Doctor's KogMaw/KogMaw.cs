@@ -11,8 +11,6 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
-using SharpDX.Direct3D9;
-using Font = SharpDX.Direct3D9.Font;
 using Color = System.Drawing.Color;
 
 namespace KogMaw
@@ -24,15 +22,10 @@ namespace KogMaw
         {
             get { return ObjectManager.Player; }
         }
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
         public static Spell.Skillshot Q;
         public static Spell.Active W;
         public static Spell.Skillshot E;
         public static Spell.Skillshot R;
-        public static Font thm;
         public static Spell.Targeted Ignite;
 
         static void Main(string[] args)
@@ -51,7 +44,6 @@ namespace KogMaw
             E.AllowedCollisionCount = int.MaxValue;
             R = new Spell.Skillshot(SpellSlot.R, 900 + 300 * (uint)Player.Instance.Spellbook.GetSpell(SpellSlot.R).Level, SkillShotType.Circular, 1200, int.MaxValue, 120);
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Menu = MainMenu.AddMenu("Doctor's KogMaw", "KogMaw");
             Menu.AddGroupLabel("iDoctor Noob Dev");
             Menu.AddGroupLabel("Ideas Haxory");
@@ -60,7 +52,6 @@ namespace KogMaw
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("Disable", new CheckBox("Dont Move While [W]", false));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("ultiR", new CheckBox("Use [R] Combo"));
             ComboMenu.Add("RMode", new ComboBox("Ultimate Mode:", 1, "Always", "HP =< 50%", "HP =< 25%"));
@@ -72,7 +63,6 @@ namespace KogMaw
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
             HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass"));
-            HarassMenu.Add("DisableH", new CheckBox("Dont Move While [W]", false));
             HarassMenu.AddGroupLabel("Ultimate Settings");
             HarassMenu.Add("HRR", new CheckBox("Use [R] Harass"));
             HarassMenu.Add("MinRHR", new Slider("Max Stacks [R] Harass", 2, 1, 10));
@@ -84,7 +74,7 @@ namespace KogMaw
             LaneClearMenu.Add("ELC", new CheckBox("Use [E] LaneClear", false));
             LaneClearMenu.Add("minE", new Slider("Min Hit Minion Use [E]", 3, 1, 6));
             LaneClearMenu.AddGroupLabel("Ultimate Settings");
-            LaneClearMenu.Add("RLC", new CheckBox("Use [R] LaneClear"));
+            LaneClearMenu.Add("RLC", new CheckBox("Use [R] LaneClear", false));
             LaneClearMenu.Add("MinRLC", new Slider("Max Stacks [R] LaneClear", 1, 1, 10));
             LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 50));
             LaneClearMenu.AddGroupLabel("Lasthit Settings");
@@ -93,10 +83,9 @@ namespace KogMaw
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
-            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear", false));
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
             JungleClearMenu.Add("WJungle", new CheckBox("Use [W] JungleClear"));
             JungleClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
-            JungleClearMenu.Add("DisJungle", new CheckBox("Dont Move While [W]", false));
             JungleClearMenu.AddGroupLabel("Ultimate Settings");
             JungleClearMenu.Add("RJungle", new CheckBox("Use [R] JungleClear"));
             JungleClearMenu.Add("MinRJC", new Slider("Max Stacks [R] JungleClear", 1, 1, 10));
@@ -112,17 +101,17 @@ namespace KogMaw
             Misc.AddGroupLabel("Misc Settings");
             Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
-            Misc.Add("AntiGap", new CheckBox("Use [W] AntiGap"));
+            Misc.Add("AntiGap", new CheckBox("Use [E] AntiGap"));
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawQ", new CheckBox("[Q] Range", false));
             Misc.Add("DrawW", new CheckBox("[W] Range"));
             Misc.Add("DrawE", new CheckBox("[E] Range", false));
             Misc.Add("DrawR", new CheckBox("[R] Range"));
-            Misc.Add("DrawIE", new CheckBox("DrawText [Move]"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnPostAttack += ResetAttack;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -142,15 +131,6 @@ namespace KogMaw
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = Q.Range }.Draw(_Player.Position);
-            }
-            if (Misc["DrawIE"].Cast<CheckBox>().CurrentValue)
-            {
-                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-                if (ComboMenu["Disable"].Cast<CheckBox>().CurrentValue && target.IsValidTarget(W.Range) && Player.HasBuff("KogMawBioArcaneBarrage") && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-                {
-                    DrawFont(thm, "Disable Movement : On", (float)(ft[0] - 50), (float)(ft[1] + 50), SharpDX.Color.Red);
-                }
             }
         }
 
@@ -201,13 +181,32 @@ namespace KogMaw
             }
 
             KillSteal();
-            Move();
 
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
                 {
                     Player.SetSkinId(SkinId());
+                }
+            }
+        }
+
+        public static void ResetAttack(AttackableUnit e, EventArgs args)
+        {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
+            var champ = (AIHeroClient)e;
+            var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
+            {
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                {
+                    var Pred = E.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        E.Cast(Pred.CastPosition);
+                    }
                 }
             }
         }
@@ -220,53 +219,30 @@ namespace KogMaw
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana + W.Handle.SData.Mana && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(target);
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
                 }
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && Player.Instance.Mana > W.Handle.SData.Mana + E.Handle.SData.Mana && !target.IsDead && !target.IsZombie)
+
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
                 {
-                    E.Cast(target);
+                    var Pred = E.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        E.Cast(Pred.CastPosition);
+                    }
                 }
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 150) && !target.IsDead && !target.IsZombie)
+				
+                if (useW && W.IsReady() && target.IsValidTarget(610 + 20 * (uint)Player.Instance.Spellbook.GetSpell(SpellSlot.W).Level))
                 {
                     W.Cast();
                 }
             }
         }
-
-        private static void Move()
-        {
-            var DisW = ComboMenu["Disable"].Cast<CheckBox>().CurrentValue;
-            var DisWH = HarassMenu["DisableH"].Cast<CheckBox>().CurrentValue;
-            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
-            if (target != null)
-            {
-                if (DisW && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
-                {
-                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
-                    {
-                        Orbwalker.DisableMovement = true;
-                    }
-                    else
-                    {
-                        Orbwalker.DisableMovement = false;
-                    }
-                }
-
-                if (DisWH && target.IsValidTarget(W.Range) && !target.IsDead && !target.IsZombie && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-                {
-                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
-                    {
-                        Orbwalker.DisableMovement = true;
-                    }
-                    else
-                    {
-                        Orbwalker.DisableMovement = false;
-                    }
-                }
-            }
-		}
 
         private static void Ultimate()
         {
@@ -276,7 +252,7 @@ namespace KogMaw
             var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
             if (target != null)
             {
-                if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit && Player.Instance.ManaPercent > mana && Player.Instance.Mana > W.Handle.SData.Mana + 50*Player.Instance.GetBuffCount("KogMawLivingArtillery"))
+                if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit && Player.Instance.ManaPercent > mana)
                 {
                     if (ComboMenu["RMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
@@ -321,7 +297,7 @@ namespace KogMaw
             if (Player.Instance.ManaPercent < mana) return;
             foreach (var minions in minionE)
             {
-                if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth())
+                if (useQ && Q.IsReady() && minions.IsValidTarget(Q.Range) && Player.Instance.GetSpellDamage(minions, SpellSlot.Q) > minions.TotalShieldHealth() && _Player.Distance(minions) > 500)
                 {
                     Q.Cast(minions);
                 }
@@ -331,21 +307,16 @@ namespace KogMaw
                     R.Cast(minions);
                 }
 
-                if (useE && E.IsReady() && minions.IsValidTarget(E.Range) && quang.HitNumber >= MinE && Player.Instance.ManaPercent >= mana)
+                if (useE && E.IsReady() && minions.IsValidTarget(E.Range) && quang.HitNumber >= MinE)
                 {
-                    E.Cast(minions);
+                    E.Cast(quang.CastPosition);
                 }
 			}
         }
 
-        public static void DrawFont(Font vFont, string vText, float jx, float jy, ColorBGRA jc)
-        {
-            vFont.DrawText(null, vText, (int)jx, (int)jy, jc);
-        }
-
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs e)
         {	
-            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player)<300)
+            if (Misc["AntiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && e.Sender.Distance(_Player) <= 375)
             {
                 E.Cast(e.Sender);
             }
@@ -378,24 +349,36 @@ namespace KogMaw
             if (Player.Instance.ManaPercent <= mana) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(target);
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
+                }
+
+                if (useW && W.IsReady() && target.IsValidTarget(610 + 20 * (uint)Player.Instance.Spellbook.GetSpell(SpellSlot.W).Level))
+                {
+                    W.Cast();
                 }
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    E.Cast(target);
+                    var Pred = E.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        E.Cast(Pred.CastPosition);
+                    }
                 }
 				
                 if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
-                    R.Cast(target);
-				}
-				
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range + 150) && !target.IsDead && !target.IsZombie)
-                {
-                    W.Cast();
+                    var Rpred = R.GetPrediction(target);
+                    if (Rpred.HitChance >= HitChance.Medium)
+                    {
+                        R.Cast(Rpred.CastPosition);
+                    }
                 }
             }
         }
@@ -405,11 +388,10 @@ namespace KogMaw
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
-            var DisW = JungleClearMenu["DisJungle"].Cast<CheckBox>().CurrentValue;
             var Rlimit = JungleClearMenu["MinRJC"].Cast<Slider>().CurrentValue;
             var useR = JungleClearMenu["RJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["ManaJC"].Cast<Slider>().CurrentValue;
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, W.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters(Player.Instance.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
             if (Player.Instance.ManaPercent <= mana) return;
             if (monster != null)
             {
@@ -431,18 +413,6 @@ namespace KogMaw
                 if (useR && Player.Instance.GetBuffCount("KogMawLivingArtillery") < Rlimit)
                 {
                     R.Cast(monster);
-                }
-				
-                if (DisW && monster.IsValidTarget(W.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-                {
-                    if (Player.Instance.HasBuff("KogMawBioArcaneBarrage"))
-                    {
-                        Orbwalker.DisableMovement = true;
-                    }
-                    else
-                    {
-                        Orbwalker.DisableMovement = false;
-                    }
                 }
             }
         }
