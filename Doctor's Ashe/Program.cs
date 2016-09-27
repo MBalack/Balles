@@ -81,6 +81,7 @@ namespace Ashe
             LaneClearMenu.AddGroupLabel("Laneclear Settings");
             LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q] Laneclear", false));
             LaneClearMenu.Add("ClearW", new CheckBox("Use [W] Laneclear", false));
+            LaneClearMenu.Add("minw", new Slider("Number Hit Minions Use [W]", 2, 1, 6));
             LaneClearMenu.Add("manaFarm", new Slider("Mana LaneClear", 60, 0, 100));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
@@ -362,17 +363,19 @@ namespace Ashe
         {
             var useQ = LaneClearMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
             var useW = LaneClearMenu["ClearW"].Cast<CheckBox>().CurrentValue;
+            var minW = LaneClearMenu["minw"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["manaFarm"].Cast<Slider>().CurrentValue;
-            var minions = ObjectManager.Get<Obj_AI_Base>().OrderBy(m => m.Health).Where(m => m.IsMinion && m.IsEnemy && !m.IsDead);
+            var minionQ = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(W.Range));
+            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, W.Width, (int) W.Range);
             if (_Player.ManaPercent < mana) return;
-            foreach (var minion in minions)
+            foreach (var minion in minionQ)
             {
-                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
+                if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && quang.HitNumber >= minW)
                 {
-                    W.Cast(minion);
+                    W.Cast(quang.CastPosition);
                 }
 				
-                if (useQ && minion.IsValidTarget(Q.Range) && QReady && minions.Count() >= 3)
+                if (useQ && minion.IsValidTarget(Q.Range) && QReady && _Player.Position.CountEnemyMinionsInRange(Q.Range) >= 2)
                 {
                     Q.Cast();
                 }

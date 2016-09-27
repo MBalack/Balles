@@ -119,18 +119,22 @@ namespace Ziggs7
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = R.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = W.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
@@ -151,23 +155,28 @@ namespace Ziggs7
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
 				Combo();
             }
                 KillSteal();
+
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -181,6 +190,7 @@ namespace Ziggs7
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -207,6 +217,7 @@ namespace Ziggs7
             return _Player.CalculateDamageOnUnit(target, DamageType.Magical,
                 (float)(new[] { 0, 200, 300, 400 }[Program.R.Level] + 0.7f * _Player.FlatMagicDamageMod));
         }
+		
         public static float Rborders(Obj_AI_Base target)
         {
             return _Player.CalculateDamageOnUnit(target, DamageType.Magical,
@@ -220,6 +231,7 @@ namespace Ziggs7
             {
                 Q.Cast(QPred.CastPosition);
             }
+			
 		    else if (target.IsValidTarget(Q2.Range) && Q.IsReady())
             {
                 Q2.Cast(QPred.CastPosition);
@@ -255,18 +267,21 @@ namespace Ziggs7
                 {
                     QCast(target);
                 }
+				
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range - 100) && !target.IsDead && !target.IsZombie)
                 {
                     E.Cast(target);
                 }
+				
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range - 100) && !target.IsDead && !target.IsZombie)
                 {
                     W.Cast(target.ServerPosition);
                 }
+				
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
                     var pred = R.GetPrediction(target);
-                    if (pred.CastPosition.CountEnemiesInRange(R.Width) >= minR && pred.HitChance >= HitChance.High)
+                    if (pred.CastPosition.CountEnemiesInRange(500) >= minR && pred.HitChance >= HitChance.High)
                     {
                         R.Cast(pred.CastPosition);
                     }
@@ -287,6 +302,7 @@ namespace Ziggs7
                 {
                     Q.Cast(minion);
                 }
+				
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && minions.Count() >= 3)
                 {
                     E.Cast(minion);
@@ -306,6 +322,7 @@ namespace Ziggs7
                 {
                     E.Cast(target);
                 }
+				
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q3.Range) && !target.IsDead && !target.IsZombie)
                 {
                     QCast(target);
@@ -326,10 +343,12 @@ namespace Ziggs7
                 {
                     Q.Cast(monster);
                 }
+				
                 if (useE && E.IsReady() && monster.IsValidTarget(E.Range))
                 {
                     E.Cast(monster);
                 }
+				
                 if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast(monster);
@@ -344,6 +363,7 @@ namespace Ziggs7
             {
                 return;
             }
+			
             if (Inter && W.IsReady() && i.DangerLevel == DangerLevel.High && W.IsInRange(sender))
             {
                 W.Cast(sender.ServerPosition);
