@@ -308,7 +308,7 @@ namespace Graves7
 
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(R.Range) && !e.IsDead && !e.IsZombie))
             {
-                if (!useQ && !Q.IsReady() && target.IsValidTarget(Q.Range))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast(target);
 		    	}
@@ -378,7 +378,7 @@ namespace Graves7
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.ManaPercent > ManaQ && quang.HitNumber >= MinQ)
                 {
-                    Q.Cast(minion);
+                    Q.Cast(quang.CastPosition);
                 }
 			}
         }
