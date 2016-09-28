@@ -107,7 +107,7 @@ namespace Borki7
 
             Game.OnTick += Game_OnTick;
             Drawing.OnDraw += Drawing_OnDraw;
-
+            Orbwalker.OnPostAttack += ResetAttack;
         }
 
 // Game OnTick
@@ -118,24 +118,30 @@ namespace Borki7
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             KillSteal();
             Item();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -159,6 +165,37 @@ namespace Borki7
 
 // Combo Mode
 
+
+        private static void ResetAttack(AttackableUnit e, EventArgs args)
+        {
+            if (!(e is AIHeroClient)) return;
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+            var champ = (AIHeroClient)e;
+            var useQ = SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var useR = SpellMenu["ComboR"].Cast<CheckBox>().CurrentValue;
+            if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
+            if (target != null)
+            {
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
+                }
+
+                if (useR && !Q.IsReady() && R.IsReady() && R.Handle.Ammo >= 1 && target.IsValidTarget(R.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                {
+                    var RPred = R.GetPrediction(target);
+                    if (RPred.HitChance >= HitChance.High)
+                    {
+                        R.Cast(Pred.CastPosition);
+                    }
+                }
+            }
+        }
+
         private static void Combo()
         {
             var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
@@ -167,11 +204,16 @@ namespace Borki7
             var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
                 {
-                    Q.Cast(target);
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
                 }
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && R.Handle.Ammo >= 1)
+				
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && R.Handle.Ammo >= 1 && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
                 {
                     var Pred = R.GetPrediction(target);
                     if (Pred.HitChance >= HitChance.Medium)
@@ -179,6 +221,7 @@ namespace Borki7
                         R.Cast(Pred.CastPosition);
                     }
                 }
+				
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
@@ -201,8 +244,13 @@ namespace Borki7
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
-                    Q.Cast(target);
+                    var Pred = Q.GetPrediction(target);
+                    if (Pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(Pred.CastPosition);
+                    }
                 }
+				
                 if (useR && R.IsReady() && target.IsValidTarget(R.Range) && R.Handle.Ammo > Rocket)
                 {
                     var Pred = R.GetPrediction(target);
@@ -211,6 +259,7 @@ namespace Borki7
                         R.Cast(Pred.CastPosition);
                     }
                 }
+				
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
@@ -235,10 +284,12 @@ namespace Borki7
                 {
                     R.Cast(minion);
                 }
+				
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     Q.Cast(minion);
                 }
+				
                 if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     E.Cast();
@@ -259,10 +310,12 @@ namespace Borki7
                 {
                     R.Cast(target);
                 }
+				
                 if (useQ && Q.IsReady() && target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                 {
                     Q.Cast(target);
                 }
+				
                 if (Ignite != null && Ignites && Ignite.IsReady())
                 {
                     if (target.Health < _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
@@ -302,10 +355,12 @@ namespace Borki7
                 {
                     Q.Cast(monster);
                 }
+				
                 if (useR && R.IsReady() && monster.IsValidTarget(R.Range) && R.Handle.Ammo > Rocket)
                 {
                     R.Cast(monster);
                 }
+				
                 if (useE && E.IsReady() && monster.IsValidTarget(E.Range))
                 {
                     E.Cast();
@@ -326,6 +381,7 @@ namespace Borki7
                 {
                     Bil.Cast(target);
                 }
+				
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
@@ -343,14 +399,17 @@ namespace Borki7
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["drawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = W.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["drawE"].Cast<CheckBox>().CurrentValue && E.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["drawR"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
