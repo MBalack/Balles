@@ -243,7 +243,7 @@ namespace Tristana
 
         private static void JungleClear()
         {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().Where(a => a.Distance(Player.Instance) <= E.Range);
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(E.Range));
             var useQ = JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue;
             var useW = JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue;
             var useE = JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue;
