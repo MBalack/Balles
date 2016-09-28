@@ -190,7 +190,7 @@ namespace Borki7
                     var RPred = R.GetPrediction(target);
                     if (RPred.HitChance >= HitChance.High)
                     {
-                        R.Cast(Pred.CastPosition);
+                        R.Cast(RPred.CastPosition);
                     }
                 }
             }
