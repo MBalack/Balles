@@ -61,7 +61,7 @@ namespace Ashe
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
-            ComboMenu.Add("KeepCombo", new CheckBox("Kepp Mana For [R]"));
+            ComboMenu.Add("KeepCombo", new CheckBox("Keep Mana For [R]"));
             ComboMenu.AddGroupLabel("KillSteal Settings");
             ComboMenu.Add("RAoe", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("ComboSL", new CheckBox("Use [R] On Selected Target", false));
@@ -322,7 +322,7 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !QReady && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !QReady && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
@@ -436,7 +436,7 @@ namespace Ashe
             var RKey = ComboMenu["RKb"].Cast<KeyBind>().CurrentValue;
             foreach (var target2 in target)
             {
-                if (RKill && R.IsReady())
+                if ((RKill || RKey) && R.IsReady())
                 {
                     if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000) && !target2.IsInRange(Player.Instance, 700))
                     {
@@ -445,14 +445,6 @@ namespace Ashe
                         {
                             R.Cast(RPred.CastPosition);
                         }
-                    }
-                }
-				
-                if (RKey && R.IsReady())
-                {
-                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000))
-                    {
-                        R.Cast(target2);
                     }
                 }
 				
