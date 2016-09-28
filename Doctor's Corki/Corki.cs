@@ -176,7 +176,7 @@ namespace Borki7
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var Pred = Q.GetPrediction(target);
                     if (Pred.HitChance >= HitChance.High)
@@ -185,7 +185,7 @@ namespace Borki7
                     }
                 }
 
-                if (useR && !Q.IsReady() && R.IsReady() && R.Handle.Ammo >= 1 && target.IsValidTarget(R.Range) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useR && !Q.IsReady() && R.IsReady() && R.Handle.Ammo >= 1 && target.IsValidTarget(R.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var RPred = R.GetPrediction(target);
                     if (RPred.HitChance >= HitChance.High)
