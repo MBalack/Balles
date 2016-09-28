@@ -137,14 +137,17 @@ namespace Kassadin7
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = R.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawTR"].Cast<CheckBox>().CurrentValue)
             {
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
@@ -165,28 +168,35 @@ namespace Kassadin7
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             KillSteal();
             Dtc();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -200,10 +210,12 @@ namespace Kassadin7
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
+		
         public static bool EReady
         {
             get { return Player.Instance.HasBuff("ForcePulseAvailable"); }

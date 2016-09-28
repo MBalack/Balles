@@ -165,28 +165,35 @@ namespace Malphite
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             KillSteal();
             RSelect();
+			
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -194,6 +201,7 @@ namespace Malphite
                     Player.SetSkinId(SkinId());
                 }
             }
+			
             if (ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue)
             {
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
@@ -204,6 +212,7 @@ namespace Malphite
         {
             return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -294,7 +303,7 @@ namespace Malphite
             if (Player.Instance.ManaPercent < mana) return;
             if (minion != null)
             {
-                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health < Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && _Player.Distance(minion) > 175)
+                if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && _Player.Distance(minion) > 175)
                 {
                     Q.Cast(minion);
                 }
@@ -372,6 +381,7 @@ namespace Malphite
             {
                 return;
             }
+
             if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
             {
                 R.Cast(sender.Position);

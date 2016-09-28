@@ -360,7 +360,7 @@ namespace Hecarim7
 
         public static float RDamage(Obj_AI_Base target)
         {
-            return _Player.CalculateDamageOnUnit(target, DamageType.Physical,
+            return _Player.CalculateDamageOnUnit(target, DamageType.Magical,
                 (float)(new[] { 0, 150, 250, 350 }[R.Level] + 1.0f * _Player.FlatMagicDamageMod));
         }
 
