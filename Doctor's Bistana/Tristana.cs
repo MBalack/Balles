@@ -110,6 +110,39 @@ namespace Tristana
 
         }
 
+// Damage
+
+        public static float EDamage(Obj_AI_Base target)
+        {
+            float Edamage = 0;
+            if (target.HasBuff("tristanaecharge"))
+            {
+                Edamage += (float)(Player.Instance.GetSpellDamage(target, SpellSlot.E) * (target.GetBuffCount("tristanaecharge") * 0.30)) + Player.Instance.GetSpellDamage(target, SpellSlot.E);
+            }
+
+            return Edamage;
+        }
+
+        public static float RDamage(Obj_AI_Base target)
+        {
+            return _Player.CalculateDamageOnUnit(target, DamageType.Magical,
+                (float)(new[] { 0, 300, 400, 500 }[R.Level] + 1.0f * _Player.FlatMagicDamageMod));
+        }
+
+        public static float GetDamage(AIHeroClient target)
+        {
+            if (target != null)
+            {
+                float Damage = 0;
+
+                if (E.IsLearned) { Damage += EDamage(target); }
+                if (R.IsLearned) { Damage += RDamage(target); }
+
+                return Damage;
+            }
+            return 0;
+        }
+
 // Flee Mode
 
         private static void Flee()
@@ -124,7 +157,7 @@ namespace Tristana
 
 // Interrupt
 
-        public static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
+        private static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
         {
             var Inter = Misc["inter"].Cast<CheckBox>().CurrentValue;
             if (!sender.IsEnemy || !(sender is AIHeroClient) || Player.Instance.IsRecalling())
@@ -152,7 +185,7 @@ namespace Tristana
                     Q.Cast();
                 }
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent >= 10 && _Player.ManaPercent > mana)
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && target.HealthPercent >= 10 && _Player.ManaPercent >= mana)
                 {
                     if (HarassMenu["HarassE" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -192,8 +225,7 @@ namespace Tristana
             var useQ = LaneMenu["ClearQ"].Cast<CheckBox>().CurrentValue;
             var useE = LaneMenu["ClearE"].Cast<CheckBox>().CurrentValue;
             var mana = LaneMenu["manaFarm"].Cast<Slider>().CurrentValue;
-            var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) < E.Range).OrderBy(a => a.Health).FirstOrDefault();
-            if (minion != null)
+            foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range)))
             {
                 if (useE && E.IsReady() && minion.HealthPercent >= 70 && minion.IsValidTarget(E.Range) && _Player.ManaPercent >= mana)
                 {
@@ -211,7 +243,7 @@ namespace Tristana
 
         private static void JungleClear()
         {
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().Where(a => a.Distance(Player.Instance) < E.Range).OrderByDescending(a => a.Health).FirstOrDefault();
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().Where(a => a.Distance(Player.Instance) <= E.Range);
             var useQ = JungleMenu["jungleQ"].Cast<CheckBox>().CurrentValue;
             var useW = JungleMenu["jungleW"].Cast<CheckBox>().CurrentValue;
             var useE = JungleMenu["jungleE"].Cast<CheckBox>().CurrentValue;
@@ -224,6 +256,7 @@ namespace Tristana
                 }
 				
                 if (_Player.ManaPercent < mana) return;
+
                 if (useW && W.IsReady() && monster.IsValidTarget(W.Range))
                 {
                     W.Cast(monster.Position);
@@ -236,7 +269,7 @@ namespace Tristana
             }
         }
 
-        public static void DrawFont(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
+        private static void DrawFont(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
@@ -245,36 +278,31 @@ namespace Tristana
 
         private static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            var renga = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Rengar"));
+            var rengar = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Rengar"));
             var khazix = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Khazix"));
-            if (renga != null)
+            if (rengar != null)
             {
-                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
+                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
                 {
-                    R.Cast(renga);
+                    R.Cast(rengar);
                 }
             }
 
             if (khazix != null)
             {
-                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) < 300)
+                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
                 {
                     R.Cast(khazix);
                 }
             }
         }
 
-// EDamage
-
-        private static float EDamage(Obj_AI_Base target)
+        private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
-            float Edamage = 0;
-            if (target.HasBuff("tristanaecharge"))
+            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && R.IsReady() && args.Sender.Distance(_Player) <= 325)
             {
-                Edamage += (float)(Player.Instance.GetSpellDamage(target, SpellSlot.E) * (target.GetBuffCount("tristanaecharge") * 0.30)) + Player.Instance.GetSpellDamage(target, SpellSlot.E);
+                R.Cast(args.Sender);
             }
-
-            return Edamage;
         }
 
 // KillSteal
@@ -290,7 +318,7 @@ namespace Tristana
             {
                 if (R.IsReady() && target2.IsValidTarget(R.Range) && (RKill || SpellMenu["RKb"].Cast<KeyBind>().CurrentValue))
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(R.Range))
+                    if (target2.TotalShieldHealth() <= RDamage(target2))
                     {
                         R.Cast(target2);
                     }
@@ -298,12 +326,12 @@ namespace Tristana
 
                 if (WKill && W.IsReady() && target2.IsValidTarget(W.Range))
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetAutoAttackDamage(target2) * WAttack && Player.Instance.Mana > W.Handle.SData.Mana * 2 && Player.Instance.HealthPercent > 25 && target2.Position.CountEnemiesInRange(400) <= minW)
+                    if (target2.TotalShieldHealth() <= Player.Instance.GetAutoAttackDamage(target2) * WAttack && Player.Instance.Mana > W.Handle.SData.Mana * 2 && Player.Instance.HealthPercent >= 10 && target2.Position.CountEnemiesInRange(600) <= minW)
                     {
                         var turret = SpellMenu["CTurret"].Cast<CheckBox>().CurrentValue;
                         if (target2.HasBuff("tristanaecharge"))
                         {
-                            if (target2.Health + target2.AttackShield > EDamage(target2))
+                            if (target2.TotalShieldHealth() > EDamage(target2))
                             {
                                 if (turret)
                                 {
@@ -337,7 +365,7 @@ namespace Tristana
 
                 if (SpellMenu["ERKs"].Cast<CheckBox>().CurrentValue && R.IsReady() && target2.IsValidTarget(R.Range) && target2.HasBuff("tristanaecharge"))
                 {
-                    if (target2.Health + target2.AttackShield < Player.Instance.GetSpellDamage(target2, SpellSlot.R) + EDamage(target2))
+                    if (target2.TotalShieldHealth() <= GetDamage(target2))
                     {
                         R.Cast(target2);
                     }
@@ -372,7 +400,7 @@ namespace Tristana
 
 // Under Turet
 
-        public static bool UnderTuret(this Vector3 position)
+        private static bool UnderTuret(this Vector3 position)
         {
             return EntityManager.Turrets.Enemies.Where(a => a.Health > 0 && !a.IsDead).Any(a => a.Distance(position) < 950);
         }
@@ -389,31 +417,28 @@ namespace Tristana
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             KillSteal();
-        }
-
-        private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
-        {
-            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && R.IsReady() && args.Sender.Distance(_Player) < 325)
-            {
-                R.Cast(args.Sender);
-            }
         }
     }
 }
