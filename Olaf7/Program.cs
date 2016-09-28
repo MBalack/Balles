@@ -228,27 +228,34 @@ namespace Olaf7
             if (target != null)
             {
                 var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsDead)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(pos.To3DWorld());
+                    if (_Player.Distance(target) > 375)
+                    {
+                        Q.Cast(pos.To3DWorld());
+                    }
+                    else
+                    {
+                        Q.Cast(target.Position);
+                    }
                 }
 				
-                if (useW && W.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead)
+                if (useW && W.IsReady() && target.IsValidTarget(E.Range))
          	    {				
                     W.Cast();
 	    		}
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
                 {
                     E.Cast(target);
                 }
 				
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
                 {
                     Bil.Cast(target);
                 }
 				
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
@@ -258,13 +265,14 @@ namespace Olaf7
         public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
             if (!(e is AIHeroClient)) return;
-            var target = TargetSelector.GetTarget(300, DamageType.Physical);
+            var target = TargetSelector.GetTarget(325, DamageType.Physical);
             var champ = (AIHeroClient)e;
             var useriu = ComboMenu["hyd"].Cast<CheckBox>().CurrentValue;
+            var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu && !E.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
@@ -275,6 +283,11 @@ namespace Olaf7
                     {
                         Tiamat.Cast();
                     }
+                }
+
+                if ((useE && E.IsReady()) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(325) && target.IsInAutoAttackRange(Player.Instance))
+                {
+                    E.Cast(target);
                 }
             }
         }
@@ -384,7 +397,14 @@ namespace Olaf7
                 var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && Player.Instance.ManaPercent >= ManaQ)
                 {
-                    Q.Cast(pos.To3DWorld());
+                    if (_Player.Distance(target) > 375)
+                    {
+                        Q.Cast(pos.To3DWorld());
+                    }
+                    else
+                    {
+                        Q.Cast(target.Position);
+                    }
                 }
 				
                 if (useW && W.IsReady() && target.IsValidTarget(325) && Player.Instance.ManaPercent >= ManaQ)
@@ -442,6 +462,7 @@ namespace Olaf7
                 Axe = sender;
             }
         }
+
         public static void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
             if (sender.Name == "olaf_axe_totem_team_id_green.troy")
@@ -472,6 +493,7 @@ namespace Olaf7
                         E.Cast(target);
                     }
                 }
+
                 if (Ignite != null && KillStealMenu["KsIgnite"].Cast<CheckBox>().CurrentValue && Ignite.IsReady())
                 {
                     if (target.Health <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
