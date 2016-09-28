@@ -260,13 +260,29 @@ namespace Ashe
         private static void Combo()
         {
             var targetS = TargetSelector.SelectedTarget;
+            var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
             var useSL = ComboMenu["ComboSL"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead && !e.IsZombie))
-            {	
+            {
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !target.IsInAutoAttackRange(Player.Instance))
+                {
+                    if (Keep)
+                    {
+                        if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && R.IsReady())
+                        {
+                            W.Cast(target);
+                        }
+                    }
+                    else
+                    {
+                        W.Cast(target);
+                    }
+                }
+
                 if (useR && R.IsReady() && target.IsValidTarget(W.Range) && _Player.HealthPercent <= 70)
                 {
                     R.Cast(target);
@@ -306,7 +322,7 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (!QReady || _Player.Distance(target) > 600) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !QReady && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
