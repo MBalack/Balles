@@ -50,7 +50,7 @@ namespace Tryndamere
             if (!_Player.ChampionName.Contains("Tryndamere")) return;
             Chat.Print("Doctor's Tryndamere Loaded!", Color.Orange);
             Q = new Spell.Active(SpellSlot.Q);
-            W = new Spell.Active(SpellSlot.W, 400);
+            W = new Spell.Active(SpellSlot.W, 800);
             E = new Spell.Skillshot(SpellSlot.E, 660, SkillShotType.Linear, 250, 700, (int)92.5);
             E.AllowedCollisionCount = int.MaxValue;
             R = new Spell.Active(SpellSlot.R, 500);
@@ -109,6 +109,7 @@ namespace Tryndamere
             Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawE", new CheckBox("E Range"));
+            Misc.Add("DrawW", new CheckBox("W Range"));
             Misc.Add("Damage", new CheckBox("Damage Indicator"));
             Misc.Add("DrawTR", new CheckBox("Draw Text Under Turret"));
             Misc.Add("DrawTime", new CheckBox("Draw Time [R]"));
@@ -123,7 +124,12 @@ namespace Tryndamere
         {
             if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Red, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+            }
+
+            if (Misc["DrawW"].Cast<CheckBox>().CurrentValue)
+            {
+                new Circle() { Color = Color.Red, BorderWidth = 1, Radius = W.Range }.Draw(_Player.Position);
             }
 
             if (Misc["DrawTR"].Cast<CheckBox>().CurrentValue)
@@ -253,11 +259,12 @@ namespace Tryndamere
 
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325 && !E.IsReady())
+                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325)
                     {
                         W.Cast();
                     }
-                    else if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
+
+                    if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
                     {
                         W.Cast();
                     }
@@ -379,7 +386,7 @@ namespace Tryndamere
 
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325 && !E.IsReady())
+                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325)
                     {
                         W.Cast();
                     }
