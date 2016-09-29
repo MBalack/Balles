@@ -332,7 +332,7 @@ namespace XinZhao7
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["ManaHR"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(_Player.AttackRange, DamageType.Physical);
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null && Player.Instance.ManaPercent >= mana)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(250) && !target.IsDead && !target.IsZombie)

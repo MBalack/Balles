@@ -251,9 +251,16 @@ namespace Tryndamere
                     }
                 }
 
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (!Player.Instance.IsFacing(target) || Player.Instance.IsInAutoAttackRange(target) && Player.Instance.HealthPercent <= 30))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    W.Cast();
+                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325 && !E.IsReady())
+                    {
+                        W.Cast();
+                    }
+                    else if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
+                    {
+                        W.Cast();
+                    }
                 }
 
                 if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
@@ -274,21 +281,34 @@ namespace Tryndamere
             var mauQ = Ulti["QHp"].Cast<Slider>().CurrentValue;
             var useR = Ulti["ultiR"].Cast<CheckBox>().CurrentValue;
             var mauR = Ulti["MauR"].Cast<Slider>().CurrentValue;
-            if (!Player.Instance.HasBuff("JudicatorIntervention") && !Player.Instance.HasBuff("kindredrnodeathbuff") && !Player.Instance.HasBuff("Undying Rage"))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead))
             {
-                if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (_Player.Position.CountEnemiesInRange(E.Range) >= 1 || _Player.Position.UnderTuret()))
+                if (!Player.Instance.HasBuff("JudicatorIntervention") && !Player.Instance.HasBuff("kindredrnodeathbuff"))
                 {
-                    if (Player.Instance.HealthPercent <= mauR || Player.Instance.HasBuff("ZedR"))
+                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || _Player.Position.UnderTuret()))
                     {
-                        R.Cast();
-                    }
-                }
+                        if (Player.Instance.HealthPercent <= mauR)
+                        {
+                            R.Cast();
+                        }
 
-                if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && (_Player.Position.CountEnemiesInRange(E.Range) >= 1 || _Player.Position.UnderTuret()))
-                {
-                    if (Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR"))
+                        if (target.GetAutoAttackDamage(_Player) >= _Player.Health)
+                        {
+                            R.Cast();
+                        }
+
+                        if (Player.Instance.HasBuff("ZedR"))
+                        {
+                            Core.DelayAction(() => R.Cast(), 750);
+                        }
+                    }
+
+                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && (target.IsValidTarget(E.Range) || _Player.Position.UnderTuret()))
                     {
-                        Q.Cast();
+                        if (Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR"))
+                        {
+                            Q.Cast();
+                        }
                     }
                 }
             }
@@ -322,13 +342,13 @@ namespace Tryndamere
         {
             var useE = LaneClearMenu["E"].Cast<CheckBox>().CurrentValue;
             var minE = LaneClearMenu["mine"].Cast<Slider>().CurrentValue;
-            var minionQ = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range));
-            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionQ, E.Width, (int) E.Range);
-            foreach (var minion in minionQ)
+            var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(E.Range));
+            var ECanCast = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minions, E.Width, (int) E.Range);
+            foreach (var minion in minions)
             {
-                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && quang.HitNumber >= minE)
+                if (useE && E.IsReady() && minion.IsValidTarget(E.Range) && ECanCast.HitNumber >= minE)
                 {
-                    E.Cast(quang.CastPosition);
+                    E.Cast(ECanCast.CastPosition);
                 }
             }
         }
@@ -339,7 +359,7 @@ namespace Tryndamere
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var disE = HarassMenu["DistanceE"].Cast<Slider>().CurrentValue;
             var turret = HarassMenu["HTurret"].Cast<KeyBind>().CurrentValue;
-            var target = TargetSelector.GetTarget(_Player.AttackRange, DamageType.Physical);
+            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null)
             {
                 if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
@@ -357,9 +377,16 @@ namespace Tryndamere
                     }
                 }
 
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (!Player.Instance.IsFacing(target) || Player.Instance.IsInAutoAttackRange(target) && Player.Instance.HealthPercent <= 30))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    W.Cast();
+                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325 && !E.IsReady())
+                    {
+                        W.Cast();
+                    }
+                    else if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
+                    {
+                        W.Cast();
+                    }
                 }
             }
         }
