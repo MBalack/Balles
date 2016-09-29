@@ -292,7 +292,7 @@ namespace Tryndamere
             {
                 if (!Player.Instance.HasBuff("JudicatorIntervention") && !Player.Instance.HasBuff("kindredrnodeathbuff"))
                 {
-                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || _Player.Position.UnderTuret()))
+                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || Player.Instance.Position.UnderTuret()))
                     {
                         if (Player.Instance.HealthPercent <= mauR)
                         {
@@ -310,7 +310,7 @@ namespace Tryndamere
                         }
                     }
 
-                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && (target.IsValidTarget(E.Range) || _Player.Position.UnderTuret()))
+                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && (target.IsValidTarget(E.Range) || Player.Instance.Position.UnderTuret()))
                     {
                         if (Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR"))
                         {
