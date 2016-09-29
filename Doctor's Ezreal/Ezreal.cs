@@ -93,12 +93,12 @@ namespace Ezreal
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LastHit Settings");
-            LaneClearMenu.Add("LastQ", new CheckBox("Always [Q] LastHit", false));
+            LaneClearMenu.Add("LastQ", new CheckBox("[Q] LastHit", false));
             LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
             LaneClearMenu.Add("LhMana", new Slider("Mana Lasthit", 60));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-            LaneClearMenu.Add("LastQLC", new CheckBox("Always LaneClear With [Q]", false));
+            LaneClearMenu.Add("LastQLC", new CheckBox("[Q] LaneClear", false));
             LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
             LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 70));
 
