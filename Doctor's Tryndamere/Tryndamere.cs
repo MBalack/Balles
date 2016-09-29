@@ -65,6 +65,7 @@ namespace Tryndamere
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.Add("ComboW2", new CheckBox("Only Use [W] If [E] Is CoolDown", false));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("DisE", new Slider("Use [E] If Enemy Distance >", 300, 0, 600));
             ComboMenu.Add("CTurret", new KeyBind("Don't Use [E] UnderTurret", false, KeyBind.BindTypes.PressToggle, 'T'));
@@ -80,11 +81,14 @@ namespace Tryndamere
             Ulti.Add("MauR", new Slider("My HP Use [R] <=", 15));
             Ulti.AddGroupLabel("Use [Q] Low Hp");
             Ulti.Add("Q", new CheckBox("Use [Q]"));
+            Ulti.Add("Q2", new CheckBox("Only Use [Q] If [R] Is CoolDown"));
             Ulti.Add("QHp", new Slider("My HP Use [Q] <=", 30));
+            Ulti.Add("Ps", new Slider("Min Fury Use [Q]", 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
+            HarassMenu.Add("HarassW2", new CheckBox("Only Use [W] If [E] Is CoolDown"));
             HarassMenu.Add("HarassE", new CheckBox("Use [E] Harass"));
             HarassMenu.Add("DistanceE", new Slider("Use [E] If Enemy Distance >", 300, 0, 600));
             HarassMenu.Add("HTurret", new CheckBox("Don't Use [E] UnderTurret"));
@@ -232,8 +236,9 @@ namespace Tryndamere
 
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
+            var useW2 = ComboMenu["ComboW2"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var disE = ComboMenu["DisE"].Cast<Slider>().CurrentValue;
             var item = ComboMenu["BOTRK"].Cast<CheckBox>().CurrentValue;
@@ -242,7 +247,7 @@ namespace Tryndamere
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             if (target != null)
             {
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && (disE <= target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 20))
                 {
                     if (turret)
                     {
@@ -259,14 +264,24 @@ namespace Tryndamere
 
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325)
+                    if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
                     {
                         W.Cast();
                     }
 
-                    if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
+                    if (useW2)
                     {
-                        W.Cast();
+                        if (!target.IsFacing(Player.Instance) && _Player.Distance(target) >= 325 && !E.IsReady())
+                        {
+                            W.Cast();
+                        }
+                    }
+                    else
+                    {
+                        if (!target.IsFacing(Player.Instance) && _Player.Distance(target) >= 325)
+                        {
+                            W.Cast();
+                        }
                     }
                 }
 
@@ -285,14 +300,16 @@ namespace Tryndamere
         private static void Ultimate()
         {
             var useQ = Ulti["Q"].Cast<CheckBox>().CurrentValue;
+            var useQ2 = Ulti["Q2"].Cast<CheckBox>().CurrentValue;
             var mauQ = Ulti["QHp"].Cast<Slider>().CurrentValue;
             var useR = Ulti["ultiR"].Cast<CheckBox>().CurrentValue;
             var mauR = Ulti["MauR"].Cast<Slider>().CurrentValue;
+            var passive = Ulti["Ps"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead))
             {
                 if (!Player.Instance.HasBuff("JudicatorIntervention") && !Player.Instance.HasBuff("kindredrnodeathbuff"))
                 {
-                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || Player.Instance.Position.UnderTuret()))
+                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || Tower(Player.Instance.Position)))
                     {
                         if (Player.Instance.HealthPercent <= mauR)
                         {
@@ -306,15 +323,25 @@ namespace Tryndamere
 
                         if (Player.Instance.HasBuff("ZedR"))
                         {
-                            Core.DelayAction(() => R.Cast(), 750);
+                            Core.DelayAction(() => R.Cast(), 500);
                         }
                     }
 
-                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && (target.IsValidTarget(E.Range) || Player.Instance.Position.UnderTuret()))
+                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && Player.Instance.Mana >= passive && (target.IsValidTarget(E.Range) || Tower(Player.Instance.Position)))
                     {
-                        if (Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR"))
+                        if (useQ2)
                         {
-                            Q.Cast();
+                            if (!R.IsReady() && (Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR")))
+                            {
+                                Q.Cast();
+                            }
+                        }
+                        else
+                        {
+                            if ((Player.Instance.HealthPercent <= mauQ || Player.Instance.HasBuff("ZedR")))
+                            {
+                                Q.Cast();
+                            }
                         }
                     }
                 }
@@ -363,13 +390,14 @@ namespace Tryndamere
         private static void Harass()
         {
             var useW = HarassMenu["HarassW"].Cast<CheckBox>().CurrentValue;
+            var useW2 = HarassMenu["HarassW2"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HarassE"].Cast<CheckBox>().CurrentValue;
             var disE = HarassMenu["DistanceE"].Cast<Slider>().CurrentValue;
-            var turret = HarassMenu["HTurret"].Cast<KeyBind>().CurrentValue;
-            var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
+            var turret = HarassMenu["HTurret"].Cast<CheckBox>().CurrentValue;
+            var target = TargetSelector.GetTarget(W.Range, DamageType.Physical);
             if (target != null)
             {
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && (disE <= target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 20))
                 {
                     if (turret)
                     {
@@ -386,13 +414,24 @@ namespace Tryndamere
 
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                 {
-                    if (!Player.Instance.IsFacing(target) && _Player.Distance(target) >= 325)
+                    if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
                     {
                         W.Cast();
                     }
-                    else if (_Player.Distance(target) <= target.GetAutoAttackRange() && Player.Instance.HealthPercent <= 60)
+
+                    if (useW2)
                     {
-                        W.Cast();
+                        if (!target.IsFacing(Player.Instance) && _Player.Distance(target) >= 325 && !E.IsReady())
+                        {
+                            W.Cast();
+                        }
+                    }
+                    else
+                    {
+                        if (!target.IsFacing(Player.Instance) && _Player.Distance(target) >= 325)
+                        {
+                            W.Cast();
+                        }
                     }
                 }
             }
@@ -424,6 +463,11 @@ namespace Tryndamere
         public static void DrawFont(Font vFont, string vText, float jx, float jy, ColorBGRA jc)
         {
             vFont.DrawText(null, vText, (int)jx, (int)jy, jc);
+        }
+
+        public static bool Tower(Vector3 position)
+        {
+            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950) && turret.IsEnemy);
         }
 
         public static bool UnderTuret(this Vector3 position)
