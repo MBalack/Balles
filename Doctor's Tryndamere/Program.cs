@@ -415,7 +415,9 @@ namespace Tryndamere
         {
             if (E.IsReady())
             {
-                E.Cast(Game.CursorPos);
+                var cursorPos = Game.CursorPos;
+                var castPos = Player.Instance.Position.Distance(cursorPos) <= E.Range ? cursorPos : Player.Instance.Position.Extend(cursorPos, E.Range).To3D();
+                E.Cast(castPos);
             }
         }
 
