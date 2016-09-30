@@ -49,7 +49,7 @@ namespace Jax
             Menu.AddSeparator();
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("comboMode", new ComboBox("Combo Mode:", 1, "E => Q", "Q => E"));
+            ComboMenu.Add("comboMode", new ComboBox("Combo Mode:", 0, "E => Q", "Q => E"));
             ComboMenu.AddSeparator();
             ComboMenu.Add("ComboQ", new CheckBox("Combo [Q]"));
             ComboMenu.Add("ComboW", new CheckBox("Combo [W]"));
@@ -262,7 +262,10 @@ namespace Jax
                         }
                         else
                         {
-                            Q.Cast(target);
+                            if (!E.IsReady())
+                            {
+                                Q.Cast(target);
+						    }
                         }
                     }
                 }
@@ -432,7 +435,7 @@ namespace Jax
             {
                 if (useE && E.IsReady())
                 {
-                    if (!ECasting && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsValidTarget(E.Range))
+                    if (useQ && !ECasting && Q.IsReady() && target.IsValidTarget(Q.Range) && !target.IsValidTarget(E.Range))
                     {
                         E.Cast();
                     }
