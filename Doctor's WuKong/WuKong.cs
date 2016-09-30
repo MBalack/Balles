@@ -209,7 +209,7 @@ namespace Doctor_s_WuKong
             var turret = ComboMenu["CTurret"].Cast<KeyBind>().CurrentValue;
             if (target != null)
             {
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
+                if (useE && E.IsReady() && !RActive && target.IsValidTarget(E.Range) && disE <= target.Distance(Player.Instance))
                 {
                     if (turret)
                     {
@@ -224,7 +224,7 @@ namespace Doctor_s_WuKong
                     }
                 }
 
-                if (useW && W.IsReady() && target.IsValidTarget(375) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && !RActive && target.IsValidTarget(375))
                 {
                     W.Cast();
                 }
@@ -261,17 +261,17 @@ namespace Doctor_s_WuKong
 
             if (target != null)
             {
-                if (useR && _Player.Position.CountEnemiesInRange(R.Range) >= minR && !RActive)
+                if (useR && R.IsReady() && _Player.Position.CountEnemiesInRange(R.Range) >= minR && !RActive)
                 {
                     R.Cast();
                 }
 				
-                if (useR2 && !RActive && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+                if (useR2 && R.IsReady() && !RActive && _Player.HealthPercent <= mauR && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
                 {
                     R.Cast();
                 }
 				
-                if (autow && _Player.HealthPercent <= mauW && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
+                if (autow && W.IsReady() && !RActive && _Player.HealthPercent <= mauW && _Player.Position.CountEnemiesInRange(R.Range) >= 1 && !Player.Instance.IsInShopRange())
                 {
                     W.Cast();
                 }
@@ -293,14 +293,14 @@ namespace Doctor_s_WuKong
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQ && !RActive && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     Q.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 
-                if ((useriu && !Q.IsReady() && !QPassive) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu && !Q.IsReady() && !QPassive && !RActive) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
@@ -348,12 +348,12 @@ namespace Doctor_s_WuKong
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null && Player.Instance.ManaPercent >= mana)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(300) && _Player.Distance(target) > 175)
+                if (useQ && Q.IsReady() && !RActive && target.IsValidTarget(300) && _Player.Distance(target) > 175)
                 {
                     Q.Cast();
                 }
 
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (useE && E.IsReady() && !RActive && target.IsValidTarget(E.Range))
                 {
                     E.Cast(target);
                 }
@@ -432,7 +432,7 @@ namespace Doctor_s_WuKong
             var KsR = KillStealMenu["KsR"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("BlitzcrankManaBarrierCD") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
-                if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
+                if (KsE && E.IsReady() && !RActive && target.IsValidTarget(E.Range))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E) + Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
@@ -440,7 +440,7 @@ namespace Doctor_s_WuKong
                     }
                 }
 
-                if (KsQ && Q.IsReady() && target.IsValidTarget(300))
+                if (KsQ && Q.IsReady() && !RActive && target.IsValidTarget(300))
                 {
                     if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
