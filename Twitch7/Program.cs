@@ -209,6 +209,11 @@ namespace Twitch
             return 0;
         }
 
+        private static bool QCasting
+        {
+            get { return Player.Instance.HasBuff("TwitchHideInShadows"); }
+        }
+
         public static void Combo()
         {
             var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
@@ -224,7 +229,7 @@ namespace Twitch
                     Q.Cast();
                 }
 
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !target.IsInAutoAttackRange(Player.Instance))
+                if (useW && W.IsReady() && !QCasting && target.IsValidTarget(W.Range) && !target.IsInAutoAttackRange(Player.Instance))
                 {
                     var pred = W.GetPrediction(target);
                     if (pred.HitChance >= HitChance.High)
@@ -434,7 +439,7 @@ namespace Twitch
                     }
                 }
 
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range))
+                if (useW && W.IsReady() && !QCasting && target.IsValidTarget(W.Range))
                 {
                     var Wpred = W.GetPrediction(target);
                     if (Wpred.HitChance >= HitChance.Medium)
@@ -468,11 +473,12 @@ namespace Twitch
                 }
             }
         }
-        private static float EDamage(Obj_AI_Base target)
+        public static float EDamage(Obj_AI_Base target)
         {
             var stacks = Stack(target);
-            return Player.Instance.CalculateDamageOnUnit(target, DamageType.Physical, BDamage[E.Level] + stacks * (0.25f * _Player.FlatPhysicalDamageMod + 0.2f * _Player.FlatMagicDamageMod + SDamage[E.Level]));
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical, SDamage[E.Level] * stacks + (0.25f * _Player.FlatPhysicalDamageMod + 0.2f * _Player.FlatMagicDamageMod + BDamage[E.Level]));
         }
+
 
         public static float StackTimeDamage(Obj_AI_Base target)
         {
@@ -511,12 +517,12 @@ namespace Twitch
             return 0;
         }
 
-        private static int Stack(Obj_AI_Base obj)
+        private static int Stack(Obj_AI_Base target)
         {
             var Ec = 0;
             for (var t = 1; t < 7; t++)
             {
-                if (ObjectManager.Get<Obj_GeneralParticleEmitter>().Any(s => s.Position.Distance(obj.ServerPosition) <= 55 && s.Name == "twitch_poison_counter_0" + t + ".troy"))
+                if (ObjectManager.Get<Obj_GeneralParticleEmitter>().Any(s => s.Position.Distance(target.ServerPosition) <= 55 && s.Name == "twitch_poison_counter_0" + t + ".troy"))
                 {
                     Ec = t;
                 }
