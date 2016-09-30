@@ -322,7 +322,7 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !QReady && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
