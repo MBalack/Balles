@@ -212,7 +212,7 @@ namespace Tryndamere
         {
             foreach (var enemy in EntityManager.Heroes.Enemies.Where(e => e.IsValid && e.IsHPBarRendered && e.TotalShieldHealth() > 10))
             {
-                var damage = Player.Instance.GetAutoAttackDamage(enemy) * 3 + Player.Instance.GetSpellDamage(enemy, SpellSlot.E);
+                var damage = Player.Instance.GetAutoAttackDamage(enemy) * 2;
 
                 if (Misc["Damage"].Cast<CheckBox>().CurrentValue)
                 {
@@ -309,7 +309,7 @@ namespace Tryndamere
             {
                 if (!Player.Instance.HasBuff("JudicatorIntervention") && !Player.Instance.HasBuff("kindredrnodeathbuff"))
                 {
-                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || Tower(Player.Instance.Position)))
+                    if (useR && R.IsReady() && !Player.Instance.IsInShopRange() && (target.IsValidTarget(E.Range) || _Player.IsUnderEnemyturret()))
                     {
                         if (Player.Instance.HealthPercent <= mauR)
                         {
@@ -327,7 +327,7 @@ namespace Tryndamere
                         }
                     }
 
-                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && Player.Instance.Mana >= passive && (target.IsValidTarget(E.Range) || Tower(Player.Instance.Position)))
+                    if (useQ && Q.IsReady() && Player.Instance.HasBuff("TryndamereQ") && RTime(Player.Instance) <= 1 && Player.Instance.Mana >= passive && (target.IsValidTarget(E.Range) || _Player.IsUnderEnemyturret()))
                     {
                         if (useQ2)
                         {
@@ -463,11 +463,6 @@ namespace Tryndamere
         public static void DrawFont(Font vFont, string vText, float jx, float jy, ColorBGRA jc)
         {
             vFont.DrawText(null, vText, (int)jx, (int)jy, jc);
-        }
-
-        public static bool Tower(Vector3 position)
-        {
-            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950) && turret.IsEnemy);
         }
 
         public static bool UnderTuret(this Vector3 position)

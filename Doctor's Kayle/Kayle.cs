@@ -239,7 +239,7 @@ namespace Kayle
                 (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             foreach (var target2 in target)
             {
-                if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (_Player.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(Player.Instance.Position)))
+                if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (target2.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
                 {
                     if (Ulti["useRon" + target2.ChampionName].Cast<CheckBox>().CurrentValue && (target2.HealthPercent <= almin || target2.HasBuff("ZedR")))
                     {
