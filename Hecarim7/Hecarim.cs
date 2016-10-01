@@ -25,6 +25,7 @@ namespace Hecarim7
             get { return ObjectManager.Player; }
         }
         public static Font Thm;
+        public static Font thn;
         public static Spell.Active Q;
         public static Spell.Active W;
         public static Spell.Active E;
@@ -47,14 +48,18 @@ namespace Hecarim7
             R.AllowedCollisionCount = int.MaxValue;
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 20, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
+            thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 22, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
 			Menu = MainMenu.AddMenu("Doctor's Hecarim", "Hecarim");
 			ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
-            ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
+            ComboMenu.AddGroupLabel("Ultimate Aoe Settings");
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 3, 0, 5));
+            ComboMenu.AddGroupLabel("Ultimate Selected Target Settings");
+            ComboMenu.Add("ComboSL", new KeyBind("Use [R] On Selected Target", false, KeyBind.BindTypes.HoldActive, 'T'));
             ComboMenu.AddGroupLabel("Interrupt Settings");
             ComboMenu.Add("inter", new CheckBox("Use [R] Interrupt"));
 
@@ -110,6 +115,7 @@ namespace Hecarim7
             Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
             Drawings.Add("DrawW", new CheckBox("[W] Range", false));
             Drawings.Add("DrawR", new CheckBox("[R] Range"));
+            Drawings.Add("DrawT", new CheckBox("Draw [E] Time"));
             Drawings.Add("DrawRhit", new CheckBox("[R] Draw Hit"));
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -121,17 +127,26 @@ namespace Hecarim7
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
             }
 			
             if (Drawings["DrawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = W.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = W.Range }.Draw(_Player.Position);
             }
 			
             if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Orange, BorderWidth = 3, Radius = R.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
+            }
+
+            if (Drawings["DrawT"].Cast<CheckBox>().CurrentValue)
+            {
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (Player.Instance.HasBuff("HecarimRamp"))
+                {
+                    DrawFont(thn, "E Time : " + ETime(Player.Instance), (float)(ft[0] - 70), (float)(ft[1] + 50), SharpDX.Color.GreenYellow);
+                }
             }
 			
             var target = TargetSelector.GetTarget(R.Range, DamageType.Mixed);
@@ -143,7 +158,7 @@ namespace Hecarim7
                 if (RPred.CastPosition.CountEnemiesInRange(250) >= MinR)
                 {
                     Vector2 ft = Drawing.WorldToScreen(_Player.Position);
-                    DrawFont(Thm, "[R] Can Hit " + RPred.CastPosition.CountEnemiesInRange(250), (float)(ft[0] - 50), (float)(ft[1] + 20), SharpDX.Color.Orange);
+                    DrawFont(Thm, "Ultimate Can Hit : " + RPred.CastPosition.CountEnemiesInRange(250), (float)(ft[0] - 70), (float)(ft[1] + 20), SharpDX.Color.Orange);
                 }
             }
         }
@@ -179,9 +194,20 @@ namespace Hecarim7
 			{
 				Combo();
 			}
+
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+			{
+				Flee();
+			}
+
+            if (ComboMenu["ComboSL"].Cast<KeyBind>().CurrentValue)
+            {
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            }
 			
             KillSteal();
             AutoQ();
+            RSelected();
 			
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -200,6 +226,15 @@ namespace Hecarim7
         public static bool checkSkin()
         {
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
+        }
+
+        public static float ETime(Obj_AI_Base target)
+        {
+            if (target.HasBuff("HecarimRamp"))
+            {
+                return Math.Max(0, target.GetBuff("HecarimRamp").EndTime) - Game.Time;
+            }
+            return 0;
         }
 		
         private static void Combo()
@@ -234,6 +269,22 @@ namespace Hecarim7
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
+                }
+            }
+        }
+
+        private static void RSelected()
+        {
+            var targetS = TargetSelector.SelectedTarget;
+            var useSL = ComboMenu["ComboSL"].Cast<KeyBind>().CurrentValue;
+            if (targetS == null) return;
+
+            if (useSL && R.IsReady() && targetS.IsValidTarget(R.Range))
+            {
+                var RPred = R.GetPrediction(targetS);
+                if (RPred.HitChance >= HitChance.High)
+                {
+                    R.Cast(RPred.CastPosition);
                 }
             }
         }
@@ -339,6 +390,14 @@ namespace Hecarim7
             }
         }
 
+        private static void Flee()
+        {
+            if (E.IsReady())
+            {
+                E.Cast();
+            }
+        }
+
         public static bool Tru(Vector3 position)
         {
             return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950) && turret.IsEnemy);
@@ -396,9 +455,13 @@ namespace Hecarim7
 				
                 if (KsR && R.IsReady() && target.IsValidTarget(R.Range))
                 {
-                    if (target.Health + target.AttackShield <= RDamage(target) && !target.IsInRange(Player.Instance, minKsR))
+                    if (target.Health + target.AttackShield <= RDamage(target) && (!target.IsInRange(Player.Instance, minKsR) || Player.Instance.HealthPercent <= 25))
                     {
-                        R.Cast(target);
+                        var RPred = R.GetPrediction(target);
+                        if (RPred.HitChance >= HitChance.High)
+                        {
+                            R.Cast(RPred.CastPosition);
+                        }
                     }
                 }
 				
