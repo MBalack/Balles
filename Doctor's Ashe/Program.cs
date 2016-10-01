@@ -61,7 +61,7 @@ namespace Ashe
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
-            ComboMenu.Add("KeepCombo", new CheckBox("Keep Mana For [R]"));
+            ComboMenu.Add("KeepCombo", new CheckBox("Keep Mana For [R]", false));
             ComboMenu.AddGroupLabel("KillSteal Settings");
             ComboMenu.Add("RAoe", new CheckBox("Use [R] Aoe"));
             ComboMenu.Add("ComboSL", new CheckBox("Use [R] On Selected Target", false));
@@ -124,24 +124,30 @@ namespace Ashe
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             KillSteal();
             Item();
+			
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -234,21 +240,31 @@ namespace Ashe
             if (_Player.ManaPercent < mana) return;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(W.Range) && !e.IsDead && !e.IsZombie))
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && !Orbwalker.IsAutoAttacking)
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     var WPred = W.GetPrediction(target);
-                    if (Keep && R.IsReady())
+                    if (Keep)
                     {
-                        if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                        if (R.IsReady())
                         {
-                            W.Cast(target);
+                            if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            if (WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
                         }
                     }
                     else
                     {
                         if (WPred.HitChance >= HitChance.High)
                         {
-                            W.Cast(target);
+                            W.Cast(WPred.CastPosition);
                         }
                     }
                 }
@@ -268,18 +284,32 @@ namespace Ashe
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead && !e.IsZombie))
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !target.IsInAutoAttackRange(Player.Instance))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                 {
+                    var WPred = W.GetPrediction(target);
                     if (Keep)
                     {
-                        if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && R.IsReady())
+                        if (R.IsReady())
                         {
-                            W.Cast(target);
+                            if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            if (WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
                         }
                     }
                     else
                     {
-                        W.Cast(target);
+                        if (WPred.HitChance >= HitChance.High)
+                        {
+                            W.Cast(WPred.CastPosition);
+                        }
                     }
                 }
 
@@ -322,14 +352,24 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && !QReady && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
                     {
-                        if (R.IsReady() && Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                        if (R.IsReady())
                         {
-                            W.Cast(WPred.CastPosition);
+                            if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            if (WPred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(WPred.CastPosition);
+                            }
                         }
                     }
                     else
@@ -343,9 +383,16 @@ namespace Ashe
 
                 if (useQ && QReady && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(650))
                 {
-                    if (Keep && R.IsReady())
+                    if (Keep)
                     {
-                        if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                        if (R.IsReady())
+                        {
+                            if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                            {
+                                Q.Cast();
+                            }
+                        }
+                        else
                         {
                             Q.Cast();
                         }
@@ -358,9 +405,16 @@ namespace Ashe
 
                 if (useQ2 && QReady && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && target.IsValidTarget(650))
                 {
-                    if (Keep2 && R.IsReady())
+                    if (Keep2)
                     {
-                        if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                        if (R.IsReady())
+                        {
+                            if (Player.Instance.Mana > Q.Handle.SData.Mana + R.Handle.SData.Mana)
+                            {
+                                Q.Cast();
+                            }
+                        }
+                        else
                         {
                             Q.Cast();
                         }
@@ -409,7 +463,7 @@ namespace Ashe
             if (_Player.ManaPercent < mana) return;
             if (monster != null)
             {
-                if (useQ && QReady && monster.IsValidTarget(Q.Range))
+                if (useQ && QReady && monster.IsValidTarget(Q.Range) && monster.TotalShieldHealth() > Player.Instance.GetAutoAttackDamage(monster) * 2)
                 {
                     Q.Cast();
                 }
