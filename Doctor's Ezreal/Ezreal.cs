@@ -53,7 +53,7 @@ namespace Ezreal
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 32, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Thn = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 15, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
             Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-            Menu = MainMenu.AddMenu("Ezreal", "Ezreal");
+            Menu = MainMenu.AddMenu("Doctor's Ezreal", "Ezreal");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
@@ -93,14 +93,14 @@ namespace Ezreal
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LastHit Settings");
-            LaneClearMenu.Add("LastQ", new CheckBox("[Q] LastHit", false));
-            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
-            LaneClearMenu.Add("LhMana", new Slider("Mana Lasthit", 60));
+            LaneClearMenu.Add("LastQ", new CheckBox("[Q] LastHit"));
+            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("LhMana", new Slider("Mana Lasthit", 50));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-            LaneClearMenu.Add("LastQLC", new CheckBox("[Q] LaneClear", false));
-            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
-            LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 70));
+            LaneClearMenu.Add("LastQLC", new CheckBox("[Q] LaneClear"));
+            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 50));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
@@ -280,7 +280,7 @@ namespace Ezreal
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var Pred = Q.GetPrediction(target);
                     if (Pred.HitChance >= HitChance.High)
@@ -566,10 +566,14 @@ namespace Ezreal
 
             var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
             if (Misc["Stackk"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
-            (!Player.Instance.IsInShopRange() && _Player.CountEnemiesInRange(1400) <= 0 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(Q.Range))
+            (!Player.Instance.IsInShopRange() && _Player.CountEnemiesInRange(2500) < 1 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(2000))
             && (Tear.IsOwned() || Manamune.IsOwned())))
             {
-                Q.Cast(Game.CursorPos);
+                if (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)
+					 && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
+				{
+                    Q.Cast(Game.CursorPos);
+                }
             }
         }
     }
