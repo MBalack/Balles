@@ -22,7 +22,6 @@ namespace Vladimir
         {
             get { return ObjectManager.Player; }
         }
-        public static readonly List<string> DodgeSpells = new List<string>() { "SorakaQ", "SorakaE", "TahmKenchW", "TahmKenchQ", "Bushwhack", "ForcePulse", "KarthusFallenOne", "KarthusWallOfPain", "KarthusLayWasteA1", "KarmaWMantra", "KarmaQMissileMantra", "KarmaSpiritBind", "KarmaQ", "JinxW", "JinxE", "JarvanIVGoldenAegis", "HowlingGaleSpell", "SowTheWind", "ReapTheWhirlwind", "IllaoiE", "HeimerdingerUltWDummySpell", "HeimerdingerUltEDummySpell", "HeimerdingerW", "HeimerdingerE", "HecarimUlt", "HecarimRampAttack", "GravesQLineSpell", "GravesQLineMis", "GravesClusterShot", "GravesSmokeGrenade", "GangplankR", "GalioIdolOfDurand", "GalioResoluteSmite", "FioraE", "EvelynnR", "EliseHumanE", "EkkoR", "EkkoW", "EkkoQ", "DravenDoubleShot", "InfectedCleaverMissileCast", "DariusExecute", "DariusAxeGrabCone", "DariusNoxianTacticsONH", "DariusCleave", "PhosphorusBomb", "MissileBarrage", "BraumQ", "BrandFissure", "BardR", "BardQ", "AatroxQ", "AatroxE", "AzirE", "AzirEWrapper", "AzirQWrapper", "AzirQ", "AzirR", "Pulverize", "AhriSeduce", "CurseoftheSadMummy", "InfernalGuardian", "Incinerate", "Volley", "EnchantedCrystalArrow", "BraumRWrapper", "CassiopeiaPetrifyingGaze", "FeralScream", "Rupture", "EzrealEssenceFlux", "EzrealMysticShot", "EzrealTrueshotBarrage", "FizzMarinerDoom", "GnarW", "GnarBigQMissile", "GnarQ", "GnarR", "GragasQ", "GragasE", "GragasR", "RiftWalk", "LeblancSlideM", "LeblancSlide", "LeonaSolarFlare", "UFSlash", "LuxMaliceCannon", "LuxLightStrikeKugel", "LuxLightBinding", "yasuoq3w", "VelkozE", "VeigarEventHorizon", "VeigarDarkMatter", "VarusR", "ThreshQ", "ThreshE", "ThreshRPenta", "SonaQ", "SonaR", "ShenShadowDash", "SejuaniGlacialPrisonCast", "RivenMartyr", "JavelinToss", "NautilusSplashZone", "NautilusAnchorDrag", "NamiR", "NamiQ", "DarkBindingMissile", "StaticField", "RocketGrab", "RocketGrabMissile", "timebombenemybuff", "NocturneUnspeakableHorror", "SyndraQ", "SyndraE", "SyndraR", "VayneCondemn", "Dazzle", "Overload", "AbsoluteZero", "IceBlast", "LeblancChaosOrb", "JudicatorReckoning", "KatarinaQ", "NullLance", "Crowstorm", "FiddlesticksDarkWind", "BrandWildfire", "Disintegrate", "FlashFrost", "Frostbite", "AkaliMota", "InfiniteDuress", "PantheonW", "blindingdart", "JayceToTheSkies", "IreliaEquilibriumStrike", "maokaiunstablegrowth", "nautilusgandline", "runeprison", "WildCards", "BlueCardAttack", "RedCardAttack", "GoldCardAttack", "AkaliShadowDance", "Headbutt", "PowerFist", "BrandConflagration", "CaitlynYordleTrap", "CaitlynAceintheHole", "CassiopeiaNoxiousBlast", "CassiopeiaMiasma", "CassiopeiaTwinFang", "Feast", "DianaArc", "DianaTeleport", "EliseHumanQ", "EvelynnE", "Terrify", "FizzPiercingStrike", "Parley", "GarenQAttack", "GarenR", "IreliaGatotsu", "IreliaEquilibriumStrike", "SowTheWind", "JarvanIVCataclysm", "JaxLeapStrike", "JaxEmpowerTwo", "JaxCounterStrike", "JayceThunderingBlow", "KarmaSpiritBind", "NetherBlade", "KatarinaR", "JudicatorRighteousFury", "KennenBringTheLight", "LeblancChaosOrbM", "BlindMonkRKick", "LeonaZenithBlade", "LeonaShieldOfDaybreak", "LissandraW", "LissandraQ", "LissandraR", "LuluQ", "LuluW", "LuluE", "LuluR", "SeismicShard", "AlZaharMaleficVisions", "AlZaharNetherGrasp", "MaokaiUnstableGrowth", "MordekaiserMaceOfSpades", "MordekaiserChildrenOfTheGrave", "SoulShackles", "NamiW", "NasusW", "NautilusGrandLine", "Takedown", "NocturneParanoia", "PoppyDevastatingBlow", "PoppyHeroicCharge", "QuinnE", "PuncturingTaunt", "RenektonPreExecute", "SpellFlux", "SejuaniWintersClaw", "TwoShivPoisen", "Fling", "SkarnerImpale", "SonaHymnofValor", "SwainTorment", "SwainDecrepify", "BlindingDart", "OrianaIzunaCommand", "OrianaDetonateCommand", "DetonatingShot", "BusterShot", "TrundleTrollSmash", "TrundlePain", "MockingShout", "Expunge", "UdyrBearStance", "UrgotHeatseekingLineMissile", "UrgotSwap2", "VeigarBalefulStrike", "VeigarPrimordialBurst", "ViR", "ViktorPowerTransfer", "VladimirTransfusion", "VolibearQ", "HungeringStrike", "XenZhaoComboTarget", "XenZhaoSweep", "YasuoQ3W", "YasuoQ3Mis", "YasuoQ3", "YasuoRKnockUpComboW" };
         public static Font Thn;
         public static Spell.Targeted Q;
         public static Spell.Active W;
@@ -66,19 +65,27 @@ namespace Vladimir
             ComboMenu.Add("antiGap", new CheckBox("Use [W] Anti Gap"));
             ComboMenu.Add("healthgap", new Slider("Use [W] AntiGap My Hp <", 50));
 
-            Evade = Menu.AddSubMenu("Spell Dodge List", "Evade");
-            Evade.AddLabel("Dodge Settings");
-            foreach (AIHeroClient enemies in EntityManager.Heroes.Enemies)
+            Evade = Menu.AddSubMenu("Spell Dodge Settings", "Evade");
+            Evade.AddGroupLabel("Dodge Settings");
+            foreach (var enemy in EntityManager.Heroes.Enemies.Where(a => a.Team != Player.Instance.Team))
             {
-                Evade.AddLabel(enemies.BaseSkinName);
+                foreach (var spell in enemy.Spellbook.Spells.Where(a => a.Slot == SpellSlot.Q || a.Slot == SpellSlot.W || a.Slot == SpellSlot.E || a.Slot == SpellSlot.R))
                 {
-                    foreach (SpellDataInst skill in enemies.Spellbook.Spells)
+                    if (spell.Slot == SpellSlot.Q)
                     {
-                        if (DodgeSpells.Any(s => s == skill.SData.Name))
-                        {
-                            Evade.Add(skill.Name, new CheckBox(enemies.BaseSkinName + " : " + skill.Slot.ToString() + " : " + skill.Name));
-                            Evade.AddLabel(skill.Name);
-                        }
+                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                    }
+                    else if (spell.Slot == SpellSlot.W)
+                    {
+                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                    }
+                    else if (spell.Slot == SpellSlot.E)
+                    {
+                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                    }
+                    else if (spell.Slot == SpellSlot.R)
+                    {
+                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
                     }
                 }
             }
@@ -449,43 +456,95 @@ namespace Vladimir
         }
 
 
-        public static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            var useW = ComboMenu["dodge"].Cast<CheckBox>().CurrentValue;
-            if (Player.Instance.IsDead || !(sender is AIHeroClient)) return;
-            if (useW && W.IsReady())
+            if ((args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E ||
+                 args.Slot == SpellSlot.R) && sender.IsEnemy && W.IsReady())
             {
-                if (sender.IsEnemy && Player.Instance.Distance(sender) <= args.SData.CastRange && sender.IsValidTarget())
+                if (args.SData.TargettingType == SpellDataTargetType.Unit || args.SData.TargettingType == SpellDataTargetType.SelfAndUnit || args.SData.TargettingType == SpellDataTargetType.Self)
                 {
-                    if (Evade[args.SData.Name].Cast<CheckBox>().CurrentValue && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    if ((args.Target.NetworkId == Player.Instance.NetworkId && args.Time < 1.5 ||
+                         args.End.Distance(Player.Instance.ServerPosition) <= Player.Instance.BoundingRadius*3) &&
+                        Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
                     {
                         W.Cast();
                     }
+                }
+                else if (args.SData.TargettingType == SpellDataTargetType.LocationAoe)
+                {
+                    var castvector =
+                        new Geometry.Polygon.Circle(args.End, args.SData.CastRadius).IsInside(
+                            Player.Instance.ServerPosition);
 
-                    if (args.SData.Name == "KarthusFallenOne")
+                    if (castvector && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
                     {
-                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                        W.Cast();
                     }
+                }
 
-                    if (args.SData.Name == "ZedR")
-                    {
-                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                    }
+                else if (args.SData.TargettingType == SpellDataTargetType.Cone)
+                {
+                    var castvector =
+                        new Geometry.Polygon.Arc(args.Start, args.End, args.SData.CastConeAngle, args.SData.CastRange)
+                            .IsInside(Player.Instance.ServerPosition);
 
-                    if (args.SData.Name == "SoulShackles")
+                    if (castvector && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
                     {
-                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                        W.Cast();
                     }
+                }
 
-                    if (args.SData.Name == "AbsoluteZero")
-                    {
-                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
-                    }
+                else if (args.SData.TargettingType == SpellDataTargetType.SelfAoe)
+                {
+                    var castvector =
+                        new Geometry.Polygon.Circle(sender.ServerPosition, args.SData.CastRadius).IsInside(
+                            Player.Instance.ServerPosition);
 
-                    if (args.SData.Name == "NocturneUnspeakableHorror")
+                    if (castvector && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
                     {
-                        Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                        W.Cast();
                     }
+                }
+                else
+                {
+                    var castvector =
+                        new Geometry.Polygon.Rectangle(args.Start, args.End, args.SData.LineWidth).IsInside(
+                            Player.Instance.ServerPosition);
+
+                    if (castvector && Evade[args.SData.Name].Cast<CheckBox>().CurrentValue)
+                    {
+                        W.Cast();
+                    }
+                }
+
+                if (args.SData.Name == "yasuoq3w")
+                {
+                    W.Cast();
+                }
+
+                if (args.SData.Name == "ZedR")
+                {
+                    W.Cast();
+                }
+
+                if (args.SData.Name == "KarthusFallenOne")
+                {
+                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                }
+
+                if (args.SData.Name == "SoulShackles")
+                {
+                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                }
+
+                if (args.SData.Name == "AbsoluteZero")
+                {
+                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
+                }
+    
+                if (args.SData.Name == "NocturneUnspeakableHorror")
+                {
+                    Core.DelayAction(() => W.Cast(), 2000 - Game.Ping - 200);
                 }
             }
         }
