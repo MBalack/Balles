@@ -67,25 +67,28 @@ namespace Vladimir
 
             Evade = Menu.AddSubMenu("Spell Dodge Settings", "Evade");
             Evade.AddGroupLabel("Dodge Settings");
-            foreach (var enemy in EntityManager.Heroes.Enemies.Where(a => a.Team != Player.Instance.Team))
+            foreach (var enemies in EntityManager.Heroes.Enemies.Where(a => a.Team != Player.Instance.Team))
             {
-                foreach (var spell in enemy.Spellbook.Spells.Where(a => a.Slot == SpellSlot.Q || a.Slot == SpellSlot.W || a.Slot == SpellSlot.E || a.Slot == SpellSlot.R))
+                Evade.AddGroupLabel(enemies.BaseSkinName);
                 {
-                    if (spell.Slot == SpellSlot.Q)
+                    foreach (var spell in enemies.Spellbook.Spells.Where(a => a.Slot == SpellSlot.Q || a.Slot == SpellSlot.W || a.Slot == SpellSlot.E || a.Slot == SpellSlot.R))
                     {
-                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
-                    }
-                    else if (spell.Slot == SpellSlot.W)
-                    {
-                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
-                    }
-                    else if (spell.Slot == SpellSlot.E)
-                    {
-                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
-                    }
-                    else if (spell.Slot == SpellSlot.R)
-                    {
-                        Evade.Add(spell.SData.Name, new CheckBox(enemy.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                        if (spell.Slot == SpellSlot.Q)
+                        {
+                            Evade.Add(spell.SData.Name, new CheckBox(enemies.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                        }
+                        else if (spell.Slot == SpellSlot.W)
+                        {
+                            Evade.Add(spell.SData.Name, new CheckBox(enemies.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                        }
+                        else if (spell.Slot == SpellSlot.E)
+                        {
+                            Evade.Add(spell.SData.Name, new CheckBox(enemies.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                        }
+                        else if (spell.Slot == SpellSlot.R)
+                        {
+                            Evade.Add(spell.SData.Name, new CheckBox(enemies.BaseSkinName + " : " + spell.Slot.ToString() + " : " + spell.Name, false));
+                        }
                     }
                 }
             }

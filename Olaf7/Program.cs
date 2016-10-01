@@ -245,7 +245,7 @@ namespace Olaf7
                     W.Cast();
 	    		}
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange())
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                 {
                     E.Cast(target);
                 }
@@ -285,7 +285,7 @@ namespace Olaf7
                     }
                 }
 
-                if ((useE && E.IsReady()) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(325) && target.IsInAutoAttackRange(Player.Instance))
+                if ((useE && E.IsReady()) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && target.IsValidTarget(325) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target))
                 {
                     E.Cast(target);
                 }
