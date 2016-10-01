@@ -62,13 +62,15 @@ namespace Ashe
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
             ComboMenu.Add("KeepCombo", new CheckBox("Keep Mana For [R]", false));
-            ComboMenu.AddGroupLabel("KillSteal Settings");
+            ComboMenu.AddGroupLabel("Ultimate Aoe Settings");
             ComboMenu.Add("RAoe", new CheckBox("Use [R] Aoe"));
-            ComboMenu.Add("ComboSL", new CheckBox("Use [R] On Selected Target", false));
             ComboMenu.Add("minRAoe", new Slider("Use [R] Aoe If Hit x Enemies", 2, 1, 5));
-            ComboMenu.Add("RKs", new CheckBox("Automatic [R] KillSteal"));
-            ComboMenu.Add("WKs", new CheckBox("Automatic [W] KillSteal"));
-            ComboMenu.Add("RKb", new KeyBind(" Semi [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'T'));
+            ComboMenu.AddGroupLabel("Ultimate Selected Target Settings");
+            ComboMenu.Add("ComboSL", new KeyBind("Use [R] On Selected Target", false, KeyBind.BindTypes.HoldActive, 'Y'));
+            ComboMenu.AddGroupLabel("KillSteal Settings");
+            ComboMenu.Add("RKs", new CheckBox("Use [R] KillSteal"));
+            ComboMenu.Add("WKs", new CheckBox("Use [W] KillSteal"));
+            ComboMenu.Add("RKb", new KeyBind("Semi Manual [R] KillSteal", false, KeyBind.BindTypes.HoldActive, 'T'));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -99,6 +101,7 @@ namespace Ashe
             Misc = Menu.AddSubMenu("Misc Settings", "Draw");
             Misc.AddGroupLabel("Anti Gapcloser");
             Misc.Add("antiGap", new CheckBox("Anti Gapcloser", false));
+            Misc.Add("antiRengar", new CheckBox("Anti Rengar KhaZix", false));
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
             Misc.AddGroupLabel("Drawings Settings");
             Misc.Add("Draw_Disabled", new CheckBox("Disabled Drawings", false));
@@ -115,6 +118,7 @@ namespace Ashe
             Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
             Interrupter.OnInterruptableSpell += Interupt;
             Orbwalker.OnPostAttack += ResetAttack;
+            GameObject.OnCreate += GameObject_OnCreate;
 
         }
 
@@ -144,9 +148,15 @@ namespace Ashe
             {
                 LaneClear();
             }
+
+            if (ComboMenu["ComboSL"].Cast<KeyBind>().CurrentValue)
+            {
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            }
 			
             KillSteal();
             Item();
+            RSelected();
 			
             if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -216,7 +226,7 @@ namespace Ashe
 
 // Interrupt
 
-        public static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
+        private static void Interupt(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs i)
         {
             var Inter = Misc["inter"].Cast<CheckBox>().CurrentValue;
             if (!sender.IsEnemy || !(sender is AIHeroClient) || Player.Instance.IsRecalling())
@@ -224,9 +234,32 @@ namespace Ashe
                 return;
             }
 			
-            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && _Player.Distance(sender) <= 1200)
+            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && _Player.Distance(sender) <= 1600)
             {
                 R.Cast(sender);
+            }
+        }
+
+// Anti Rengar + Khazix
+
+        private static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        {
+            var rengar = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Rengar"));
+            var khazix = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Khazix"));
+            if (rengar != null)
+            {
+                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                {
+                    R.Cast(rengar);
+                }
+            }
+
+            if (khazix != null)
+            {
+                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                {
+                    R.Cast(khazix);
+                }
             }
         }
 
@@ -275,16 +308,14 @@ namespace Ashe
 
         private static void Combo()
         {
-            var targetS = TargetSelector.SelectedTarget;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var RAoe = ComboMenu["RAoe"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["minRAoe"].Cast<Slider>().CurrentValue;
-            var useSL = ComboMenu["ComboSL"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead && !e.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2350) && !e.IsDead && !e.IsZombie))
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target) || Player.Instance.HealthPercent < 20))
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
@@ -315,24 +346,36 @@ namespace Ashe
 
                 if (useR && R.IsReady() && target.IsValidTarget(W.Range) && _Player.HealthPercent <= 70)
                 {
-                    R.Cast(target);
+                    var RPred = R.GetPrediction(target);
+                    if (RPred.HitChance >= HitChance.High)
+                    {
+                        R.Cast(RPred.CastPosition);
+                    }
                 }
 
-                if (RAoe && R.IsReady() && target.IsValidTarget(2000))
+                if (RAoe && R.IsReady() && target.IsValidTarget(2300))
                 {
                     var RPred = R.GetPrediction(target);
-                    if (RPred.CastPosition.CountEnemiesInRange(350) >= MinR && RPred.HitChance >= HitChance.Medium)
+                    if (RPred.CastPosition.CountEnemiesInRange(325) >= MinR && RPred.HitChance >= HitChance.Medium)
                     {
                         R.Cast(RPred.CastPosition);
                     }
 		    	}
             }
+        }
 
-            if (useSL && targetS != null)
+        private static void RSelected()
+        {
+            var targetS = TargetSelector.SelectedTarget;
+            var useSL = ComboMenu["ComboSL"].Cast<KeyBind>().CurrentValue;
+            if (targetS == null) return;
+
+            if (useSL && R.IsReady() && targetS.IsValidTarget(2800))
             {
-                if (R.IsReady() && targetS.IsValidTarget(1500))
+                var RPred = R.GetPrediction(targetS);
+                if (RPred.HitChance >= HitChance.High)
                 {
-                    R.Cast(targetS);
+                    R.Cast(RPred.CastPosition);
                 }
             }
         }
@@ -352,7 +395,7 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && !QReady && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && !QReady && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Player.Instance.HealthPercent > 20)
                 {
                     var WPred = W.GetPrediction(target);
                     if (Keep)
@@ -463,7 +506,7 @@ namespace Ashe
             if (_Player.ManaPercent < mana) return;
             if (monster != null)
             {
-                if (useQ && QReady && monster.IsValidTarget(Q.Range) && monster.TotalShieldHealth() > Player.Instance.GetAutoAttackDamage(monster) * 2)
+                if (useQ && QReady && monster.IsValidTarget(Q.Range))
                 {
                     Q.Cast();
                 }
@@ -484,7 +527,7 @@ namespace Ashe
 
         private static void KillSteal()
         {
-            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
+            var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2350) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
             var RKill = ComboMenu["RKs"].Cast<CheckBox>().CurrentValue;
             var WKill = ComboMenu["WKs"].Cast<CheckBox>().CurrentValue;
             var RKey = ComboMenu["RKb"].Cast<KeyBind>().CurrentValue;
@@ -492,7 +535,7 @@ namespace Ashe
             {
                 if ((RKill || RKey) && R.IsReady())
                 {
-                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2000) && !target2.IsInRange(Player.Instance, 700))
+                    if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2300) && !target2.IsInRange(Player.Instance, 700))
                     {
                         var RPred = R.GetPrediction(target2);
                         if (RPred.HitChance >= HitChance.Medium)
@@ -520,9 +563,9 @@ namespace Ashe
 
         private static void Gapcloser_OnGapCloser(Obj_AI_Base sender, Gapcloser.GapcloserEventArgs args)
         {
-            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && args.Sender.Distance(_Player) < 325)
+            if (Misc["antiGap"].Cast<CheckBox>().CurrentValue && sender.IsEnemy && args.Sender.Distance(_Player) <= 325)
             {
-                R.Cast(args.Sender);
+                W.Cast(args.Sender);
             }
         }
 
