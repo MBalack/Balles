@@ -114,7 +114,6 @@ namespace Twitch
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
             KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
-            KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("Misc Settings");
@@ -165,6 +164,15 @@ namespace Twitch
                     DrawFont(thm, "Q Stealthed : " + QTime(Player.Instance), (float)(ft[0] - 100), (float)(ft[1] + 50), SharpDX.Color.GreenYellow);
                 }
             }
+
+            if (Misc["DrawT"].Cast<CheckBox>().CurrentValue)
+            {
+                Vector2 ft = Drawing.WorldToScreen(_Player.Position);
+                if (Player.Instance.HasBuff("TwitchFullAutomatic"))
+                {
+                    DrawFont(thm, "R Time : " + RTime(Player.Instance), (float)(ft[0] - 70), (float)(ft[1] + 100), SharpDX.Color.Red);
+                }
+            }
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -205,6 +213,15 @@ namespace Twitch
             if (target.HasBuff("TwitchHideInShadows"))
             {
                 return Math.Max(0, target.GetBuff("TwitchHideInShadows").EndTime) - Game.Time;
+            }
+            return 0;
+        }
+
+        public static float RTime(Obj_AI_Base target)
+        {
+            if (target.HasBuff("TwitchFullAutomatic"))
+            {
+                return Math.Max(0, target.GetBuff("TwitchFullAutomatic").EndTime) - Game.Time;
             }
             return 0;
         }
@@ -533,21 +550,13 @@ namespace Twitch
         public static void KillSteal()
         {
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && hero.HasBuff("twitchdeadlyvenom") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && hero.HasBuff("twitchdeadlyvenom") && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage")))
             {
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health <= EDamage(target) + StackTimeDamage(target) || target.TotalShieldHealth() <= 10)
+                    if (EDamage(target) + StackTimeDamage(target) >= target.TotalShieldHealth() || target.HealthPercent <= 10)
                     {
-                        E.Cast();
-                    }
-                }
-
-                if (Ignite != null && KillStealMenu["ign"].Cast<CheckBox>().CurrentValue && Ignite.IsReady() && target.IsValidTarget(Ignite.Range))
-                {
-                    if (target.TotalShieldHealth() <= _Player.GetSummonerSpellDamage(target, DamageLibrary.SummonerSpells.Ignite))
-                    {
-                        Ignite.Cast(target);
+                        Player.CastSpell(SpellSlot.E);
                     }
                 }
             }
