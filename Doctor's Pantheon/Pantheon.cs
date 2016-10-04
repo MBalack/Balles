@@ -416,7 +416,7 @@ namespace Pantheon
 
             foreach (var minion in minionQ)
             {
-                if (useQ && Q.CanCast(minion) && !ECasting)
+                if (useQ && Q.CanCast(minion))
                 {
                     if (minion.Health <= QDamage(minion))
                     {
@@ -424,7 +424,7 @@ namespace Pantheon
                     }
                 }
 
-                if (useW && W.CanCast(minion) && !ECasting)
+                if (useW && W.CanCast(minion))
                 {
                     if (minion.Health <= WDamage(minion))
                     {
@@ -446,7 +446,17 @@ namespace Pantheon
                 {
                     if (quang.HitNumber >= MinE)
                     {
-                        E.Cast(quang.CastPosition);
+                        if (useQ)
+                        {
+                            if (!Q.IsReady())
+                            {
+                                E.Cast(quang.CastPosition);
+                            }
+                        }
+                        else
+                        {
+                            E.Cast(quang.CastPosition);
+                        }
                     }
                 }
             }
