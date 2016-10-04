@@ -328,7 +328,7 @@ namespace Pantheon
                     W.Cast(target);
                 }
 
-                if (useQ && Q.CanCast(target) && (_Player.Distance(target) >= 275 || !W.IsReady() && !E.IsReady()))
+                if (useQ && Q.CanCast(target))
                 {
                     Q.Cast(target);
                 }
@@ -368,7 +368,7 @@ namespace Pantheon
                     W.Cast(target);
                 }
 
-                if (useQ && Q.CanCast(target) && (_Player.Distance(target) >= 275 || !W.IsReady() && !E.IsReady()))
+                if (useQ && Q.CanCast(target))
                 {
                     Q.Cast(target);
                 }
@@ -416,7 +416,7 @@ namespace Pantheon
 
             foreach (var minion in minionQ)
             {
-                if (useQ && Q.CanCast(minion))
+                if (useQ && Q.CanCast(minion) && !ECasting)
                 {
                     if (minion.Health <= QDamage(minion))
                     {
@@ -424,7 +424,7 @@ namespace Pantheon
                     }
                 }
 
-                if (useW && W.CanCast(minion))
+                if (useW && W.CanCast(minion) && !ECasting)
                 {
                     if (minion.Health <= WDamage(minion))
                     {
