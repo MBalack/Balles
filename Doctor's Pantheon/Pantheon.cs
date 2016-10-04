@@ -294,13 +294,14 @@ namespace Pantheon
             var useW = HarassMenu["HW"].Cast<CheckBox>().CurrentValue;
             var useE = HarassMenu["HE"].Cast<CheckBox>().CurrentValue;
             var mana = HarassMenu["HM"].Cast<Slider>().CurrentValue;
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
 
             if (Player.Instance.ManaPercent <= mana)
             {
                 return;
             }
 
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
+            if (target != null)
             {
                 if (useW && W.CanCast(target) && !target.HasBuffOfType(BuffType.Stun))
                 {
@@ -338,7 +339,9 @@ namespace Pantheon
             var useQ = ComboMenu["CQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["CW"].Cast<CheckBox>().CurrentValue;
             var useE = ComboMenu["CE"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
+            var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+
+            if (target != null)
             {
                 if (useW && W.CanCast(target) && !target.HasBuffOfType(BuffType.Stun))
                 {
@@ -426,6 +429,7 @@ namespace Pantheon
             var useQ = LaneClearMenu["LHQ"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["LHM"].Cast<Slider>().CurrentValue;
             var unit = (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= mana);
+
             if (target == null)
             {
                 return;
@@ -448,6 +452,7 @@ namespace Pantheon
             var useW = JungleClearMenu["JW"].Cast<CheckBox>().CurrentValue;
             var useE = JungleClearMenu["JE"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["JM"].Cast<Slider>().CurrentValue;
+
             if (Player.Instance.ManaPercent <= mana)
             {
                 return;
@@ -490,6 +495,7 @@ namespace Pantheon
             var useQ = KillSteals["Q"].Cast<CheckBox>().CurrentValue;
             var useW = KillSteals["W"].Cast<CheckBox>().CurrentValue;
             var useIG = KillSteals["ign"].Cast<CheckBox>().CurrentValue;
+
             foreach (var target in Enemies)
             {
                 if (useQ && Q.CanCast(target))
