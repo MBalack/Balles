@@ -111,7 +111,7 @@ namespace Ashe
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 6, "1", "2", "3", "4", "5", "6", "7", "8"));
+            Skin.Add("skin.Id", new ComboBox("Skin Mode", 6, "1", "2", "3", "4", "5", "6", "7", "8", "9"));
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
