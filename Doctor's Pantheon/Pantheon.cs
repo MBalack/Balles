@@ -85,7 +85,7 @@ namespace Pantheon
             LaneClearMenu.Add("LQ", new CheckBox("Use [Q] Laneclear"));
             LaneClearMenu.Add("LW", new CheckBox("Use [W] Laneclear", false));
             LaneClearMenu.Add("LE", new CheckBox("Use [E] Laneclear", false));
-            LaneClearMenu.Add("ME", new Slider("Mana LaneClear", 2, 1, 6));
+            LaneClearMenu.Add("ME", new Slider("Min Hit Minions Use [E] LaneClear", 3, 1, 6));
             LaneClearMenu.Add("LM", new Slider("Mana LaneClear", 60, 0, 100));
             LaneClearMenu.AddGroupLabel("LastHit Settings");
             LaneClearMenu.Add("LHQ", new CheckBox("Use [Q] LastHit"));

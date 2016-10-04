@@ -15,7 +15,7 @@ using Font = SharpDX.Direct3D9.Font;
 using SharpDX.Direct3D9;
 using Color = System.Drawing.Color;
 
-namespace Ashe
+namespace Champion
 {
     internal class Program
     {
