@@ -128,6 +128,8 @@ namespace Pantheon
             Interrupter.OnInterruptableSpell += Interupt;
             Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
             Spellbook.OnCastSpell += OnCastSpell;
+            Obj_AI_Base.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
+            Obj_AI_Base.OnBuffLose += BuffLose;
         }
 
         private static void Game_OnUpdate(EventArgs args)
@@ -150,17 +152,6 @@ namespace Pantheon
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
-            }
-
-            if (ECasting)
-            {
-                Orbwalker.DisableAttacking = true;
-                Orbwalker.DisableMovement = true;
-            }
-            else
-            {
-                Core.DelayAction(() => Orbwalker.DisableAttacking = false, 1500);
-                Core.DelayAction(() => Orbwalker.DisableMovement = false, 1500);
             }
 
             KillSteal();
@@ -236,6 +227,35 @@ namespace Pantheon
                 {
                     args.Process = false;
                 }
+            }
+        }
+		
+		
+        private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
+            if (args.Slot == SpellSlot.E)
+            {
+                Orbwalker.DisableMovement = true;
+                Orbwalker.DisableAttacking = true;
+            }
+        }
+
+        private static void BuffLose(Obj_AI_Base sender, Obj_AI_BaseBuffLoseEventArgs args)
+        {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
+            if (args.Buff.DisplayName == "PantheonESound")
+            {
+                Orbwalker.DisableMovement = false;
+                Orbwalker.DisableAttacking = false;
             }
         }
 
@@ -408,7 +428,17 @@ namespace Pantheon
                 {
                     if (minion.Health <= WDamage(minion))
                     {
-                        W.Cast(minion);
+                        if (useQ)
+                        {
+                            if (!Q.IsReady())
+                            {
+                                W.Cast(minion);
+                            }
+                        }
+                        else
+                        {
+                            W.Cast(minion);
+                        }
                     }
                 }
 
@@ -477,7 +507,17 @@ namespace Pantheon
 
                 if (useE && E.CanCast(monster))
                 {
-                    E.Cast(monster.Position);
+                    if (useQ && useW)
+                    {
+                        if (!Q.IsReady() && !W.IsReady())
+                        {
+                            E.Cast(monster.Position);
+                        }
+                    }
+                    else
+                    {
+                        E.Cast(monster.Position);
+                    }
                 }
             }
         }
@@ -548,7 +588,7 @@ namespace Pantheon
 
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead && !e.IsZombie))
             {
-                if (useQ && Q.CanCast(target))
+                if (useQ && Q.CanCast(target) && (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 { 
                     if (HarassMenu["HarassQ" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
