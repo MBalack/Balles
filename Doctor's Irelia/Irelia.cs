@@ -137,16 +137,19 @@ namespace Irelia
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (_Player.IsDead) return;
-            if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
-                return;
+			
+            if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
+
             if (Misc["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawR"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
             }
+			
             if (Misc["DrawTR"].Cast<CheckBox>().CurrentValue)
             {
                 Vector2 ft = Drawing.WorldToScreen(_Player.Position);
@@ -167,29 +170,36 @@ namespace Irelia
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             KillSteal();
             Item();
             RBaxam();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -203,6 +213,7 @@ namespace Irelia
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;

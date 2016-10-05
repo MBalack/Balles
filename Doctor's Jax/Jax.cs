@@ -15,7 +15,6 @@ namespace Jax
 {
     internal class Program
     {
-        public const string ChampionName = "Jax";
         public static Menu Menu, ComboMenu, Autos, HarassMenu, LaneClearMenu, Debugs, JungleClearMenu, Misc, KillStealMenu, Drawings;
         public static Item Botrk;
         public static Item Bil;
@@ -127,6 +126,7 @@ namespace Jax
             {
                 new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
+
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
@@ -252,7 +252,7 @@ namespace Jax
                         {
                             E.Cast();
                         }
-	    	    	}
+                    }
 
                     if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && (Player.Instance.GetAutoAttackRange() < target.Distance(Player.Instance) || Player.Instance.HealthPercent <= 25))
                     {
@@ -265,7 +265,7 @@ namespace Jax
                             if (!E.IsReady())
                             {
                                 Q.Cast(target);
-						    }
+                            }
                         }
                     }
                 }

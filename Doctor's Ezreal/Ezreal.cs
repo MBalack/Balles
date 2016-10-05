@@ -315,7 +315,7 @@ namespace Ezreal
                     {
                         W.Cast(Wpred.CastPosition);
                     }
-	    		}
+                }
 
                 if (useR && R.IsReady() && target.IsValidTarget(2000) && target.IsInRange(Player.Instance, 2000) && !target.IsInRange(Player.Instance, 800))
                 {
@@ -336,7 +336,7 @@ namespace Ezreal
             if (monster != null)
             {
                 if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= mana)
-		    	{
+                {
                     Q.Cast(monster);
                 }
             }
@@ -461,9 +461,11 @@ namespace Ezreal
                 }
             }
         }
+
 // Thanks MarioGK has allowed me to use some his logic
+
         public static void RStun()
-		{
+        {
             var Rstun = Misc["Rstun"].Cast<CheckBox>().CurrentValue;
             if (Rstun && R.IsReady())
             {
@@ -557,7 +559,7 @@ namespace Ezreal
         }
         
 		public static void Stacks()
-		{	
+        {	
             if (Misc["Stack"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
             (Player.Instance.IsInShopRange()) && (Tear.IsOwned() || Manamune.IsOwned()))
             {
@@ -571,7 +573,7 @@ namespace Ezreal
             {
                 if (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)
 					 && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
-				{
+                {
                     Q.Cast(Game.CursorPos);
                 }
             }
