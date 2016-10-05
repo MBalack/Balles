@@ -124,20 +124,24 @@ namespace Malphite
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (_Player.IsDead) return;
-            if (Drawings["Draw_Disabled"].Cast<CheckBox>().CurrentValue)
-                return;
+			
+            if (Drawings["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
+			
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["DrawR"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 2f, Radius = R.Range }.Draw(_Player.Position);
             }
+			
             var target = TargetSelector.GetTarget(R.Range, DamageType.Magical);
             if (Drawings["Notifications"].Cast<CheckBox>().CurrentValue && R.IsReady())
             {
@@ -147,6 +151,7 @@ namespace Malphite
                     DrawFont(Thm, "R Can Killable " + target.ChampionName, (float)(ft[0] - 140), (float)(ft[1] + 80), SharpDX.Color.Red);
                 }
             }
+			
             if (Drawings["DrawRhit"].Cast<CheckBox>().CurrentValue && target != null && R.IsReady() && target.IsValidTarget(R.Range))
             {
                 var RPred = R.GetPrediction(target);
@@ -258,7 +263,12 @@ namespace Malphite
         {
             var targetF = TargetSelector.SelectedTarget;
             var useFQ = ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue;
-            if (targetF == null) return;
+
+            if (targetF == null)
+            {
+                return;
+            }
+
             if (useFQ && R.IsReady())
             {
                 if (targetF.IsValidTarget(R.Range))
@@ -301,6 +311,7 @@ namespace Malphite
             var useQ = LaneClearMenu["LastHitQ"].Cast<CheckBox>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(a => a.Distance(Player.Instance) <= Q.Range).OrderBy(a => a.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana) return;
+
             if (minion != null)
             {
                 if (useQ && Q.IsReady() && minion.IsValidTarget(Q.Range) && minion.Health <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && _Player.Distance(minion) > 175)
@@ -318,6 +329,7 @@ namespace Malphite
             var mana = JungleClearMenu["JungleMana"].Cast<Slider>().CurrentValue;
             var monters = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(R.Range));
             if (Player.Instance.ManaPercent <= mana) return;
+
             if (monters != null)
             {
                 if (useQ && Q.IsReady() && monters.IsValidTarget(Q.Range))
@@ -345,6 +357,7 @@ namespace Malphite
             var useQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var disQ = HarassMenu["DisQ2"].Cast<Slider>().CurrentValue;
             if (Player.Instance.ManaPercent < ManaQ) return;
+
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && disQ <= target.Distance(Player.Instance))

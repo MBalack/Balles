@@ -135,28 +135,35 @@ namespace Renekton7
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 Combo();
             }
+			
             KillSteal();
             Ultimate();
+			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
                 if (checkSkin())
@@ -170,6 +177,7 @@ namespace Renekton7
         {
             return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -229,7 +237,7 @@ namespace Renekton7
             var useE = ComboMenu["ComboE"].Cast<CheckBox>().CurrentValue;
             var useE2 = ComboMenu["ComboE2"].Cast<CheckBox>().CurrentValue;
             var E2dis = ComboMenu["Edis"].Cast<Slider>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(Q.Range) && !e.IsDead))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(E.Range) && !e.IsDead))
             {
                 if (useQ && Q.IsReady() && !PassiveW && target.IsValidTarget(Q.Range))
                 {
@@ -254,6 +262,7 @@ namespace Renekton7
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
             var minR = Ulti["MinR"].Cast<Slider>().CurrentValue;
             var minE = Ulti["MinE"].Cast<Slider>().CurrentValue;
+			
             if (useR && _Player.HealthPercent <= minR && _Player.Position.CountEnemiesInRange(500) >= 1 && !Player.Instance.IsInShopRange())
             {
                 R.Cast();
@@ -418,7 +427,7 @@ namespace Renekton7
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsW = KillStealMenu["KsW"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(E.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
