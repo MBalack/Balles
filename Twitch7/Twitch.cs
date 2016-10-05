@@ -246,10 +246,10 @@ namespace Twitch
                     Q.Cast();
                 }
 
-                if (useW && W.IsReady() && !QCasting && target.IsValidTarget(W.Range) && !target.IsInAutoAttackRange(Player.Instance))
+                if (useW && W.IsReady() && !QCasting && target.IsValidTarget(W.Range) && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                 {
                     var pred = W.GetPrediction(target);
-                    if (pred.HitChance >= HitChance.High)
+                    if (pred.HitChance >= HitChance.Medium)
                     {
                         W.Cast(pred.CastPosition);
                     }
@@ -279,7 +279,7 @@ namespace Twitch
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && target.IsInAutoAttackRange(Player.Instance) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     var Pred = W.GetPrediction(target);
                     if (Pred.HitChance >= HitChance.High)
@@ -492,8 +492,7 @@ namespace Twitch
         }
         public static float EDamage(Obj_AI_Base target)
         {
-            var stacks = Stack(target);
-            return _Player.CalculateDamageOnUnit(target, DamageType.Physical, SDamage[E.Level] * stacks + (0.25f * _Player.FlatPhysicalDamageMod + 0.2f * _Player.FlatMagicDamageMod + BDamage[E.Level]));
+            return _Player.CalculateDamageOnUnit(target, DamageType.Physical, SDamage[E.Level] * Stack(target) + (0.25f * _Player.FlatPhysicalDamageMod + 0.2f * _Player.FlatMagicDamageMod + BDamage[E.Level]));
         }
 
 
@@ -522,7 +521,20 @@ namespace Twitch
             {
                 dmg = 6;
             }
-            return dmg*Stack(target)*StackTime(target) - target.HPRegenRate*StackTime(target);
+            return dmg * Stack(target) * StackTime(target) - target.HPRegenRate*StackTime(target);
+        }
+
+        private static int Stack(Obj_AI_Base target)
+        {
+            var Ec = 0;
+            for (var t = 1; t < 7; t++)
+            {
+                if (ObjectManager.Get<Obj_GeneralParticleEmitter>().Any(s => s.Position.Distance(target.ServerPosition) <= 175 && s.Name == "twitch_poison_counter_0" + t + ".troy"))
+                {
+                    Ec = t;
+                }
+            }
+            return Ec;
         }
 
         public static float StackTime(Obj_AI_Base target)
@@ -532,19 +544,6 @@ namespace Twitch
                 return Math.Max(0, target.GetBuff("twitchdeadlyvenom").EndTime) - Game.Time;
             }
             return 0;
-        }
-
-        private static int Stack(Obj_AI_Base target)
-        {
-            var Ec = 0;
-            for (var t = 1; t < 7; t++)
-            {
-                if (ObjectManager.Get<Obj_GeneralParticleEmitter>().Any(s => s.Position.Distance(target.ServerPosition) <= 55 && s.Name == "twitch_poison_counter_0" + t + ".troy"))
-                {
-                    Ec = t;
-                }
-            }
-            return Ec;
         }
 
         public static void KillSteal()
