@@ -260,7 +260,7 @@ namespace Ekko
         public static void Game_On_Create(GameObject sender, EventArgs args)
         {
             var Emitter = sender as Obj_GeneralParticleEmitter;
-            if (Emitter != null && sender.IsMe)
+            if (Emitter != null)
             {
                 if (Emitter.Name.Equals("Ekko_Base_R_TrailEnd.troy"))
                 {
@@ -272,7 +272,7 @@ namespace Ekko
         public static void Game_On_Delete(GameObject sender, EventArgs args)
         {
             var Emitter = sender as Obj_GeneralParticleEmitter;
-            if (Emitter != null && sender.IsMe)
+            if (Emitter != null)
             {
                 if (Emitter.Name.Equals("Ekko_Base_R_TrailEnd.troy"))
                 {
