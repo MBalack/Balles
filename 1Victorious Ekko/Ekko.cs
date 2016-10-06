@@ -46,7 +46,7 @@ namespace Ekko
             Q = new Spell.Skillshot(SpellSlot.Q, 850, SkillShotType.Linear, 250, 2200, 60);
             Q.AllowedCollisionCount = int.MaxValue;
             W = new Spell.Skillshot(SpellSlot.W, 1600, SkillShotType.Circular, 1500, 500, 650);
-            W.AllowedCollisionCount = 0;
+            W.AllowedCollisionCount = int.MaxValue;
             E = new Spell.Active(SpellSlot.E, 450);
             R = new Spell.Active(SpellSlot.R, 375);
             Thm = new Font(Drawing.Direct3DDevice, new FontDescription { FaceName = "Tahoma", Height = 16, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
