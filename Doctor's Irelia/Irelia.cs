@@ -317,7 +317,7 @@ namespace Irelia
                         }
                     }
 					
-                    if (!Sheen.IsOwned() || !Tryn.IsOwned())
+                    if (!Sheen.IsOwned() && !Tryn.IsOwned())
                     {
                         if (target.IsValidTarget(R.Range) && _Player.HasBuff("IreliaTranscendentBlades"))
                         {
@@ -600,7 +600,7 @@ namespace Irelia
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(target);
                     }
@@ -608,7 +608,7 @@ namespace Irelia
 
                 if (KsE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
-                    if (target.Health + target.AttackShield < Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target);
                     }
@@ -616,7 +616,7 @@ namespace Irelia
 
                 if (KsR && R.IsReady())
                 {
-                    if (target.Health + target.AttackShield < RDamage(target) * 4 && (_Player.Distance(target) > 325 || !Q.IsReady()))
+                    if (target.Health <= RDamage(target) * 4 && (_Player.Distance(target) > 325 || !Q.IsReady()))
                     {
                         R.Cast(target);
                     }
