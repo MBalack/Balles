@@ -106,7 +106,7 @@ namespace Doctor_s_WuKong
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawR", new CheckBox("[R] Range"));
             Misc.Add("DrawE", new CheckBox("[E] Range"));
-            Misc.Add("DrawTR", new CheckBox("Draw Text Tower"));
+            Misc.Add("DrawTR", new CheckBox("Status UnderTurret"));
             Misc.AddGroupLabel("Interrupt/Anti Gap Settings");
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
             Misc.Add("AntiGap", new CheckBox("Use [W] Anti Gapcloser"));

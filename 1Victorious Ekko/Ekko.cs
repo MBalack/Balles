@@ -259,6 +259,11 @@ namespace Ekko
 
         public static void Game_On_Create(GameObject sender, EventArgs args)
         {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
             var Emitter = sender as Obj_GeneralParticleEmitter;
             if (Emitter != null)
             {
@@ -271,6 +276,11 @@ namespace Ekko
 
         public static void Game_On_Delete(GameObject sender, EventArgs args)
         {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+
             var Emitter = sender as Obj_GeneralParticleEmitter;
             if (Emitter != null)
             {

@@ -43,7 +43,6 @@ namespace Ashe
         {
             if (!_Player.ChampionName.Contains("Ashe")) return;
             Chat.Print("Doctor's Ashe Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q, 600);
             W = new Spell.Skillshot(SpellSlot.W, 1200, SkillShotType.Linear, 0, int.MaxValue, 60);
             W.AllowedCollisionCount = 0;
