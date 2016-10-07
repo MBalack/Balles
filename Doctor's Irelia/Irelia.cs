@@ -77,7 +77,7 @@ namespace Irelia
             Ultimate.Add("RHeatlh", new CheckBox("Use [R] If MyHP <"));
             Ultimate.Add("MauR", new Slider("MyHP Use [R] <", 50));
             Ultimate.AddLabel("Use [R] Sheen");
-            Ultimate.Add("RShen", new CheckBox("Use [R] Sheen"));
+            Ultimate.Add("RShen", new CheckBox("Use [R] Sheen", false));
             Ultimate.AddLabel("Use [R] Ks");
             Ultimate.Add("KsR", new CheckBox("Use [R] KillSteal"));
             Ultimate.AddLabel("Use [R] Minions");
@@ -126,9 +126,6 @@ namespace Irelia
             Misc.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
             Misc.AddGroupLabel("Flee Settings");
             Misc.Add("FleeQ", new CheckBox("Only Use [Q] Flee If Killalble Minion"));
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 4, "Default", "1", "2", "3", "4", "5", "6"));
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawQ", new CheckBox("[Q] Range"));
             Misc.Add("DrawR", new CheckBox("[R] Range"));
@@ -206,30 +203,11 @@ namespace Irelia
             Item();
             RMinions();
             RLogic();
-			
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
         }
 
-        public static int SkinId()
+        public static bool UnderTuret(this Vector3 position)
         {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-		
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
-        }
-
-        private static bool UnderTuret(Obj_AI_Base target)
-        {
-            var tower = ObjectManager.Get<Obj_AI_Turret>().FirstOrDefault(turret => turret != null && turret.Distance(target) <= 775 && turret.IsValid && turret.Health > 0 && !turret.IsAlly);
-            return tower != null;
+            return EntityManager.Turrets.Enemies.Where(a => a.Health > 0 && !a.IsDead).Any(a => a.Distance(position) < 950);
         }
 
         private static void Combo()
@@ -248,7 +226,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(minion))
+                        if (!minion.Position.UnderTuret())
                         {
                             Q.Cast(minion);
                         }
@@ -263,7 +241,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(target))
+                        if (!target.Position.UnderTuret())
                         {
                             Q.Cast(target);
                         }
@@ -368,7 +346,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(minion))
+                        if (!minion.Position.UnderTuret())
                         {
                             Q.Cast(minion);
                         }
@@ -405,7 +383,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(minion))
+                        if (!minion.Position.UnderTuret())
                         {
                             Q.Cast(minion);
                         }
@@ -468,7 +446,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(minion))
+                        if (!minion.Position.UnderTuret())
                         {
                             Q.Cast(minion);
                         }
@@ -483,7 +461,7 @@ namespace Irelia
                 {
                     if (turret)
                     {
-                        if (!UnderTuret(target))
+                        if (!target.Position.UnderTuret())
                         {
                             Q.Cast(target);
                         }
