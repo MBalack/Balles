@@ -19,7 +19,7 @@ namespace Irelia
 {
     static class Program
     {
-        public static Menu Menu, ComboMenu, HarassMenu, JungleClearMenu, LaneClearMenu, KillStealMenu, Misc;
+        public static Menu Menu, ComboMenu, Ultimate, HarassMenu, JungleClearMenu, LaneClearMenu, KillStealMenu, Misc;
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -67,15 +67,21 @@ namespace Irelia
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
             ComboMenu.Add("AlwaysE", new CheckBox("Only Use [E] If Can Stun Target", false));
             ComboMenu.Add("CTurret", new KeyBind("Dont Use [Q] UnderTurret", false, KeyBind.BindTypes.PressToggle, 'T'));
-            ComboMenu.AddGroupLabel("Ultimate Settings");
-            ComboMenu.Add("useRCombo", new CheckBox("Use [R] Combo"));
-            ComboMenu.Add("RHeatlh", new CheckBox("Use [R] If MyHP <"));
-            ComboMenu.Add("MauR", new Slider("MyHP Use [R] <", 50));
-            ComboMenu.Add("RShen", new CheckBox("Use [R] Sheen"));
-            ComboMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            ComboMenu.Add("Rminion", new CheckBox("Use [R] On Minion If No Enemies Around"));
             ComboMenu.AddGroupLabel("Interrupt Settings");
             ComboMenu.Add("interQ", new CheckBox("Use [E] Interrupt"));
+
+            Ultimate = Menu.AddSubMenu("Ultimate Settings", "Ultimate");
+            Ultimate.AddGroupLabel("Ultimate Settings");
+            Ultimate.Add("useRCombo", new CheckBox("Use [R]"));
+            Ultimate.AddLabel("Use [R] Low Hp");
+            Ultimate.Add("RHeatlh", new CheckBox("Use [R] If MyHP <"));
+            Ultimate.Add("MauR", new Slider("MyHP Use [R] <", 50));
+            Ultimate.AddLabel("Use [R] Sheen");
+            Ultimate.Add("RShen", new CheckBox("Use [R] Sheen"));
+            Ultimate.AddLabel("Use [R] Ks");
+            Ultimate.Add("KsR", new CheckBox("Use [R] KillSteal"));
+            Ultimate.AddLabel("Use [R] Minions");
+            Ultimate.Add("Rminion", new CheckBox("Use [R] On Minion If No Enemies Around"));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
@@ -198,7 +204,8 @@ namespace Irelia
 			
             KillSteal();
             Item();
-            RBaxam();
+            RMinions();
+            RLogic();
 			
             if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
             {
@@ -237,7 +244,6 @@ namespace Irelia
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(1200)))
             {
                 var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.Distance(Player.Instance) < Q.Range && Player.Instance.GetSpellDamage(m, SpellSlot.Q) > m.TotalShieldHealth()).OrderBy(m => m.Health).FirstOrDefault();
-                if (minion == null) return;
                 if (useQ2 && Q.IsReady() && minion.IsValidTarget(Q.Range) && Player.Instance.Mana > Q.Handle.SData.Mana * 2 && _Player.Distance(target) > Q.Range && minion.Distance(target) < _Player.Distance(target))
                 {
                     if (turret)
@@ -287,11 +293,18 @@ namespace Irelia
                 {
                     W.Cast();
                 }
+            }
+        }
 
-                var Rhealth = ComboMenu["RHeatlh"].Cast<CheckBox>().CurrentValue;
-                var mauR = ComboMenu["MauR"].Cast<Slider>().CurrentValue;
-                var RSheen = ComboMenu["RShen"].Cast<CheckBox>().CurrentValue;
-                var useR = ComboMenu["useRCombo"].Cast<CheckBox>().CurrentValue;
+        private static void RLogic()
+        {
+            var target = TargetSelector.GetTarget(R.Range, DamageType.Physical);
+            if (target != null)
+            {
+                var Rhealth = Ultimate["RHeatlh"].Cast<CheckBox>().CurrentValue;
+                var mauR = Ultimate["MauR"].Cast<Slider>().CurrentValue;
+                var RSheen = Ultimate["RShen"].Cast<CheckBox>().CurrentValue;
+                var useR = Ultimate["useRCombo"].Cast<CheckBox>().CurrentValue;
                 if (useR)
                 {
                     if (Rhealth && R.IsReady() && target.IsValidTarget(R.Range))
@@ -328,9 +341,9 @@ namespace Irelia
             }
         }
 
-        private static void RBaxam()
+        private static void RMinions()
         {
-            var useR = ComboMenu["Rminion"].Cast<CheckBox>().CurrentValue;
+            var useR = Ultimate["Rminion"].Cast<CheckBox>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (minion == null) return;
             if (useR && _Player.HasBuff("IreliaTranscendentBlades") && _Player.Position.CountEnemiesInRange(1200) == 0)
@@ -595,7 +608,7 @@ namespace Irelia
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
             var KsE = KillStealMenu["KsE"].Cast<CheckBox>().CurrentValue;
-            var KsR = ComboMenu["KsR"].Cast<CheckBox>().CurrentValue;
+            var KsR = Ultimate["KsR"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(R.Range) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(Q.Range))
