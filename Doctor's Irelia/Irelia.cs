@@ -60,7 +60,7 @@ namespace Irelia
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            ComboMenu.Add("ComboQ2", new CheckBox("Use [Q] Minions Approaching Enemies"));
+            ComboMenu.Add("ComboQ2", new CheckBox("Use [Q] on minions to get closer to the target"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("DisQ", new Slider("Use [Q] If Enemy Distance >", 125, 0, 625));
             ComboMenu.AddLabel("[Q] Distance < 125 = Always [Q]");
@@ -86,7 +86,7 @@ namespace Irelia
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
-            HarassMenu.Add("HarassQ2", new CheckBox("Use [Q] Minions Approaching Enemies"));
+            HarassMenu.Add("HarassQ2", new CheckBox("Use [Q] on minions to get closer to the target"));
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass"));
             HarassMenu.Add("DisQ2", new Slider("Use [Q] If Enemy Distance >", 125, 0, 625));
             HarassMenu.AddLabel("[Q] Distance < 125 = Always [Q]");
