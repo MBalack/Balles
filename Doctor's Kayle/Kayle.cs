@@ -108,7 +108,7 @@ namespace Kayle
             Misc.Add("DrawQ", new CheckBox("[Q] Range"));
             Misc.Add("DrawE", new CheckBox("[E] Range"));
             Misc.Add("DrawR", new CheckBox("[R] - [W] Range"));
-            Misc.Add("DrawIE", new CheckBox("DrawText [E]"));
+            Misc.Add("DrawIE", new CheckBox("Status [E] Buff"));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;

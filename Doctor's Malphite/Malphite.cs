@@ -113,7 +113,7 @@ namespace Malphite
             Drawings.Add("DrawE", new CheckBox("[E] Range"));
             Drawings.Add("DrawR", new CheckBox("[R] Range"));
             Drawings.Add("DrawRhit", new CheckBox("[R] Draw Hit"));
-            Drawings.Add("Notifications", new CheckBox("Notifications Killable [R]"));
+            Drawings.Add("Notifications", new CheckBox("Alerter Can Killable [R]"));
             Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
 
             Drawing.OnDraw += Drawing_OnDraw;

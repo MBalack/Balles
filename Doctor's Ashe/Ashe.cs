@@ -106,7 +106,7 @@ namespace Ashe
             Misc.Add("Draw_Disabled", new CheckBox("Disabled Drawings", false));
             Misc.Add("DrawE", new CheckBox("Draw [E]"));
             Misc.Add("DrawW", new CheckBox("Draw [W]", false));
-            Misc.Add("Notifications", new CheckBox("Notifications Can Kill With [R]"));
+            Misc.Add("Notifications", new CheckBox("Alerter Can Kill With [R]"));
 
             Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
             Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));

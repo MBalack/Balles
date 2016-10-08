@@ -129,7 +129,7 @@ namespace Graves7
             Drawings.Add("DrawE", new CheckBox("[E] Range", false));
             Drawings.Add("DrawR", new CheckBox("[R] Range"));
             Drawings.Add("Draw_Disabled", new CheckBox("Disabled Drawings"));
-            Drawings.Add("Notifications", new CheckBox("Notifications Can Kill [R]"));
+            Drawings.Add("Notifications", new CheckBox("Alerter Can Kill [R]"));
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;

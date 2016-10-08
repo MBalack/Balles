@@ -116,9 +116,6 @@ namespace Ezreal
             Misc.Add("Stack", new CheckBox("Auto Stacks In Shop"));
             Misc.Add("Stackk", new CheckBox("Auto Stacks If Enemies Around = 0", false));
             Misc.Add("Stackkm", new Slider("Min Mana Auto Stack", 80));
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 8, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
             Items = Menu.AddSubMenu("Items Settings", "Items");
             Items.AddGroupLabel("Items Settings");
@@ -141,7 +138,7 @@ namespace Ezreal
             Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
             Drawings.Add("DrawW", new CheckBox("[W] Range", false));
             Drawings.Add("DrawE", new CheckBox("[E] Range", false));
-            Drawings.Add("Notifications", new CheckBox("Notifications Can Kill [R]"));
+            Drawings.Add("Notifications", new CheckBox("Alerter Can Kill [R]"));
             Drawings.Add("DrawAT", new CheckBox("Draw Auto Harass"));
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -232,24 +229,6 @@ namespace Ezreal
             AutoHarass();
             RStun();
             Item();
-			
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-		
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         public static void Item()
