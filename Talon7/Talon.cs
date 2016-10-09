@@ -402,7 +402,7 @@ namespace Talon7
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 			
-                if ((useriu && !Q.IsReady() && !QPassive) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
