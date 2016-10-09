@@ -145,7 +145,7 @@ namespace Trundle7
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            Orbwalker.ForcedTarget = null;
+
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
@@ -188,7 +188,7 @@ namespace Trundle7
             {
                 return;
             }
-            if (Inter && E.IsReady() && i.DangerLevel == DangerLevel.High && E.IsInRange(sender))
+            if (Inter && E.IsReady() && i.DangerLevel == DangerLevel.Medium && E.IsInRange(sender))
             {
                 E.Cast(sender.Position);
             }
@@ -222,18 +222,19 @@ namespace Trundle7
             var minR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
-                if (useW && W.IsReady() && W.IsInRange(target) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
-                    W.Cast(target);
+                    W.Cast(target.Position);
                 }
 
-                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                if (useE && E.IsReady() && E.IsInRange(target) && E2dis <= target.Distance(Player.Instance))
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -100);
+
+                if (useE && E.IsReady() && E.IsInRange(target) && E2dis <= _Player.Position.Distance(target))
                 {
                     E.Cast(pos.To3DWorld());
                 }
 
-                if (useR && _Player.HealthPercent <= minR && target.IsValidTarget(R.Range))
+                if (useR && Player.Instance.HealthPercent <= minR && target.IsValidTarget(R.Range))
                 {
                     if (ComboMenu["useRCombo" + target.ChampionName].Cast<CheckBox>().CurrentValue)
                     {
@@ -248,15 +249,15 @@ namespace Trundle7
             var item = Items["BOTRK"].Cast<CheckBox>().CurrentValue;
             var Minhp = Items["ihp"].Cast<Slider>().CurrentValue;
             var Minhpp = Items["ihpp"].Cast<Slider>().CurrentValue;
-            var target = TargetSelector.GetTarget(450, DamageType.Physical);
+            var target = TargetSelector.GetTarget(475, DamageType.Physical);
             if (target != null)
             {
-                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(450))
+                if (item && Bil.IsReady() && Bil.IsOwned() && target.IsValidTarget(475))
                 {
                     Bil.Cast(target);
                 }
 
-                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(450)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
+                if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
                 }
@@ -282,14 +283,14 @@ namespace Trundle7
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 			
-                if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent > Hmana)
+                if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= Hmana)
                 {
                     Q.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                 }
 			
-                if ((useriu && !Q.IsReady()) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
+                if ((useriu) && (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass)))
                 {
                     if (Hydra.IsOwned(Player.Instance) && Hydra.IsReady() && target.IsValidTarget(250))
                     {
@@ -324,7 +325,7 @@ namespace Trundle7
 
                 if (useW && W.IsReady() && minion.IsValidTarget(W.Range) && minions.Count() >= 3)
                 {
-                    W.Cast(minion);
+                    W.Cast(_Player.Position);
                 }
             }
         }
@@ -357,13 +358,13 @@ namespace Trundle7
             if (Player.Instance.ManaPercent < mana) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && W.IsInRange(target) && !target.IsDead && !target.IsZombie)
+                if (useW && W.IsReady() && W.IsInRange(target))
                 {
-                    W.Cast(target);
+                    W.Cast(target.Position);
                 }
 
-                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !target.IsDead && !target.IsZombie)
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -100);
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast(pos.To3DWorld());
                 }
@@ -375,8 +376,12 @@ namespace Trundle7
             var useQ = JungleClearMenu["QJungle"].Cast<CheckBox>().CurrentValue;
             var useW = JungleClearMenu["WJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MJC"].Cast<Slider>().CurrentValue;
-            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(Q.Range));
-            if (Player.Instance.ManaPercent < mana) return;
+            var monster = EntityManager.MinionsAndMonsters.GetJungleMonsters().OrderByDescending(j => j.Health).FirstOrDefault(j => j.IsValidTarget(W.Range));
+            if (Player.Instance.ManaPercent <= mana)
+            {
+                return;
+            }
+
             if (monster != null)
             {
                 if (useQ && Q.IsReady() && monster.IsValidTarget(300))
@@ -384,7 +389,7 @@ namespace Trundle7
                     Q.Cast();
                 }
 
-                if (useW && W.IsReady() && W.IsInRange(monster))
+                if (useW && W.IsReady() && W.IsInRange(monster.Position))
                 {
                     W.Cast(monster);
                 }
@@ -396,7 +401,8 @@ namespace Trundle7
             var target = TargetSelector.GetTarget(E.Range, DamageType.Physical);
             if (target != null)
             {
-                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, 80);
+                var pos = E.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, 100);
+
                 if (E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast(pos.To3DWorld());
@@ -405,18 +411,18 @@ namespace Trundle7
 
             if (W.IsReady())
             {
-                Player.CastSpell(SpellSlot.W, Game.CursorPos);
+                Player.CastSpell(SpellSlot.W, Player.Instance);
             }
         }
 
         private static void KillSteal()
         {
             var KsQ = KillStealMenu["KsQ"].Cast<CheckBox>().CurrentValue;
-            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(600) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
+            foreach (var target in EntityManager.Heroes.Enemies.Where(hero => hero.IsValidTarget(475) && !hero.HasBuff("JudicatorIntervention") && !hero.HasBuff("kindredrnodeathbuff") && !hero.HasBuff("Undying Rage") && !hero.IsDead && !hero.IsZombie))
             {
                 if (KsQ && Q.IsReady() && target.IsValidTarget(250))
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast();
                     }
