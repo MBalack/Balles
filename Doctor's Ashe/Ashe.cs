@@ -57,6 +57,7 @@ namespace Ashe
             Menu.AddGroupLabel("Mercedes7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboMode", new ComboBox("Combo Mode:", 0, "Fast Combo", "Full Damage"));
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
@@ -104,7 +105,6 @@ namespace Ashe
             Misc.Add("inter", new CheckBox("Use [R] Interupt"));
             Misc.AddGroupLabel("Drawings Settings");
             Misc.Add("Draw_Disabled", new CheckBox("Disabled Drawings", false));
-            Misc.Add("DrawE", new CheckBox("Draw [E]"));
             Misc.Add("DrawW", new CheckBox("Draw [W]", false));
             Misc.Add("Notifications", new CheckBox("Alerter Can Kill With [R]"));
 
@@ -173,11 +173,6 @@ namespace Ashe
             if (_Player.IsDead) return;
 			
             if (Misc["Draw_Disabled"].Cast<CheckBox>().CurrentValue) return;
-			
-            if (Misc["DrawE"].Cast<CheckBox>().CurrentValue)
-            {
-                new Circle() { Color = Color.Orange, BorderWidth = 2, Radius = E.Range }.Draw(_Player.Position);
-            }
 			
             if (Misc["DrawW"].Cast<CheckBox>().CurrentValue && W.IsReady())
             {
@@ -314,16 +309,26 @@ namespace Ashe
             var Keep = ComboMenu["KeepCombo"].Cast<CheckBox>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2350) && !e.IsDead && !e.IsZombie))
             {
-                if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target) || Player.Instance.HealthPercent < 20))
+                if (ComboMenu["ComboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    var WPred = W.GetPrediction(target);
-                    if (Keep)
+                    if (useW && W.IsReady() && target.IsValidTarget(W.Range) && (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target) || Player.Instance.HealthPercent < 20))
                     {
-                        if (R.IsReady())
+                        var WPred = W.GetPrediction(target);
+                        if (Keep)
                         {
-                            if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                            if (R.IsReady())
                             {
-                                W.Cast(WPred.CastPosition);
+                                if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(WPred.CastPosition);
+                                }
+                            }
+                            else
+                            {
+                                if (WPred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(WPred.CastPosition);
+                                }
                             }
                         }
                         else
@@ -334,11 +339,36 @@ namespace Ashe
                             }
                         }
                     }
-                    else
+                }
+
+                if (ComboMenu["ComboMode"].Cast<ComboBox>().CurrentValue == 0)
+                {
+                    if (useW && W.IsReady() && target.IsValidTarget(W.Range))
                     {
-                        if (WPred.HitChance >= HitChance.High)
+                        var Pred = W.GetPrediction(target);
+                        if (Keep)
                         {
-                            W.Cast(WPred.CastPosition);
+                            if (R.IsReady())
+                            {
+                                if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && Pred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(Pred.CastPosition);
+                                }
+                            }
+                            else
+                            {
+                                if (Pred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(Pred.CastPosition);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Pred.HitChance >= HitChance.High)
+                            {
+                                W.Cast(Pred.CastPosition);
+                            }
                         }
                     }
                 }
@@ -367,7 +397,11 @@ namespace Ashe
         {
             var targetS = TargetSelector.SelectedTarget;
             var useSL = ComboMenu["ComboSL"].Cast<KeyBind>().CurrentValue;
-            if (targetS == null) return;
+
+            if (targetS == null)
+            {
+                return;
+            }
 
             if (useSL && R.IsReady() && targetS.IsValidTarget(2800))
             {
@@ -394,16 +428,26 @@ namespace Ashe
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && W.IsReady() && !QReady && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Player.Instance.HealthPercent > 20)
+                if (ComboMenu["ComboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    var WPred = W.GetPrediction(target);
-                    if (Keep)
+                    if (useW && W.IsReady() && !QReady && target.IsValidTarget(W.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Player.Instance.HealthPercent > 20)
                     {
-                        if (R.IsReady())
+                        var WPred = W.GetPrediction(target);
+                        if (Keep)
                         {
-                            if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                            if (R.IsReady())
                             {
-                                W.Cast(WPred.CastPosition);
+                                if (Player.Instance.Mana > W.Handle.SData.Mana + R.Handle.SData.Mana && WPred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(WPred.CastPosition);
+                                }
+                            }
+                            else
+                            {
+                                if (WPred.HitChance >= HitChance.High)
+                                {
+                                    W.Cast(WPred.CastPosition);
+                                }
                             }
                         }
                         else
@@ -412,13 +456,6 @@ namespace Ashe
                             {
                                 W.Cast(WPred.CastPosition);
                             }
-                        }
-                    }
-                    else
-                    {
-                        if (WPred.HitChance >= HitChance.High)
-                        {
-                            W.Cast(WPred.CastPosition);
                         }
                     }
                 }
@@ -527,12 +564,12 @@ namespace Ashe
         private static void KillSteal()
         {
             var target = EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2350) && !e.HasBuff("JudicatorIntervention") && !e.HasBuff("kindredrnodeathbuff") && !e.HasBuff("Undying Rage") && !e.IsDead && !e.IsZombie);
-            var RKill = ComboMenu["RKs"].Cast<CheckBox>().CurrentValue;
-            var WKill = ComboMenu["WKs"].Cast<CheckBox>().CurrentValue;
+            var useR = ComboMenu["RKs"].Cast<CheckBox>().CurrentValue;
+            var useW = ComboMenu["WKs"].Cast<CheckBox>().CurrentValue;
             var RKey = ComboMenu["RKb"].Cast<KeyBind>().CurrentValue;
             foreach (var target2 in target)
             {
-                if ((RKill || RKey) && R.IsReady())
+                if ((useR || RKey) && R.IsReady())
                 {
                     if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.R) && target2.IsValidTarget(2300) && !target2.IsInRange(Player.Instance, 700))
                     {
@@ -544,7 +581,7 @@ namespace Ashe
                     }
                 }
 				
-                if (WKill && W.IsReady())
+                if (useW && W.IsReady())
                 {
                     if (target2.Health + target2.AttackShield <= Player.Instance.GetSpellDamage(target2, SpellSlot.W) && target2.IsValidTarget(W.Range))
                     {
@@ -581,6 +618,7 @@ namespace Ashe
                 {
                     Bil.Cast(target);
                 }
+
                 if ((item && Botrk.IsReady() && Botrk.IsOwned() && target.IsValidTarget(475)) && (Player.Instance.HealthPercent <= Minhp || target.HealthPercent < Minhpp))
                 {
                     Botrk.Cast(target);
