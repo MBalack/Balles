@@ -80,13 +80,12 @@ namespace Olaf7
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LaneClear Settings");
-            LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
+            LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]"));
             LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
             LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
             LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
+            LaneClearMenu.Add("ClearW", new CheckBox("Use [W]", false));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
-            LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
-            LaneClearMenu.Add("Wlc", new Slider("Health For [W] LaneClear", 80));
 
             LastHitMenu = Menu.AddSubMenu("LastHit Settings", "LastHit");
             LastHitMenu.AddGroupLabel("LastHit Settings");
@@ -94,7 +93,6 @@ namespace Olaf7
             LastHitMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
             LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
             LastHitMenu.Add("LhMana", new Slider("Min Mana For LastHit", 60));
-
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
@@ -349,14 +347,13 @@ namespace Olaf7
             var useW = LaneClearMenu["ClearW"].Cast<CheckBox>().CurrentValue;
             var useE = LaneClearMenu["ClearE"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var manaW = LaneClearMenu["Wlc"].Cast<Slider>().CurrentValue;
             var MinQ = LaneClearMenu["minQ"].Cast<Slider>().CurrentValue;
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
             var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, Q.Width, (int) 600);
 			
             foreach (var minion in minionE)
             {
-                if (useW && W.IsReady() && Player.Instance.ManaPercent > mana && Player.Instance.HealthPercent < manaW && minion.IsValidTarget(E.Range))
+                if (useW && W.IsReady() && Player.Instance.ManaPercent >= mana && minion.IsValidTarget(E.Range))
                 {
                     W.Cast();
                 }
@@ -366,7 +363,7 @@ namespace Olaf7
                     E.Cast(minion);
                 }
 
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(600) && quang.HitNumber >= MinQ)
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent >= mana && minion.IsValidTarget(600) && quang.HitNumber >= MinQ)
                 {
                     Q.Cast(quang.CastPosition);
                 }
