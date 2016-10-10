@@ -354,9 +354,9 @@ namespace Ezreal
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (minions != null)
             {
-                if (useQ && LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 0)
+                if (LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 0)
                 {
-                    if (Player.Instance.ManaPercent >= mana)
+                    if (useQ && Player.Instance.ManaPercent >= mana)
                     {
                         if (Q.IsReady() && Prediction.Health.GetPrediction(minions, Q.CastDelay) <= Player.Instance.GetSpellDamage(minions, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
                         {
@@ -373,8 +373,8 @@ namespace Ezreal
             var useQ2 = LaneClearMenu["QLH"].Cast<Slider>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var manaa = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var unit = (useQ && LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= mana)
-            || (useQ2 && LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= manaa);
+            var unit = (LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && useQ && Player.Instance.ManaPercent >= mana)
+            || (LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && useQ2 && Player.Instance.ManaPercent >= manaa);
             if (target == null) return;
             if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
@@ -425,9 +425,9 @@ namespace Ezreal
 
             if (minion != null)
             {
-                if (useQ && LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 0)
+                if (LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 0)
                 {
-                    if (Q.IsReady() && Prediction.Health.GetPrediction(minion, Q.CastDelay) <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
+                    if (useQ && Q.IsReady() && Prediction.Health.GetPrediction(minion, Q.CastDelay) <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
                     {
                         Q.Cast(minion);
                     }
