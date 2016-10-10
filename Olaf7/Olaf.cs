@@ -26,6 +26,8 @@ namespace Olaf7
         public static Item Tiamat;
         public static Item Titanic;
         public static GameObject Axe { get; set; }
+        public static float Time { get; set; }
+        public static float End { get; set; }
         public static AIHeroClient _Player
         {
             get { return ObjectManager.Player; }
@@ -43,118 +45,118 @@ namespace Olaf7
 
         static void OnLoadingComplete(EventArgs args)
         {
-                if (!_Player.ChampionName.Contains("Olaf")) return;
-                Chat.Print("Doctor's Olaf Loaded!", Color.Orange);
-                Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1550, 75);
-                Q.AllowedCollisionCount = int.MaxValue;
-                W = new Spell.Active(SpellSlot.W);
-                E = new Spell.Targeted(SpellSlot.E,325);
-                R= new Spell.Active(SpellSlot.R);
-                Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
-                Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
-                Bil = new Item(3144, 475f);
-                Tiamat = new Item( ItemId.Tiamat_Melee_Only, 400);
-                Hydra = new Item( ItemId.Ravenous_Hydra_Melee_Only, 400);
-                Titanic = new Item( ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
-                Menu = MainMenu.AddMenu("Olaf", "Olaf");
-                Menu.AddGroupLabel("Doctor7");
-                ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-                ComboMenu.AddGroupLabel("Combo Settings");
-                ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));
-                ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
-                ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
-                ComboMenu.AddGroupLabel("Items Settings");
-                ComboMenu.Add("item", new CheckBox("Use [BOTRK]"));
-                ComboMenu.Add("hyd", new CheckBox("Use [Hydra] Reset AA"));
-                ComboMenu.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
-                ComboMenu.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
+            if (!_Player.ChampionName.Contains("Olaf")) return;
+            Chat.Print("Doctor's Olaf Loaded!", Color.Orange);
+            Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1550, 75);
+            Q.AllowedCollisionCount = int.MaxValue;
+            W = new Spell.Active(SpellSlot.W);
+            E = new Spell.Targeted(SpellSlot.E, 325);
+            R = new Spell.Active(SpellSlot.R);
+            Ignite = new Spell.Targeted(ObjectManager.Player.GetSpellSlotFromName("summonerdot"), 600);
+            Botrk = new Item(ItemId.Blade_of_the_Ruined_King);
+            Bil = new Item(3144, 475f);
+            Tiamat = new Item(ItemId.Tiamat_Melee_Only, 400);
+            Hydra = new Item(ItemId.Ravenous_Hydra_Melee_Only, 400);
+            Titanic = new Item(ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
+            Menu = MainMenu.AddMenu("Olaf", "Olaf");
+            Menu.AddGroupLabel("Doctor7");
+            ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
+            ComboMenu.AddGroupLabel("Combo Settings");
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q]"));
+            ComboMenu.Add("ComboW", new CheckBox("Use [W]"));
+            ComboMenu.Add("ComboE", new CheckBox("Use [E]"));
+            ComboMenu.AddGroupLabel("Items Settings");
+            ComboMenu.Add("item", new CheckBox("Use [BOTRK]"));
+            ComboMenu.Add("hyd", new CheckBox("Use [Hydra] Reset AA"));
+            ComboMenu.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
+            ComboMenu.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
 
-                HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
-                HarassMenu.AddGroupLabel("Harass Settings");
-                HarassMenu.Add("HarassQ", new CheckBox("Use [Q]"));
-                HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
-                HarassMenu.Add("HarassE", new CheckBox("Use [E]"));
-                HarassMenu.Add("ManaQ", new Slider("Min Mana For Harass", 40));
+            HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
+            HarassMenu.AddGroupLabel("Harass Settings");
+            HarassMenu.Add("HarassQ", new CheckBox("Use [Q]"));
+            HarassMenu.Add("HarassW", new CheckBox("Use [W]", false));
+            HarassMenu.Add("HarassE", new CheckBox("Use [E]"));
+            HarassMenu.Add("ManaQ", new Slider("Min Mana For Harass", 40));
 
-                LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
-                LaneClearMenu.AddGroupLabel("LaneClear Settings");
-                LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
-                LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
-                LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
-                LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
-                LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
-                LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
-                LaneClearMenu.Add("Wlc", new Slider("Health For [W] LaneClear", 80));
+            LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
+            LaneClearMenu.AddGroupLabel("LaneClear Settings");
+            LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
+            LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
+            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
+            LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
+            LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
+            LaneClearMenu.Add("Wlc", new Slider("Health For [W] LaneClear", 80));
 
-                LastHitMenu = Menu.AddSubMenu("LastHit Settings", "LastHit");
-                LastHitMenu.AddGroupLabel("LastHit Settings");
-                LastHitMenu.Add("LastQ", new CheckBox("Use [Q] LastHit", false));
-                LastHitMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
-                LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
-                LastHitMenu.Add("LhMana", new Slider("Min Mana For LastHit", 60));
+            LastHitMenu = Menu.AddSubMenu("LastHit Settings", "LastHit");
+            LastHitMenu.AddGroupLabel("LastHit Settings");
+            LastHitMenu.Add("LastQ", new CheckBox("Use [Q] LastHit", false));
+            LastHitMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion"));
+            LastHitMenu.Add("LastE", new CheckBox("Use [E] LastHit"));
+            LastHitMenu.Add("LhMana", new Slider("Min Mana For LastHit", 60));
 
 
-                JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
-                JungleClearMenu.AddGroupLabel("JungleClear Settings");
-                JungleClearMenu.Add("QJungle", new CheckBox("Use [Q]"));
-                JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
-                JungleClearMenu.Add("EJungle", new CheckBox("Use [E]"));
-                JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear", 30));
+            JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear Settings");
+            JungleClearMenu.Add("QJungle", new CheckBox("Use [Q]"));
+            JungleClearMenu.Add("WJungle", new CheckBox("Use [W]"));
+            JungleClearMenu.Add("EJungle", new CheckBox("Use [E]"));
+            JungleClearMenu.Add("MnJungle", new Slider("Min Mana JungleClear", 30));
 
-                Misc = Menu.AddSubMenu("Ultimate Settings", "Misc");
-                Misc.Add("Ulti", new CheckBox("Use Ultimate"));
-                Misc.AddGroupLabel("Use [R] On");
-                Misc.Add("stun", new CheckBox("Stuns"));
-                Misc.Add("rot", new CheckBox("Root"));
-                Misc.Add("knockup", new CheckBox("Knock Ups"));
-                Misc.Add("tunt", new CheckBox("Taunt"));
-                Misc.Add("charm", new CheckBox("Charm", false));
-                Misc.Add("snare", new CheckBox("Snare"));
-                Misc.Add("sleep", new CheckBox("Sleep", false));
-                Misc.Add("blind", new CheckBox("Blinds", false));
-                Misc.Add("disarm", new CheckBox("Disarm", false));
-                Misc.Add("fear", new CheckBox("Fear", false));
-                Misc.Add("silence", new CheckBox("Silence", false));
-                Misc.Add("frenzy", new CheckBox("Frenzy", false));
-                Misc.Add("supperss", new CheckBox("Supperss", false));
-                Misc.Add("slow", new CheckBox("Slows", false));
-                Misc.Add("poison", new CheckBox("Poisons", false));
-                Misc.Add("knockback", new CheckBox("Knock Backs", false));
-                Misc.Add("nearsight", new CheckBox("NearSight", false));
-                Misc.Add("poly", new CheckBox("Polymorph", false));
-                Misc.AddGroupLabel("Ultimate Setting");
-                Misc.Add("healulti", new Slider("Min Health Use [R]", 60));
-                Misc.Add("Rulti", new Slider("Min Enemies Around Use [R]", 1, 1, 5));
-                Misc.AddGroupLabel("Ultimate Delay");
-                Misc.Add("delay", new Slider("Humanizer Delay", 0, 0, 1000));
+            Misc = Menu.AddSubMenu("Ultimate Settings", "Misc");
+            Misc.Add("Ulti", new CheckBox("Use Ultimate"));
+            Misc.AddGroupLabel("Use [R] On");
+            Misc.Add("stun", new CheckBox("Stuns"));
+            Misc.Add("rot", new CheckBox("Root"));
+            Misc.Add("knockup", new CheckBox("Knock Ups"));
+            Misc.Add("tunt", new CheckBox("Taunt"));
+            Misc.Add("charm", new CheckBox("Charm", false));
+            Misc.Add("snare", new CheckBox("Snare"));
+            Misc.Add("sleep", new CheckBox("Sleep", false));
+            Misc.Add("blind", new CheckBox("Blinds", false));
+            Misc.Add("disarm", new CheckBox("Disarm", false));
+            Misc.Add("fear", new CheckBox("Fear", false));
+            Misc.Add("silence", new CheckBox("Silence", false));
+            Misc.Add("frenzy", new CheckBox("Frenzy", false));
+            Misc.Add("supperss", new CheckBox("Supperss", false));
+            Misc.Add("slow", new CheckBox("Slows", false));
+            Misc.Add("poison", new CheckBox("Poisons", false));
+            Misc.Add("knockback", new CheckBox("Knock Backs", false));
+            Misc.Add("nearsight", new CheckBox("NearSight", false));
+            Misc.Add("poly", new CheckBox("Polymorph", false));
+            Misc.AddGroupLabel("Ultimate Setting");
+            Misc.Add("healulti", new Slider("Min Health Use [R]", 60));
+            Misc.Add("Rulti", new Slider("Min Enemies Around Use [R]", 1, 1, 5));
+            Misc.AddGroupLabel("Ultimate Delay");
+            Misc.Add("delay", new Slider("Humanizer Delay", 0, 0, 1000));
 
-                KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
-                KillStealMenu.AddGroupLabel("KillSteal Settings");
-                KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
-                KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
-                KillStealMenu.Add("KsIgnite", new CheckBox("Use [Ignite] KillSteal"));
+            KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
+            KillStealMenu.AddGroupLabel("KillSteal Settings");
+            KillStealMenu.Add("KsQ", new CheckBox("Use [Q] KillSteal"));
+            KillStealMenu.Add("KsE", new CheckBox("Use [E] KillSteal"));
+            KillStealMenu.Add("KsIgnite", new CheckBox("Use [Ignite] KillSteal"));
 
-                Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-                Skin.AddGroupLabel("Skin Settings");
-                Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
-                Skin.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5"));
+            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
+            Skin.AddGroupLabel("Skin Settings");
+            Skin.Add("checkSkin", new CheckBox("Use Skin Changer"));
+            Skin.Add("skin.Id", new ComboBox("Skin Mode", 3, "Default", "1", "2", "3", "4", "5", "6"));
 
-                Drawings = Menu.AddSubMenu("Misc Settings", "Draw");
-                Drawings.AddGroupLabel("Misc Setting");
-                Drawings.Add("QStun", new CheckBox("Use [Q] If Enemy Has CC", false));
-                Drawings.Add("AntiGap", new CheckBox("Use [Q] Anti Gapcloser"));
-                Drawings.AddGroupLabel("Drawing Settings");
-                Drawings.Add("DrawQ", new CheckBox("Q Range"));
-                Drawings.Add("DrawE", new CheckBox("E Range", false));
-                Drawings.Add("Axe", new CheckBox("Axe Draw"));
+            Drawings = Menu.AddSubMenu("Misc Settings", "Draw");
+            Drawings.AddGroupLabel("Misc Setting");
+            Drawings.Add("QStun", new CheckBox("Use [Q] If Enemy Has CC", false));
+            Drawings.Add("AntiGap", new CheckBox("Use [Q] Anti Gapcloser"));
+            Drawings.AddGroupLabel("Drawing Settings");
+            Drawings.Add("DrawQ", new CheckBox("Q Range"));
+            Drawings.Add("DrawE", new CheckBox("E Range", false));
+            Drawings.Add("Axe", new CheckBox("Axe Draw"));
 
-                Drawing.OnDraw += Drawing_OnDraw;
-                Game.OnUpdate += Game_OnUpdate;
-                Orbwalker.OnPostAttack += ResetAttack;
-                Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
-                GameObject.OnCreate += GameObject_OnCreate;
-                GameObject.OnDelete += GameObject_OnDelete;
-                Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.OnPostAttack += ResetAttack;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapcloser;
+            GameObject.OnCreate += GameObject_OnCreate;
+            GameObject.OnDelete += GameObject_OnDelete;
+            Orbwalker.OnUnkillableMinion += Orbwalker_CantLasthit;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -163,10 +165,12 @@ namespace Olaf7
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
                 new Circle() { Color = Color.Orange, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
+			
             if (Drawings["Axe"].Cast<CheckBox>().CurrentValue && Axe != null)
             {
                 new Circle() { Color = Color.GreenYellow, BorderWidth = 6, Radius = 100 }.Draw(Axe.Position);
@@ -179,26 +183,32 @@ namespace Olaf7
             {
                 Combo();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {
                 Harass();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
             {
                 JungleClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
             {
                 LaneClear();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit))
             {
                 LastHit();
             }
+			
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 Flee();
             }
+			
             KillSteal();
             RStun();
             Ult();
@@ -216,6 +226,7 @@ namespace Olaf7
         {
             return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
         }
+		
         public static bool checkSkin()
         {
             return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
@@ -312,6 +323,7 @@ namespace Olaf7
             var useE = JungleClearMenu["EJungle"].Cast<CheckBox>().CurrentValue;
             var mana = JungleClearMenu["MnJungle"].Cast<Slider>().CurrentValue;
             var jungle = EntityManager.MinionsAndMonsters.GetJungleMonsters(_Player.Position, Q.Range).OrderByDescending(a => a.MaxHealth).FirstOrDefault();
+			
             if (jungle != null)
             {
                 if (useQ && Q.IsReady() && Q.IsInRange(jungle) && Player.Instance.ManaPercent >= mana)
@@ -340,7 +352,8 @@ namespace Olaf7
             var manaW = LaneClearMenu["Wlc"].Cast<Slider>().CurrentValue;
             var MinQ = LaneClearMenu["minQ"].Cast<Slider>().CurrentValue;
             var minionE = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(e => e.IsValidTarget(Q.Range)).ToArray();
-            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, Q.Width, (int) Q.Range);
+            var quang = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minionE, Q.Width, (int) 600);
+			
             foreach (var minion in minionE)
             {
                 if (useW && W.IsReady() && Player.Instance.ManaPercent > mana && Player.Instance.HealthPercent < manaW && minion.IsValidTarget(E.Range))
@@ -353,7 +366,7 @@ namespace Olaf7
                     E.Cast(minion);
                 }
 
-                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(Q.Range) && quang.HitNumber >= MinQ)
+                if (useQ && Q.IsReady() && Player.Instance.ManaPercent > mana && minion.IsValidTarget(600) && quang.HitNumber >= MinQ)
                 {
                     Q.Cast(quang.CastPosition);
                 }
@@ -368,7 +381,12 @@ namespace Olaf7
             var LhM = LastHitMenu["LhMana"].Cast<Slider>().CurrentValue;
             var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
             || (useAA && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= LhM);
-            if (target == null) return;
+			
+            if (target == null)
+            {
+                return;
+            }
+
             if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
                 if (Player.Instance.GetSpellDamage(target, SpellSlot.Q) >= Prediction.Health.GetPrediction(target, Q.CastDelay))
@@ -452,9 +470,9 @@ namespace Olaf7
             {
                 if (target != null)
                 {
-                    if (target.IsRooted || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
+                    if (target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup))
                     {
-                        Q.Cast(target);
+                        Q.Cast(target.Position);
                     }
                 }
             }
@@ -462,15 +480,17 @@ namespace Olaf7
 
         public static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (sender.Name == "olaf_axe_totem_team_id_green.troy")
+            if (sender.Name.ToLower().Contains("olaf_base_q_axe"))
             {
                 Axe = sender;
+                Time = Game.Time;
+                End = Game.Time + 8;
             }
         }
 
         public static void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
-            if (sender.Name == "olaf_axe_totem_team_id_green.troy")
+            if (sender.Name.ToLower().Contains("olaf_base_q_axe"))
             {
                 Axe = null;
             }
@@ -485,7 +505,7 @@ namespace Olaf7
                 if (KsQ && Q.IsReady())
                 {
                     var pos = Q.GetPrediction(target).CastPosition.Extend(Player.Instance.Position, -80);
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
+                    if (target.Health <= Player.Instance.GetSpellDamage(target, SpellSlot.Q))
                     {
                         Q.Cast(pos.To3DWorld());
                     }
@@ -493,7 +513,7 @@ namespace Olaf7
 
                 if (KsE && E.IsReady())
                 {
-                    if (target.Health + target.AttackShield <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
+                    if (target.Health <= Player.Instance.GetSpellDamage(target, SpellSlot.E))
                     {
                         E.Cast(target);
                     }
@@ -508,6 +528,7 @@ namespace Olaf7
                 }
             }
         }
+
         private static void Ult()
         {
             var ulti = Misc["Ulti"].Cast<CheckBox>().CurrentValue;
