@@ -395,7 +395,7 @@ namespace Yi
             }
 
             if ((args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E ||
-                 args.Slot == SpellSlot.R) && sender.IsEnemy && Q.IsReady() && _Player.Distance(sender) <= args.SData.CastRange)
+                 args.Slot == SpellSlot.R) && sender.IsEnemy && Q.IsReady() && _Player.Distance(sender) <= args.SData.CastRange && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
             {
                 if (args.SData.TargettingType == SpellDataTargetType.Unit || args.SData.TargettingType == SpellDataTargetType.SelfAndUnit || args.SData.TargettingType == SpellDataTargetType.Self)
                 {
