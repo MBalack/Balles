@@ -274,7 +274,6 @@ namespace Trundle7
             var target = TargetSelector.GetTarget(300, DamageType.Physical);
             var champ = (AIHeroClient)e;
             var useriu = Items["hydra"].Cast<CheckBox>().CurrentValue;
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var HasQ = HarassMenu["HarassQ"].Cast<CheckBox>().CurrentValue;
             var Hmana = HarassMenu["MHR"].Cast<Slider>().CurrentValue;
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
@@ -282,7 +281,7 @@ namespace Trundle7
             {
                 if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                     {
                         Q.Cast();
                         Orbwalker.ResetAutoAttack();
