@@ -56,7 +56,7 @@ namespace Ezreal
             Menu = MainMenu.AddMenu("Doctor's Ezreal", "Ezreal");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("comboMode", new ComboBox("Q Mode:", 0, "Always [Q]", "[Q] Reset AA"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe"));
@@ -93,13 +93,11 @@ namespace Ezreal
 
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LastHit Settings");
-            LaneClearMenu.Add("LastQ", new CheckBox("[Q] LastHit"));
-            LaneClearMenu.Add("LhAA", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("LHMode", new ComboBox("LastHit Mode:", 0, "Always [Q]", "[Q] If Orb Cant Killable"));
             LaneClearMenu.Add("LhMana", new Slider("Mana Lasthit", 50));
             LaneClearMenu.AddSeparator();
             LaneClearMenu.AddGroupLabel("Lane Clear Settings");
-            LaneClearMenu.Add("LastQLC", new CheckBox("[Q] LaneClear"));
-            LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("LCMode", new ComboBox("LaneClear Mode:", 0, "Always [Q]", "[Q] If Orb Cant Killable"));
             LaneClearMenu.Add("ManaLC", new Slider("Mana LaneClear", 50));
 
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
@@ -255,16 +253,18 @@ namespace Ezreal
             if (!(e is AIHeroClient)) return;
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var champ = (AIHeroClient)e;
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    var Pred = Q.GetPrediction(target);
-                    if (Pred.HitChance >= HitChance.High)
+                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                     {
-                        Q.Cast(Pred.CastPosition);
+                        var Pred = Q.GetPrediction(target);
+                        if (Pred.HitChance >= HitChance.High)
+                        {
+                            Q.Cast(Pred.CastPosition);
+                        }
                     }
                 }
             }
@@ -272,18 +272,31 @@ namespace Ezreal
 
         public static void Combo()
         {
-            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
+            var Qpred = Q.GetPrediction(target);
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead))
      	    {
-                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    var Qpred = Q.GetPrediction(target);
-                    if (Qpred.HitChance >= HitChance.High)
+                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                     {
-                        Q.Cast(Qpred.CastPosition);
+                        if (Qpred.HitChance >= HitChance.Medium)
+                        {
+                            Q.Cast(Qpred.CastPosition);
+                        }
+                    }
+                }
+
+                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 0)
+                {
+                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
+                    {
+                        if (Qpred.HitChance >= HitChance.High)
+                        {
+                            Q.Cast(Qpred.CastPosition);
+                        }
                     }
                 }
 
@@ -333,16 +346,18 @@ namespace Ezreal
 
         public static void LaneClear()
         {
-            var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var useQLH = LaneClearMenu["LastQLC"].Cast<CheckBox>().CurrentValue;
+            var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (minions != null)
             {
-                if (Player.Instance.ManaPercent >= laneQMN)
+                if (LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 0)
                 {
-                    if (useQLH && Q.IsReady() && Prediction.Health.GetPrediction(minions, Q.CastDelay) <= Player.Instance.GetSpellDamage(minions, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
+                    if (Player.Instance.ManaPercent >= mana)
                     {
-                        Q.Cast(minions);
+                        if (Q.IsReady() && Prediction.Health.GetPrediction(minions, Q.CastDelay) <= Player.Instance.GetSpellDamage(minions, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
+                        {
+                            Q.Cast(minions);
+                        }
                     }
                 }
             }
@@ -350,12 +365,10 @@ namespace Ezreal
 
         private static void Orbwalker_CantLasthit(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            var useCant = LaneClearMenu["CantLC"].Cast<CheckBox>().CurrentValue;
-            var laneQMN = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
-            var useAA = LaneClearMenu["LhAA"].Cast<CheckBox>().CurrentValue;
-            var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
-            var unit = (useCant && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= laneQMN)
-            || (useAA && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= LhM);
+            var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
+            var manaa = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
+            var unit = (LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && Player.Instance.ManaPercent >= mana)
+            || (LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && Player.Instance.ManaPercent >= manaa);
             if (target == null) return;
             if (unit && Q.IsReady() && target.IsValidTarget(Q.Range))
             {
@@ -396,15 +409,21 @@ namespace Ezreal
 
         public static void LastHit()
         {
-            var useQ = LaneClearMenu["LastQ"].Cast<CheckBox>().CurrentValue;
-            var LhM = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
+            var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
-            if (Player.Instance.ManaPercent < LhM) return;
+            if (Player.Instance.ManaPercent < mana)
+            {
+                return;
+            }
+
             if (minion != null)
             {
-                if (useQ && Q.IsReady() && Prediction.Health.GetPrediction(minion, Q.CastDelay) <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
+                if (LaneClearMenu["LHMode"].Cast<ComboBox>().CurrentValue == 0)
                 {
-                    Q.Cast(minion);
+                    if (Q.IsReady() && Prediction.Health.GetPrediction(minion, Q.CastDelay) <= Player.Instance.GetSpellDamage(minion, SpellSlot.Q) && !Orbwalker.IsAutoAttacking)
+                    {
+                        Q.Cast(minion);
+                    }
                 }
             }
         }
@@ -547,7 +566,7 @@ namespace Ezreal
 
             var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
             if (Misc["Stackk"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
-            (!Player.Instance.IsInShopRange() && _Player.CountEnemiesInRange(2500) < 1 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(2000))
+            (!Player.Instance.IsInShopRange() && _Player.Position.CountEnemiesInRange(2500) < 1 && !_Player.IsRecalling() && Player.Instance.ManaPercent >= mana && !EntityManager.MinionsAndMonsters.CombinedAttackable.Any(x => x.IsValidTarget(2000))
             && (Tear.IsOwned() || Manamune.IsOwned())))
             {
                 if (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)
