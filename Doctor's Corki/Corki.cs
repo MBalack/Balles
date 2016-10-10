@@ -43,7 +43,9 @@ namespace Borki7
             if (!_Player.ChampionName.Contains("Corki")) return;
             Chat.Print("Doctor's Corki Loaded!", Color.Orange);
             Q = new Spell.Skillshot(SpellSlot.Q, 825, SkillShotType.Circular, 300 , 1000 ,250);
+            Q.AllowedCollisionCount = int.MaxValue;
             W = new Spell.Skillshot(SpellSlot.W, 800, SkillShotType.Linear);
+            W.AllowedCollisionCount = int.MaxValue;
             E = new Spell.Active(SpellSlot.E, 600);
             R = new Spell.Skillshot(SpellSlot.R, 1200, SkillShotType.Linear, 200, 1950, 40);
             Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
@@ -54,9 +56,9 @@ namespace Borki7
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            SpellMenu.Add("QMode", new ComboBox("Q Mode:", 1, "Fast [Q]", "[Q] Reset Attack"));
+            SpellMenu.Add("QMode", new ComboBox("Q Mode:", 0, "Fast [Q]", "[Q] Reset Attack"));
             SpellMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
-            SpellMenu.Add("RMode", new ComboBox("Q Mode:", 1, "Fast [R]", "[R] Reset Attack"));
+            SpellMenu.Add("RMode", new ComboBox("Q Mode:", 0, "Fast [R]", "[R] Reset Attack"));
             SpellMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
@@ -210,15 +212,14 @@ namespace Borki7
             var useQ = SpellMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useR = SpellMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var useE = SpellMenu["ComboE"].Cast<CheckBox>().CurrentValue;
-            var Pred = Q.GetPrediction(target);
-            var RPred = R.GetPrediction(target);
             if (target != null)
             {
                 if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
                     if (SpellMenu["QMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
-                        if (Pred.HitChance >= HitChance.High)
+                        var Pred = Q.GetPrediction(target);
+                        if (Pred.HitChance >= HitChance.Medium)
                         {
                             Q.Cast(Pred.CastPosition);
                         }
@@ -227,7 +228,8 @@ namespace Borki7
                     {
                         if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                         {
-                            if (Pred.HitChance >= HitChance.High)
+                            var Pred = Q.GetPrediction(target);
+                            if (Pred.HitChance >= HitChance.Medium)
                             {
                                 Q.Cast(Pred.CastPosition);
                             }
@@ -239,6 +241,7 @@ namespace Borki7
                 {
                     if (SpellMenu["RMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
+                        var RPred = R.GetPrediction(target);
                         if (RPred.HitChance >= HitChance.Medium)
                         {
                             R.Cast(RPred.CastPosition);
@@ -248,6 +251,7 @@ namespace Borki7
                     {
                         if (_Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                         {
+                            var RPred = R.GetPrediction(target);
                             if (RPred.HitChance >= HitChance.Medium)
                             {
                                 R.Cast(RPred.CastPosition);
@@ -256,7 +260,7 @@ namespace Borki7
                     }
                 }
 				
-                if (useE && E.IsReady() && target.IsValidTarget(E.Range) && !Orbwalker.IsAutoAttacking)
+                if (useE && E.IsReady() && target.IsValidTarget(E.Range))
                 {
                     E.Cast();
                 }
