@@ -41,7 +41,6 @@ namespace Trundle7
         {
             if (!_Player.ChampionName.Contains("Trundle")) return;
             Chat.Print("Doctor's Trundle Loaded!", Color.Orange);
-            Bootstrap.Init(null);
             Q = new Spell.Active(SpellSlot.Q);
             W = new Spell.Skillshot(SpellSlot.W, 900, SkillShotType.Circular, 0, 2000, 900);
             E = new Spell.Skillshot(SpellSlot.E, 1000, SkillShotType.Circular, 500, int.MaxValue, 80);
@@ -52,13 +51,10 @@ namespace Trundle7
             Titanic = new Item(ItemId.Titanic_Hydra, Player.Instance.GetAutoAttackRange());
             Botrk = new Item( ItemId.Blade_of_the_Ruined_King);
             Bil = new Item(3144, 475f);
-
-            Menu = MainMenu.AddMenu("Trundle", "Trundle");
-            Menu.AddSeparator();
+            Menu = MainMenu.AddMenu("Doctor's Trundle", "Trundle");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
-            ComboMenu.AddSeparator();
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("comboMode", new ComboBox("Combo Mode:", 0, "Always [Q]", "Only [Q] Reset AA"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.AddGroupLabel("Combo [E] Settings");
             ComboMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
@@ -222,6 +218,14 @@ namespace Trundle7
             var minR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             if (target != null)
             {
+                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 0)
+                {
+                    if (Q.IsReady() && target.IsValidTarget(325))
+                    {
+                        Q.Cast();
+                    }
+                }
+
                 if (useW && W.IsReady() && W.IsInRange(target))
                 {
                     W.Cast(target.Position);
@@ -276,11 +280,14 @@ namespace Trundle7
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    Q.Cast();
-                    Orbwalker.ResetAutoAttack();
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                    if (useQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    {
+                        Q.Cast();
+                        Orbwalker.ResetAutoAttack();
+                        Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                    }
                 }
 			
                 if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= Hmana)
