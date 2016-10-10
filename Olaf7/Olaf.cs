@@ -81,8 +81,8 @@ namespace Olaf7
             LaneClearMenu = Menu.AddSubMenu("LaneClear Settings", "LaneClear");
             LaneClearMenu.AddGroupLabel("LaneClear Settings");
             LaneClearMenu.Add("ClearQ", new CheckBox("Use [Q]", false));
-            LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
             LaneClearMenu.Add("CantLC", new CheckBox("Only [Q] If Orbwalker Cant Killable Minion", false));
+            LaneClearMenu.Add("minQ", new Slider("Min Hit Minions Use [Q]", 3, 1, 6));
             LaneClearMenu.Add("ClearE", new CheckBox("Use [E]"));
             LaneClearMenu.Add("ManaLC", new Slider("Min Mana For LaneClear", 60));
             LaneClearMenu.Add("ClearW", new CheckBox("Use [W]"));
