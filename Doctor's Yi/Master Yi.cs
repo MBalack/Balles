@@ -17,7 +17,7 @@ namespace Yi
 {
     class Program
     {
-        public static Menu Menu, ComboMenu, Evade, HarassMenu, LaneClearMenu, Misc, Items, KillStealMenu, Drawings;
+        public static Menu Menu, ComboMenu, Evade, HarassMenu, LaneClearMenu, Items, KillStealMenu, Drawings;
         public static Item Botrk;
         public static Item Bil;
         public static Item Youmuu;
@@ -112,11 +112,6 @@ namespace Yi
             LaneClearMenu.Add("EJungle", new CheckBox("Use [E] JungleClear"));
             LaneClearMenu.Add("MnJungle", new Slider("Mana JungleClear", 30));
 
-            Misc = Menu.AddSubMenu("Skin Settings", "Misc");
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 9, "Default", "1", "2", "3", "4", "5", "6", "7", "8" , "9", "10", "11", "12"));
-
             Items = Menu.AddSubMenu("Items Settings", "Items");
             Items.AddGroupLabel("Items Settings");
             Items.Add("you", new CheckBox("Use [Youmuu]"));
@@ -173,23 +168,6 @@ namespace Yi
             }
             KillSteal();
             Item();
-
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         public static void Item()
@@ -417,7 +395,7 @@ namespace Yi
             }
 
             if ((args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E ||
-                 args.Slot == SpellSlot.R) && sender.IsEnemy && Q.IsReady())
+                 args.Slot == SpellSlot.R) && sender.IsEnemy && Q.IsReady() && _Player.Distance(sender) <= args.SData.CastRange)
             {
                 if (args.SData.TargettingType == SpellDataTargetType.Unit || args.SData.TargettingType == SpellDataTargetType.SelfAndUnit || args.SData.TargettingType == SpellDataTargetType.Self)
                 {
