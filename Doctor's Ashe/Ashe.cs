@@ -57,7 +57,7 @@ namespace Ashe
             Menu.AddGroupLabel("Mercedes7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("ComboMode", new ComboBox("Combo Mode:", 0, "Fast [W]", "[W] Reset AA"));
+            ComboMenu.Add("ComboMode", new ComboBox("Combo Mode:", 1, "Fast [W]", "[W] Reset AA"));
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Reset AA"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
