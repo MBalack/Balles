@@ -349,7 +349,7 @@ namespace Ezreal
 
         public static void LaneClear()
         {
-            var useQ = LaneClearMenu["QLC"].Cast<Slider>().CurrentValue;
+            var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var minions = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (minions != null)
@@ -369,8 +369,8 @@ namespace Ezreal
 
         private static void Orbwalker_CantLasthit(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            var useQ = LaneClearMenu["QLC"].Cast<Slider>().CurrentValue;
-            var useQ2 = LaneClearMenu["QLH"].Cast<Slider>().CurrentValue;
+            var useQ = LaneClearMenu["QLC"].Cast<CheckBox>().CurrentValue;
+            var useQ2 = LaneClearMenu["QLH"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["ManaLC"].Cast<Slider>().CurrentValue;
             var manaa = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var unit = (LaneClearMenu["LCMode"].Cast<ComboBox>().CurrentValue == 1 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && useQ && Player.Instance.ManaPercent >= mana)
@@ -415,7 +415,7 @@ namespace Ezreal
 
         public static void LastHit()
         {
-            var useQ = LaneClearMenu["QLH"].Cast<Slider>().CurrentValue;
+            var useQ = LaneClearMenu["QLH"].Cast<CheckBox>().CurrentValue;
             var mana = LaneClearMenu["LhMana"].Cast<Slider>().CurrentValue;
             var minion = EntityManager.MinionsAndMonsters.GetLaneMinions().Where(m => m.IsValidTarget(Q.Range)).OrderBy(m => m.Health).FirstOrDefault();
             if (Player.Instance.ManaPercent < mana)
