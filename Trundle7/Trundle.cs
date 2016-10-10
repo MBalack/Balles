@@ -220,7 +220,7 @@ namespace Trundle7
             {
                 if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 0)
                 {
-                    if (Q.IsReady() && target.IsValidTarget(325))
+                    if (Q.IsReady() && target.IsValidTarget(375))
                     {
                         Q.Cast();
                     }
