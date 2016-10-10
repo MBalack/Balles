@@ -275,13 +275,13 @@ namespace Ezreal
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
-            var Qpred = Q.GetPrediction(target);
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead))
      	    {
                 if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
                     if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
                     {
+                        var Qpred = Q.GetPrediction(target);
                         if (Qpred.HitChance >= HitChance.Medium)
                         {
                             Q.Cast(Qpred.CastPosition);
@@ -293,9 +293,10 @@ namespace Ezreal
                 {
                     if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                     {
-                        if (Qpred.HitChance >= HitChance.High)
+                        var predQ = Q.GetPrediction(target);
+                        if (predQ.HitChance >= HitChance.High)
                         {
-                            Q.Cast(Qpred.CastPosition);
+                            Q.Cast(predQ.CastPosition);
                         }
                     }
                 }
