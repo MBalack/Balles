@@ -242,7 +242,7 @@ namespace Ashe
             var khazix = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Khazix"));
             if (rengar != null)
             {
-                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && R.IsReady() && sender.Position.Distance(_Player) <= 300)
                 {
                     R.Cast(rengar);
                 }
@@ -250,7 +250,7 @@ namespace Ashe
 
             if (khazix != null)
             {
-                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && R.IsReady() && sender.Position.Distance(_Player) <= 300)
                 {
                     R.Cast(khazix);
                 }

@@ -281,7 +281,7 @@ namespace Trundle7
             {
                 if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Q.IsReady())
                     {
                         Q.Cast();
                         Orbwalker.ResetAutoAttack();
@@ -289,7 +289,7 @@ namespace Trundle7
                     }
                 }
 			
-                if (HasQ && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= Hmana)
+                if (HasQ && Q.IsReady() && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Player.Instance.ManaPercent >= Hmana)
                 {
                     Q.Cast();
                     Orbwalker.ResetAutoAttack();

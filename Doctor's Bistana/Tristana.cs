@@ -165,7 +165,7 @@ namespace Tristana
                 return;
             }
 			
-            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.High && R.IsInRange(sender))
+            if (Inter && R.IsReady() && i.DangerLevel == DangerLevel.Medium && R.IsInRange(sender))
             {
                 R.Cast(sender);
             }
@@ -282,7 +282,7 @@ namespace Tristana
             var khazix = EntityManager.Heroes.Enemies.Find(e => e.ChampionName.Equals("Khazix"));
             if (rengar != null)
             {
-                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                if (sender.Name == ("Rengar_LeapSound.troy") && Misc["antiRengar"].Cast<CheckBox>().CurrentValue && R.IsReady() && sender.Position.Distance(_Player) <= 300)
                 {
                     R.Cast(rengar);
                 }
@@ -290,7 +290,7 @@ namespace Tristana
 
             if (khazix != null)
             {
-                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && sender.Position.Distance(_Player) <= 300)
+                if (sender.Name == ("Khazix_Base_E_Tar.troy") && Misc["antiKZ"].Cast<CheckBox>().CurrentValue && R.IsReady() && sender.Position.Distance(_Player) <= 300)
                 {
                     R.Cast(khazix);
                 }

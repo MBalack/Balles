@@ -300,14 +300,14 @@ namespace Yi
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
             if (target != null)
             {
-                if (useW && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
+                if (useW && W.IsReady() && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && _Player.ManaPercent > mana && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
                     Player.IssueOrder(GameObjectOrder.AttackTo, target);
                 }
 
-                if (useQC && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                if (useQC && W.IsReady() && Player.Instance.Distance(target) <= Player.Instance.GetAutoAttackRange() - 50 && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                 {
                     W.Cast();
                     Orbwalker.ResetAutoAttack();
