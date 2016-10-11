@@ -56,19 +56,21 @@ namespace Ezreal
             Menu = MainMenu.AddMenu("Doctor's Ezreal", "Ezreal");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("comboMode", new ComboBox("Q Mode:", 0, "Always [Q]", "[Q] Reset AA"));
+            ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
+            ComboMenu.Add("comboMode", new ComboBox("Q Mode:", 0, "Fast [Q]", "[Q] After AA"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.Add("WMode", new ComboBox("W Mode:", 0, "Fast [W]", "[W] After AA"));
             ComboMenu.AddGroupLabel("Ultimate Settings");
-            ComboMenu.Add("ComboR", new CheckBox("Use [R] Aoe"));
-            ComboMenu.Add("MinR", new Slider("Min Enemies Use [R]", 2, 1, 5));
+            ComboMenu.Add("ComboR", new CheckBox("Use [R] AoE"));
+            ComboMenu.Add("MinR", new Slider("Use [R] AoE If Hit x Enemies", 2, 1, 5));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
             HarassMenu.AddGroupLabel("Harass Settings");
             HarassMenu.Add("HarassQ", new CheckBox("Use [Q] Harass"));
-            HarassMenu.Add("ManaQ", new Slider("Min Mana Harass [Q]", 40));
+            HarassMenu.Add("ManaQ", new Slider("Mana Harass [Q]", 40));
             HarassMenu.AddSeparator();
             HarassMenu.Add("HarassW", new CheckBox("Use [W] Harass", false) );
-            HarassMenu.Add("ManaW", new Slider("Min Mana Harass [W]<=", 40));
+            HarassMenu.Add("ManaW", new Slider("Mana Harass [W]", 40));
             HarassMenu.AddSeparator();
             HarassMenu.AddGroupLabel("Harass On");
             foreach (var target in EntityManager.Heroes.Enemies)
@@ -78,7 +80,7 @@ namespace Ezreal
 
             Auto = Menu.AddSubMenu("Auto Harass Settings", "Auto Harass");
 			Auto.AddGroupLabel("Auto Harass Settings");
-            Auto.Add("Key", new KeyBind("Auto Harass", false, KeyBind.BindTypes.PressToggle, 'H'));
+            Auto.Add("Key", new KeyBind("Auto Harass", false, KeyBind.BindTypes.PressToggle, 'T'));
             Auto.Add("AutoQ", new CheckBox("Use [Q]"));
             Auto.Add("AutomanaQ", new Slider("Min Mana Auto [Q]", 60));
             Auto.AddSeparator();
@@ -105,7 +107,7 @@ namespace Ezreal
             JungleClearMenu = Menu.AddSubMenu("JungleClear Settings", "JungleClear");
             JungleClearMenu.AddGroupLabel("JungleClear Settings");
             JungleClearMenu.Add("QJungle", new CheckBox("Use [Q] JungleClear"));
-            JungleClearMenu.Add("MnJungle", new Slider("Mana JungleClear", 30));
+            JungleClearMenu.Add("MnJungle", new Slider("Mana JungleClear", 20));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
             Misc.AddGroupLabel("AntiGap Settings");
@@ -131,14 +133,14 @@ namespace Ezreal
             KillStealMenu.AddSeparator();
             KillStealMenu.AddGroupLabel("Ultimate Settings");
             KillStealMenu.Add("KsR", new CheckBox("Use [R] KillSteal"));
-            KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'T'));
+            KillStealMenu.Add("RKb", new KeyBind("[R] KillSteal Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'R'));
 
             Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
             Drawings.AddGroupLabel("Drawing Settings");
             Drawings.Add("DrawQ", new CheckBox("[Q] Range"));
             Drawings.Add("DrawW", new CheckBox("[W] Range", false));
             Drawings.Add("DrawE", new CheckBox("[E] Range", false));
-            Drawings.Add("Notifications", new CheckBox("Alerter Can Kill [R]"));
+            Drawings.Add("Notifications", new CheckBox("Alerter Can Killable [R]"));
             Drawings.Add("DrawAT", new CheckBox("Draw Auto Harass"));
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -253,6 +255,8 @@ namespace Ezreal
         public static void ResetAttack(AttackableUnit e, EventArgs args)
         {
             if (!(e is AIHeroClient)) return;
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
+            var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var target = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
             var champ = (AIHeroClient)e;
             if (champ == null || champ.Type != GameObjectType.AIHeroClient || !champ.IsValid) return;
@@ -260,7 +264,7 @@ namespace Ezreal
             {
                 if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
                 {
-                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && _Player.Position.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
                     {
                         var Pred = Q.GetPrediction(target);
                         if (Pred.HitChance >= HitChance.High)
@@ -269,31 +273,32 @@ namespace Ezreal
                         }
                     }
                 }
+
+                if (ComboMenu["WMode"].Cast<ComboBox>().CurrentValue == 1)
+                {
+                    if (useW && W.IsReady() && target.IsValidTarget(W.Range) && _Player.Position.Distance(target) < Player.Instance.GetAutoAttackRange(target) && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                    {
+                        var WPred = W.GetPrediction(target);
+                        if (WPred.HitChance >= HitChance.High)
+                        {
+                            W.Cast(WPred.CastPosition);
+                        }
+                    }
+                }
             }
         }
 
         public static void Combo()
         {
+            var useQ = ComboMenu["ComboQ"].Cast<CheckBox>().CurrentValue;
             var useW = ComboMenu["ComboW"].Cast<CheckBox>().CurrentValue;
             var useR = ComboMenu["ComboR"].Cast<CheckBox>().CurrentValue;
             var MinR = ComboMenu["MinR"].Cast<Slider>().CurrentValue;
             foreach (var target in EntityManager.Heroes.Enemies.Where(e => e.IsValidTarget(2000) && !e.IsDead))
      	    {
-                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 1)
+                if (useQ && Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
                 {
-                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking && _Player.Distance(target) > Player.Instance.GetAutoAttackRange(target))
-                    {
-                        var Qpred = Q.GetPrediction(target);
-                        if (Qpred.HitChance >= HitChance.Medium)
-                        {
-                            Q.Cast(Qpred.CastPosition);
-                        }
-                    }
-                }
-
-                if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 0)
-                {
-                    if (Q.IsReady() && target.IsValidTarget(Q.Range) && !Orbwalker.IsAutoAttacking)
+                    if (ComboMenu["comboMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
                         var predQ = Q.GetPrediction(target);
                         if (predQ.HitChance >= HitChance.High)
@@ -301,14 +306,39 @@ namespace Ezreal
                             Q.Cast(predQ.CastPosition);
                         }
                     }
+                    else
+                    {
+                        if (_Player.Position.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                        {
+                            var Qpred = Q.GetPrediction(target);
+                            if (Qpred.HitChance >= HitChance.Medium)
+                            {
+                                Q.Cast(Qpred.CastPosition);
+                            }
+                        }
+                    }
                 }
 
                 if (useW && W.IsReady() && target.IsValidTarget(W.Range) && !Orbwalker.IsAutoAttacking)
                 {
-                    var Wpred = W.GetPrediction(target);
-                    if (Wpred.HitChance >= HitChance.High)
+                    if (ComboMenu["WMode"].Cast<ComboBox>().CurrentValue == 0)
                     {
-                        W.Cast(Wpred.CastPosition);
+                        var Wpred = W.GetPrediction(target);
+                        if (Wpred.HitChance >= HitChance.High)
+                        {
+                            W.Cast(Wpred.CastPosition);
+                        }
+                    }
+                    else
+                    {
+                        if (_Player.Position.Distance(target) > Player.Instance.GetAutoAttackRange(target))
+                        {
+                            var predW = W.GetPrediction(target);
+                            if (predW.HitChance >= HitChance.High)
+                            {
+                                W.Cast(predW.CastPosition);
+                            }
+                        }
                     }
                 }
 
@@ -564,11 +594,12 @@ namespace Ezreal
         }
         
 		public static void Stacks()
-        {	
+        {
+            var castPos = Player.Instance.Position.Distance(Game.CursorPos) <= Q.Range ? Game.CursorPos : Player.Instance.Position.Extend(Game.CursorPos, Q.Range).To3D();
             if (Misc["Stack"].Cast<CheckBox>().CurrentValue && Q.IsReady() &&
             (Player.Instance.IsInShopRange()) && (Tear.IsOwned() || Manamune.IsOwned()))
             {
-                Q.Cast(Game.CursorPos);
+                Q.Cast(castPos);
             }
 
             var mana = Misc["Stackkm"].Cast<Slider>().CurrentValue;
@@ -579,7 +610,7 @@ namespace Ezreal
                 if (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)
 					 && !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear))
                 {
-                    Q.Cast(Game.CursorPos);
+                    Q.Cast(castPos);
                 }
             }
         }

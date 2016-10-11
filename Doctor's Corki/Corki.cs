@@ -56,9 +56,9 @@ namespace Borki7
             SpellMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             SpellMenu.AddGroupLabel("Combo Settings");
             SpellMenu.Add("ComboQ", new CheckBox("Use [Q] Combo"));
-            SpellMenu.Add("QMode", new ComboBox("Q Mode:", 0, "Fast [Q]", "[Q] Reset Attack"));
+            SpellMenu.Add("QMode", new ComboBox("Q Mode:", 0, "Fast [Q]", "[Q] After Attack"));
             SpellMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
-            SpellMenu.Add("RMode", new ComboBox("Q Mode:", 0, "Fast [R]", "[R] Reset Attack"));
+            SpellMenu.Add("RMode", new ComboBox("Q Mode:", 0, "Fast [R]", "[R] After Attack"));
             SpellMenu.Add("ComboE", new CheckBox("Use [E] Combo"));
 
             HarassMenu = Menu.AddSubMenu("Harass Settings", "Harass");
@@ -294,7 +294,7 @@ namespace Borki7
                     }
                 }
 				
-                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && R.Handle.Ammo >= Rocket)
+                if (useR && R.IsReady() && target.IsValidTarget(R.Range) && R.Handle.Ammo > Rocket)
                 {
                     var Pred = R.GetPrediction(target);
                     if (Pred.HitChance >= HitChance.High)
@@ -418,7 +418,7 @@ namespace Borki7
                     Q.Cast(monster);
                 }
 				
-                if (useR && R.IsReady() && monster.IsValidTarget(R.Range) && R.Handle.Ammo >= Rocket)
+                if (useR && R.IsReady() && monster.IsValidTarget(R.Range) && R.Handle.Ammo > Rocket)
                 {
                     R.Cast(monster);
                 }

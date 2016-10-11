@@ -57,9 +57,9 @@ namespace Ashe
             Menu.AddGroupLabel("Mercedes7");
             ComboMenu = Menu.AddSubMenu("Combo Settings", "Combo");
             ComboMenu.AddGroupLabel("Combo Settings");
-            ComboMenu.Add("ComboMode", new ComboBox("Combo Mode:", 1, "Fast [W]", "[W] Reset AA"));
             ComboMenu.Add("ComboQ", new CheckBox("Use [Q] Reset AA"));
             ComboMenu.Add("ComboW", new CheckBox("Use [W] Combo"));
+            ComboMenu.Add("ComboMode", new ComboBox("W Mode:", 1, "Fast [W]", "[W] Reset AA"));
             ComboMenu.Add("ComboR", new CheckBox("Use [R] Combo"));
             ComboMenu.Add("KeepCombo", new CheckBox("Keep Mana For [R]", false));
             ComboMenu.AddGroupLabel("Ultimate Aoe Settings");
