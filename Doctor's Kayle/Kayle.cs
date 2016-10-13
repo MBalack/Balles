@@ -235,8 +235,7 @@ namespace Kayle
         {
             var almin = Ulti["Alhp"].Cast<Slider>().CurrentValue;
             var useR2 = Ulti["ultiR2"].Cast<CheckBox>().CurrentValue;
-            var target = EntityManager.Heroes.Allies.OrderByDescending
-                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
+            var target = EntityManager.Heroes.Allies.Where(a => a.IsValidTarget() && a.Distance(_Player.Position) <= R.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("Undying Rage") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             foreach (var target2 in target)
             {
                 if (useR2 && !Player.Instance.IsInShopRange() && R.IsReady() && (!Player.Instance.IsRecalling()) && (target2.Position.CountEnemiesInRange(R.Range) >= 1 || Tru(target2.Position)))
@@ -254,8 +253,7 @@ namespace Kayle
             var almin = Heal["AlW"].Cast<Slider>().CurrentValue;
             var useW2 = Heal["healW2"].Cast<CheckBox>().CurrentValue;
             var mana = Heal["ManaHeal"].Cast<Slider>().CurrentValue;
-            var target = EntityManager.Heroes.Allies.OrderByDescending
-                (a => a.HealthPercent).Where(a => a.IsValidTarget() && a.Distance(_Player) <= W.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
+            var target = EntityManager.Heroes.Allies.Where(a => a.IsValidTarget() && a.Distance(_Player.Position) <= W.Range && !a.IsDead && !a.IsZombie && !a.HasBuff("kindredrnodeathbuff") && !a.HasBuff("JudicatorIntervention") && !a.HasBuff("Recall"));
             if (Player.Instance.ManaPercent <= mana) return;
             foreach (var target2 in target)
             {
