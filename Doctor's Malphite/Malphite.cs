@@ -19,7 +19,7 @@ namespace Malphite
 {
     internal class Program
     {
-        public static Menu Menu, ComboMenu, HarassMenu, JungleClearMenu, LaneClearMenu, KillStealMenu, Skin, Drawings;
+        public static Menu Menu, ComboMenu, HarassMenu, JungleClearMenu, LaneClearMenu, KillStealMenu, Drawings;
         public static Font Thm;
         public static Font Thn;
         public static AIHeroClient _Player
@@ -102,10 +102,6 @@ namespace Malphite
             KillStealMenu.Add("minKsR", new Slider("Min [R] Distance KillSteal", 100, 1, 1000));
             KillStealMenu.Add("RKb", new KeyBind("[R] Semi Manual Key", false, KeyBind.BindTypes.HoldActive, 'Y'));
             KillStealMenu.AddGroupLabel("Recommended Distance 600");
-
-            Skin = Menu.AddSubMenu("Skin Changer", "SkinChanger");
-            Skin.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Skin.Add("skin.Id", new ComboBox("Skin Mode", 4, "Default", "1", "2", "3", "4", "5", "6", "7"));
 
             Drawings = Menu.AddSubMenu("Draw Settings", "Draw");
             Drawings.AddGroupLabel("Drawing Settings");
@@ -199,28 +195,10 @@ namespace Malphite
             KillSteal();
             RSelect();
 			
-            if (_Player.SkinId != Skin["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-			
             if (ComboMenu["ComboFQ"].Cast<KeyBind>().CurrentValue)
             {
                 Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
             }
-        }
-
-        public static int SkinId()
-        {
-            return Skin["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-		
-        public static bool checkSkin()
-        {
-            return Skin["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         private static void Combo()

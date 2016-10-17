@@ -98,9 +98,6 @@ namespace Borki7
             Misc.Add("drawW", new CheckBox("Range [W]", false));
             Misc.Add("drawE", new CheckBox("Range [E]"));
             Misc.Add("drawR", new CheckBox("Range [R]"));
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5", "6", "7"));
 
             items = Menu.AddSubMenu("Items Settings", "Items");
             items.AddGroupLabel("Items Settings");
@@ -144,30 +141,9 @@ namespace Borki7
 			
             KillSteal();
             Item();
-			
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-// Skin Changer
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
 // Combo Mode
-
 
         private static void ResetAttack(AttackableUnit e, EventArgs args)
         {

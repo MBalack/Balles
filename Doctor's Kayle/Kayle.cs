@@ -101,9 +101,6 @@ namespace Kayle
             KillStealMenu.Add("ign", new CheckBox("Use [Ignite] KillSteal"));
 
             Misc = Menu.AddSubMenu("Misc Settings", "Misc");
-            Misc.AddGroupLabel("Skin Settings");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer", false));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 0, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
             Misc.AddGroupLabel("Drawing Settings");
             Misc.Add("DrawQ", new CheckBox("[Q] Range"));
             Misc.Add("DrawE", new CheckBox("[E] Range"));
@@ -187,24 +184,6 @@ namespace Kayle
             KillSteal();
             Ultimate();
             Heals();
-			
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-		
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         private static void Combo()

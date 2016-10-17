@@ -15,7 +15,7 @@ namespace Jax
 {
     internal class Program
     {
-        public static Menu Menu, ComboMenu, Autos, HarassMenu, LaneClearMenu, Debugs, JungleClearMenu, Misc, KillStealMenu, Drawings;
+        public static Menu Menu, ComboMenu, Autos, HarassMenu, LaneClearMenu, JungleClearMenu, Misc, KillStealMenu, Drawings;
         public static Item Botrk;
         public static Item Bil;
         public static AIHeroClient _Player
@@ -36,7 +36,7 @@ namespace Jax
         static void OnLoadingComplete(EventArgs args)
         {
             if (!_Player.ChampionName.Contains("Jax")) return;
-            Chat.Print("Doctor's Jax Loaded!", Color.GreenYellow);
+            Chat.Print("Doctor's Jax Loaded!", Color.White);
             Q = new Spell.Targeted(SpellSlot.Q, 700);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Active(SpellSlot.E,350);
@@ -97,9 +97,6 @@ namespace Jax
             Misc.Add("BOTRK", new CheckBox("Use [Botrk]"));
             Misc.Add("ihp", new Slider("My HP Use BOTRK <=", 50));
             Misc.Add("ihpp", new Slider("Enemy HP Use BOTRK <=", 50));
-            Misc.AddGroupLabel("Skin Changer");
-            Misc.Add("checkSkin", new CheckBox("Use Skin Changer"));
-            Misc.Add("skin.Id", new ComboBox("Skin Mode", 1, "Default", "1", "2", "3", "4", "5", "6", "7", "8"));
 
             KillStealMenu = Menu.AddSubMenu("KillSteal Settings", "KillSteal");
             KillStealMenu.AddGroupLabel("KillSteal Settings");
@@ -111,10 +108,6 @@ namespace Jax
             Drawings.Add("DrawQ", new CheckBox("Q Range"));
             Drawings.Add("DrawE", new CheckBox("E Range", false));
 
-            Debugs = Menu.AddSubMenu("Debug", "Debugs");
-            Debugs.AddGroupLabel("Debug Settings");
-            Debugs.Add("Debug", new CheckBox("Debug"));
-
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.OnPostAttack += ResetAttack;
@@ -124,12 +117,12 @@ namespace Jax
         {
             if (Drawings["DrawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = Q.Range }.Draw(_Player.Position);
             }
 
             if (Drawings["DrawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.GreenYellow, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
+                new Circle() { Color = Color.White, BorderWidth = 1, Radius = E.Range }.Draw(_Player.Position);
             }
         }
 
@@ -167,24 +160,6 @@ namespace Jax
 			
             KillSteal();
             Item();
-			
-            if (_Player.SkinId != Misc["skin.Id"].Cast<ComboBox>().CurrentValue)
-            {
-                if (checkSkin())
-                {
-                    Player.SetSkinId(SkinId());
-                }
-            }
-        }
-
-        public static int SkinId()
-        {
-            return Misc["skin.Id"].Cast<ComboBox>().CurrentValue;
-        }
-
-        public static bool checkSkin()
-        {
-            return Misc["checkSkin"].Cast<CheckBox>().CurrentValue;
         }
 
         public static bool ECasting
@@ -258,7 +233,7 @@ namespace Jax
                     {
                         if (ECasting)
                         {
-                            Core.DelayAction(() => Q.Cast(target), 600);
+                            Core.DelayAction(() => Q.Cast(target), 500);
                         }
                         else
                         {
@@ -455,7 +430,7 @@ namespace Jax
                 {
                     if (ECasting)
                     {
-                        Core.DelayAction(() => Q.Cast(target), 600);
+                        Core.DelayAction(() => Q.Cast(target), 500);
                     }
                     else
                     {
